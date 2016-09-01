@@ -5,7 +5,7 @@ Documentation of identification of clock genes in verticillium genomes
 
 
 Note - all this work was performed in the directory:
-/home/groups/harrisonlab/project_files/verticclium/clocks
+/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
 
 The following is a summary of the work presented in this Readme.
 
