@@ -100,7 +100,7 @@ sequences and remove poor quality data. This was done with fastq-mcf
 
 ```bash
 	ls
-	
+
 ```
 
 ```
@@ -163,16 +163,15 @@ kmer counting was performed using kmc
 This allowed estimation of sequencing depth and total genome size
 
 This was performed for strains with single runs of data
-
 ```bash
-	for TrimPath in $(ls -d raw_dna/paired/*/*); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
-		TrimF=$(ls $TrimPath/F/*.fastq*)
-		TrimR=$(ls $TrimPath/R/*.fastq*)
+		for TrimPath in $(ls -d qc_dna/paired/*/*); do
+		ProgDir=/home/lopeze/git_repos/tools/seq_tools/dna_qc
+		TrimF=$(ls $TrimPath/F/*.fq.gz)
+		TrimR=$(ls $TrimPath/R/*.fq.gz)
 		echo $TrimF
 		echo $TrimR
 		qsub $ProgDir/kmc_kmer_counting.sh $TrimF $TrimR
-	done
+		done
 ```
 <!--
 and for strains with muiltiple runs of data:
@@ -220,46 +219,14 @@ revealed the coverage to be greater, an that the <5 result was a result of poor
 thresholding and did not represeent median coverage.
 
 ```
-	PG8_true_kmer_summary.txt
-	The mode kmer abundance is:  53 < fail
-	125_true_kmer_summary.txt
-	The mode kmer abundance is:  46 < pass
-	55_true_kmer_summary.txt
-	The mode kmer abundance is:  29 < pass
-	A1-2_true_kmer_summary.txt
-	The mode kmer abundance is:  16 < pass
-	A13_true_kmer_summary.txt
-	The mode kmer abundance is:  22 < pass
-	A23_true_kmer_summary.txt
-	The mode kmer abundance is:  33 < pass
-	A28_true_kmer_summary.txt
-	The mode kmer abundance is:  36 < pass
-	CB3_true_kmer_summary.txt
-	The mode kmer abundance is:  21 < pass
-	D2_true_kmer_summary.txt
-	The mode kmer abundance is:  11 < pass
-	Fus2_true_kmer_summary.txt
-	The mode kmer abundance is:  109 < 2lib
-	HB17_true_kmer_summary.txt
-	The mode kmer abundance is:  27 < pass
-	HB6_true_kmer_summary.txt
-	The mode kmer abundance is:  91 < 2 lib
-	PG_true_kmer_summary.txt
-	The mode kmer abundance is:  58 < pass
-	N139_true_kmer_summary.txt
-	The mode kmer abundance is:  26 < pass
-	FOP1_true_kmer_summary.txt
-	The mode kmer abundance is:  32 <- fail
-	FOP5_true_kmer_summary.txt
-	The mode kmer abundance is:  62 <- fail
-	L5_true_kmer_summary.txt
-	The mode kmer abundance is:  35 <- pass
-	PG18_true_kmer_summary.txt
-	The mode kmer abundance is:  24 <- pass
-	PG3_true_kmer_summary.txt
-	The mode kmer abundance is:  28 <- pass
-	A8_true_kmer_summary.txt
-	The mode kmer abundance is:  21 <- pass
+51_true_kmer_summary.txt
+The mode kmer abundance is:  52
+53_true_kmer_summary.txt
+The mode kmer abundance is:  37
+58_true_kmer_summary.txt
+The mode kmer abundance is:  71
+61_true_kmer_summary.txt
+The mode kmer abundance is:  53
 ```
 
 #Assembly
