@@ -62,7 +62,11 @@ and annotation.
   cp $RawDat/Vd12008_S1_L001_R2_001.fastq.gz raw_dna/paired/$Species/$Strain/R/.
 ```
 
+To gzip files:
 
+for File in $(ls raw_dna/paired/*/*/*/*.fastq); do
+gzip $File > $File.gz
+done
 
 This process was repeated for RNAseq data:
 
@@ -83,7 +87,7 @@ programs:
 Data quality was visualised using fastqc:
 ```bash
 	for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		ProgDir=/home/lopeze/git_repos/tools/seq_tools/dna_qc
 		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
 	done
@@ -95,13 +99,8 @@ sequences and remove poor quality data. This was done with fastq-mcf
 <!-- Firstly, those strains with more than one run were identified:
 
 ```bash
-	for Strain in $(ls -d raw_dna/paired/*/*); do
-	NumReads=$(ls $Strain/F/*.gz | wc -l);
-		if [ $NumReads -gt 1 ]; then
-			echo "$Strain";
-			echo "$NumReads";
-		fi;
-	done
+	ls
+	
 ```
 
 ```
@@ -114,9 +113,9 @@ sequences and remove poor quality data. This was done with fastq-mcf
 Trimming was first performed on all strains that had a single run of data:
 
 ```bash
-	for StrainPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/armita/git_repos/emr_repos/tools/seq_tools/ncbi_adapters.fa
+	for StrainPath in $(ls -d raw_dna/paired/*/*); do
+		ProgDir=/home/lopeze/git_repos/tools/seq_tools/rna_qc
+		IlluminaAdapters=/home/lopeze/git_repos/tools/seq_tools/ncbi_adapters.fa
 		ReadsF=$(ls $StrainPath/F/*.fastq*)
 		ReadsR=$(ls $StrainPath/R/*.fastq*)
 		echo $ReadsF
@@ -154,7 +153,7 @@ Trimming was then performed for strains with multiple runs of data
 Data quality was visualised once again following trimming:
 ```bash
 	for RawData in $(ls qc_dna/paired/*/*/*/*.fq.gz ); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
+		ProgDir=/home/lopeze/git_repos/tools/seq_tools/dna_qc
 		echo $RawData;
 		qsub $ProgDir/run_fastqc.sh $RawData
 	done
@@ -166,7 +165,7 @@ This allowed estimation of sequencing depth and total genome size
 This was performed for strains with single runs of data
 
 ```bash
-	for TrimPath in $(ls -d raw_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
+	for TrimPath in $(ls -d raw_dna/paired/*/*); do
 		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/dna_qc
 		TrimF=$(ls $TrimPath/F/*.fastq*)
 		TrimR=$(ls $TrimPath/R/*.fastq*)
