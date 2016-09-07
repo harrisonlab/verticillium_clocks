@@ -259,9 +259,6 @@ Assembly was performed with:
     done
 ```
 
-Assembly for PG8, FOP1 and FOP5 failed due to a lack of memory, as such the assembly was
-resubmitted with more RAM.
-
 
 <!--
 Assemblies were submitted for genomes with data from multiple sequencing runs:
@@ -305,14 +302,50 @@ for StrainPath in $(ls -d qc_dna/paired/F.*/HB6); do
 	  done
 ``` -->
 
-Quast
+Quast --> quality assessment tool for genome assemblies.
 
 ```bash
-  ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-  for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta | grep 'FOP2'); do
-	    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
-    OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
-    qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-  done
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
 ```
+51 reults:
+Assembly                   contigs_min_500bp  contigs_min_500bp broken      
+# contigs                  1482               1557                    
+Largest contig             321888             321888                  
+Total length               33065465           33064715                
+GC (%)                     55.93              55.93                   
+N50                        64178              59021                   
+N75                        34220              32519                   
+
+53 results:                
+Assembly                   contigs_min_500bp  contigs_min_500bp broken         
+# contigs                  1387               1479                    
+Largest contig             237640             193510                  
+Total length               32389379           32388393                
+GC (%)                     56.40              56.40                   
+N50                        47913              45145                   
+N75                        26178              24006                   
+
+58 results:
+Assembly                   contigs_min_500bp  contigs_min_500bp broken             
+# contigs                  1160               1262                    
+Largest contig             294690             294690                  
+Total length               32601233           32600213                
+GC (%)                     55.87              55.87                   
+N50                        79211              68028                   
+N75                        41540              37617                   
+
+
+61 results:
+Assembly                   contigs_min_500bp  contigs_min_500bp broken                 
+# contigs                  1239               1364               
+Largest contig             359375             331650                  
+Total length               32897558           32896308                
+GC (%)                     55.64              55.64                   
+N50                        81559              71457                   
+N75                        41700              36159                   
