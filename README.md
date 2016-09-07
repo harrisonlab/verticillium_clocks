@@ -239,42 +239,30 @@ Assembly was performed with:
 
 
 ```bash
-	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -v -e 'Fus2' -e 'HB6'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
-		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
-		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
-		F_Read=$(ls $StrainPath/F/*.fq.gz)
-		R_Read=$(ls $StrainPath/R/*.fq.gz)
-		OutDir=assembly/spades/$Organism/$Strain
-		Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
-		while [ $Jobs -gt 1 ]; do
-			sleep 5m
-			printf "."
-			Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
-		done		
-		printf "\n"
-		echo $F_Read
-		echo $R_Read
-		qsub $ProgDir/submit_SPAdes.sh $F_Read $R_Read $OutDir correct 10
-	done
+    for StrainPath in $(ls -d qc_dna/paired/*/* ); do
+    ProgDir=/home/lopeze/git_repos/tools/seq_tools/assemblers/spades
+    Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+    Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+    F_Read=$(ls $StrainPath/F/*.fq.gz)
+    R_Read=$(ls $StrainPath/R/*.fq.gz)
+    OutDir=assembly/spades/$Organism/$Strain
+    Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
+    while [ $Jobs -gt 1 ]; do
+    sleep 5m
+    printf "."
+    Jobs=$(qstat | grep 'submit_SPA' | grep 'qw' | wc -l)
+    done		
+    printf "\n"
+    echo $F_Read
+    echo $R_Read
+    qsub $ProgDir/submit_SPAdes.sh $F_Read $R_Read $OutDir correct 10
+    done
 ```
 
 Assembly for PG8, FOP1 and FOP5 failed due to a lack of memory, as such the assembly was
 resubmitted with more RAM.
 
-```bash
-	for StrainPath in $(ls -d qc_dna/paired/*/* | grep -e 'FOP5' -e 'PG8' -e 'FOP1'); do
-		ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades
-		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
-		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
-		F_Read=$(ls $StrainPath/F/*.fq.gz)
-		R_Read=$(ls $StrainPath/R/*.fq.gz)
-		OutDir=assembly/spades/$Organism/$Strain
-		echo $F_Read
-		echo $R_Read
-		qsub $ProgDir/submit_SPAdes_HiMem.sh $F_Read $R_Read $OutDir correct 10
-	done
-```
+
 <!--
 Assemblies were submitted for genomes with data from multiple sequencing runs:
 
