@@ -349,3 +349,43 @@ Total length               32897558           32896308
 GC (%)                     55.64              55.64                   
 N50                        81559              71457                   
 N75                        41700              36159                   
+
+
+
+#Repeatmasking
+
+Repeat masking was performed with:
+* Repeatmasker
+* Repeatmodeler
+
+The best assembly was used to perform Repeatmasking
+
+```bash
+
+for BestAssembly in $(ls assembly/spades/*/*/filtered_contigs/contigs_min_500bp.fasta);
+do
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
+qsub $ProgDir/rep_modeling.sh $BestAssembly
+qsub $ProgDir/transposonPSI.sh $BestAssembly
+done
+```
+
+Strain 51:
+** % bases masked by hardmasked and softmasked: 3.52% (bases masked:1162406 bp)
+
+** % bases masked by transposon psi: 1.96% (bases masked:647979 bp)
+
+Strain 53:
+** % bases masked by hardmasked and softmasked: 2.11% (bases masked:684231 bp)
+
+** % bases masked by transposon psi: 0.6% (bases masked:194701 bp)
+
+Strain 58:
+** % bases masked by hardmasked and softmasked: 3.7% (bases masked:1206433 bp)
+
+** % bases masked by transposon psi: 2.13% (bases masked:693007 bp)
+
+Strain 61:
+** % bases masked by hardmasked and softmasked: 4.96% (bases masked:1631055 bp)
+
+** % bases masked by transposon psi: 3.42% (bases masked:1125600 bp)
