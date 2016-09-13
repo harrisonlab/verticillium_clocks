@@ -388,4 +388,31 @@ Strain 58:
 Strain 61:
 ** % bases masked by hardmasked and softmasked: 4.96% (bases masked:1631055 bp)
 
-** % bases masked by transposon psi: 3.42% (bases masked:1125600 bp)
+** % bases masked by transposon psi: 3.42cd % (bases masked:1125600 bp)
+
+
+Up till now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
+
+```bash
+for File in $(ls repeat_masked/*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "$OutFile"
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+```
+repeat_masked/V.dahliae/51/filtered_contigs_repmask/51_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+1347372
+repeat_masked/V.dahliae/53/filtered_contigs_repmask/53_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+857586
+repeat_masked/V.dahliae/58/filtered_contigs_repmask/58_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+1370443
+repeat_masked/V.dahliae/61/filtered_contigs_repmask/61_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+1796687
