@@ -371,24 +371,24 @@ done
 ```
 
 Strain 51:
-** % bases masked by hardmasked and softmasked: 3.52% (bases masked:1162406 bp)
+** % bases masked by hardmasked and softmasked: 3.45% (bases masked:1142147 bp)
 
-** % bases masked by transposon psi: 1.96% (bases masked:647979 bp)
+** % bases masked by transposon psi: 1.88% (bases masked:622307 bp)
 
 Strain 53:
-** % bases masked by hardmasked and softmasked: 2.11% (bases masked:684231 bp)
+** % bases masked by hardmasked and softmasked: 2.07% (bases masked:684231 bp)
 
-** % bases masked by transposon psi: 0.6% (bases masked:194701 bp)
+** % bases masked by transposon psi: 0.58% (bases masked:189342 bp)
 
 Strain 58:
-** % bases masked by hardmasked and softmasked: 3.7% (bases masked:1206433 bp)
+** % bases masked by hardmasked and softmasked: 4% (bases masked:1302941 bp)
 
-** % bases masked by transposon psi: 2.13% (bases masked:693007 bp)
+** % bases masked by transposon psi: 2.45% (bases masked:798225 bp)
 
 Strain 61:
-** % bases masked by hardmasked and softmasked: 4.96% (bases masked:1631055 bp)
+** % bases masked by hardmasked and softmasked: 4.78% (bases masked:1573657 bp)
 
-** % bases masked by transposon psi: 3.42cd % (bases masked:1125600 bp)
+** % bases masked by transposon psi: 3.24 % (bases masked:1065488 bp)
 
 
 Up till now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
@@ -406,13 +406,18 @@ done
 ```
 repeat_masked/V.dahliae/51/filtered_contigs_repmask/51_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-1347372
+1319234
 repeat_masked/V.dahliae/53/filtered_contigs_repmask/53_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-857586
+857005
 repeat_masked/V.dahliae/58/filtered_contigs_repmask/58_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-1370443
+1456508
 repeat_masked/V.dahliae/61/filtered_contigs_repmask/61_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
-1796687
+1726406
+
+
+
+cp /home/armita/generic_profiles/2016-07-28/.generic_profile /home/lopeze/.profile
+. ~/.profile
