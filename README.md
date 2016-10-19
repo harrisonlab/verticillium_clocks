@@ -409,7 +409,7 @@ done
 
 Gene prediction followed three steps: Pre-gene prediction - Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified. Gene model training - Gene models were trained using assembled RNAseq data as part of the Braker1 pipeline Gene prediction - Gene models were used to predict genes in genomes as part of the the Braker1 pipeline. This used RNAseq data as hints for gene models.
 
-##Pre-gene prediction
+#Pre-gene prediction
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 
 ```bash
@@ -460,3 +460,34 @@ printf "$Species\t$Strain\n";
 cat $File | head -n18 | tail -n+4;printf "\n";
 done > gene_pred/cegma/cegma_results_dna_summary.txt
   ```
+
+#Gene prediction
+Copy raw_rna data from verticillium_dahliae/pathogenomics to verticillium_dahliae/clocks
+This contained the following data:
+12008PDA
+
+12008-PDA_S2_L001_R1_001.fastq.gz 12008-PDA_S2_L001_R2_001.fastq.gz 12008-PDA_S2_L001_R1_001.fastq 12008-PDA_S2_L001_R2_001.fastq
+
+12008CD
+
+12008-CD_S1_L001_R1_001.fastq.gz 12008-CD_S1_L001_R2_001.fastq.gz 12008-CD_S1_L001_R1_001.fastq 12008-CD_S1_L001_R2_001.fastq
+
+##Aligning
+Insert sizes of the RNA seq library were unknown until a draft alignment could be made. To do this tophat and cufflinks were run, aligning the reads against a single genome. The fragment length and stdev were printed to stdout while cufflinks was running.
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/V.*/12008PDA); do
+Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=alignment/$Organism/$Strain/$Timepoint
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+done
+done
+```
