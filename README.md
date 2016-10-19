@@ -371,24 +371,24 @@ done
 ```
 
 Strain 51:
-** % bases masked by hardmasked and softmasked: 3.45% (bases masked:1142147 bp)
+** % bases masked by hardmasked and softmasked: 3.52% (bases masked:1162406 bp)
 
-** % bases masked by transposon psi: 1.88% (bases masked:622307 bp)
+** % bases masked by transposon psi: 1.96% (bases masked:647979 bp)
 
 Strain 53:
-** % bases masked by hardmasked and softmasked: 2.07% (bases masked:684231 bp)
+** % bases masked by hardmasked and softmasked: 2.11% (bases masked:684231 bp)
 
-** % bases masked by transposon psi: 0.58% (bases masked:189342 bp)
+** % bases masked by transposon psi: 0.6% (bases masked:194701 bp)
 
 Strain 58:
-** % bases masked by hardmasked and softmasked: 4% (bases masked:1302941 bp)
+** % bases masked by hardmasked and softmasked: 3.7% (bases masked:1206433 bp)
 
-** % bases masked by transposon psi: 2.45% (bases masked:798225 bp)
+** % bases masked by transposon psi: 2.13% (bases masked:693007 bp)
 
 Strain 61:
-** % bases masked by hardmasked and softmasked: 4.78% (bases masked:1573657 bp)
+** % bases masked by hardmasked and softmasked: 4.96% (bases masked:1631055 bp)
 
-** % bases masked by transposon psi: 3.24 % (bases masked:1065488 bp)
+** % bases masked by transposon psi: 3.42cd % (bases masked:1125600 bp)
 
 
 Up till now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
@@ -404,20 +404,59 @@ echo "Number of masked bases:"
 cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
 ```
-repeat_masked/V.dahliae/51/filtered_contigs_repmask/51_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-1319234
-repeat_masked/V.dahliae/53/filtered_contigs_repmask/53_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-857005
-repeat_masked/V.dahliae/58/filtered_contigs_repmask/58_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-1456508
-repeat_masked/V.dahliae/61/filtered_contigs_repmask/61_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-1726406
+
+#Gene prediction
+
+Gene prediction followed three steps: Pre-gene prediction - Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified. Gene model training - Gene models were trained using assembled RNAseq data as part of the Braker1 pipeline Gene prediction - Gene models were used to predict genes in genomes as part of the the Braker1 pipeline. This used RNAseq data as hints for gene models.
+
+##Pre-gene prediction
+Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
+
+```bash
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
+cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+for Genome in $(ls repeat_masked/V.*/*/*/*_contigs_softmasked.fa); do
+echo $Genome;
+qsub $ProgDir/sub_cegma.sh $Genome dna;
+done
+```
+** 12251 Number of cegma genes present and complete: 94.76% ** Number of cegma genes present and partial: 97.98%
+             #Prots  %Completeness  -  #Total  Average  %Ortho
+Complete      235       94.76      -   282     1.20     16.17
+Partial       243       97.98      -   298     1.23     18.52
+
+** 12253 Number of cegma genes present and complete: 94.35% ** Number of cegma genes present and partial: 97.98%
+            #Prots  %Completeness  -  #Total  Average  %Ortho
+Complete      234       94.35      -   292     1.25     20.94
+Partial      243       97.98      -   309     1.27     22.22
+
+** 12158q Number of cegma genes present and complete: 95.16% ** Number of cegma genes present and partial: 97.18%
+             #Prots  %Completeness  -  #Total  Average  %Ortho
+Complete      236       95.16      -   276     1.17     11.44
+Partial      241       97.18      -   289     1.20     14.52
+
+** 12261 Number of cegma genes present and complete: 95.56% ** Number of cegma genes present and partial: 97.58%
+            #Prots  %Completeness  -  #Total  Average  %Ortho
+Complete      237       95.56      -   276     1.16     11.39
+Partial      242       97.58      -   287     1.19     13.64
 
 
+```bash
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
+cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+for Genome in $(ls repeat_masked/V.*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+echo $Genome;
+qsub $ProgDir/sub_cegma.sh $Genome dna;
+done
+  ```
 
-cp /home/armita/generic_profiles/2016-07-28/.generic_profile /home/lopeze/.profile
-. ~/.profile
+  Outputs were summarised using the commands:
+
+  ```bash
+for File in $(ls gene_pred/cegma/V.*/*/*_dna_cegma.completeness_report); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
+Species=$(echo $File | rev | cut -f3 -d '/' | rev);
+printf "$Species\t$Strain\n";
+cat $File | head -n18 | tail -n+4;printf "\n";
+done > gene_pred/cegma/cegma_results_dna_summary.txt
+  ```
