@@ -410,6 +410,7 @@ done
 Gene prediction followed three steps: Pre-gene prediction - Quality of genome assemblies were assessed using Cegma to see how many core eukaryotic genes can be identified. Gene model training - Gene models were trained using assembled RNAseq data as part of the Braker1 pipeline Gene prediction - Gene models were used to predict genes in genomes as part of the the Braker1 pipeline. This used RNAseq data as hints for gene models.
 
 #Pre-gene prediction
+
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 
 ```bash
@@ -420,26 +421,14 @@ echo $Genome;
 qsub $ProgDir/sub_cegma.sh $Genome dna;
 done
 ```
-** 12251 Number of cegma genes present and complete: 94.76% ** Number of cegma genes present and partial: 97.98%
-             #Prots  %Completeness  -  #Total  Average  %Ortho
-Complete      235       94.76      -   282     1.20     16.17
-Partial       243       97.98      -   298     1.23     18.52
 
-** 12253 Number of cegma genes present and complete: 94.35% ** Number of cegma genes present and partial: 97.98%
-            #Prots  %Completeness  -  #Total  Average  %Ortho
-Complete      234       94.35      -   292     1.25     20.94
-Partial      243       97.98      -   309     1.27     22.22
+** 12251 Number of cegma genes present and complete: 94.76% ** Number of cegma genes present and partial: 97.98% #Prots %Completeness - #Total Average %Ortho Complete 235 94.76 - 282 1.20 16.17 Partial 243 97.98 - 298 1.23 18.52
 
-** 12158q Number of cegma genes present and complete: 95.16% ** Number of cegma genes present and partial: 97.18%
-             #Prots  %Completeness  -  #Total  Average  %Ortho
-Complete      236       95.16      -   276     1.17     11.44
-Partial      241       97.18      -   289     1.20     14.52
+** 12253 Number of cegma genes present and complete: 94.35% ** Number of cegma genes present and partial: 97.98% #Prots %Completeness - #Total Average %Ortho Complete 234 94.35 - 292 1.25 20.94 Partial 243 97.98 - 309 1.27 22.22
 
-** 12261 Number of cegma genes present and complete: 95.56% ** Number of cegma genes present and partial: 97.58%
-            #Prots  %Completeness  -  #Total  Average  %Ortho
-Complete      237       95.56      -   276     1.16     11.39
-Partial      242       97.58      -   287     1.19     13.64
+** 12158q Number of cegma genes present and complete: 95.16% ** Number of cegma genes present and partial: 97.18% #Prots %Completeness - #Total Average %Ortho Complete 236 95.16 - 276 1.17 11.44 Partial 241 97.18 - 289 1.20 14.52
 
+** 12261 Number of cegma genes present and complete: 95.56% ** Number of cegma genes present and partial: 97.58% #Prots %Completeness - #Total Average %Ortho Complete 237 95.56 - 276 1.16 11.39 Partial 242 97.58 - 287 1.19 13.64
 
 ```bash
 ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
@@ -448,23 +437,22 @@ for Genome in $(ls repeat_masked/V.*/*/*/*_contigs_softmasked_repeatmasker_TPSI_
 echo $Genome;
 qsub $ProgDir/sub_cegma.sh $Genome dna;
 done
-  ```
+```
 
-  Outputs were summarised using the commands:
+Outputs were summarised using the commands:
 
-  ```bash
+```bash
 for File in $(ls gene_pred/cegma/V.*/*/*_dna_cegma.completeness_report); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
 Species=$(echo $File | rev | cut -f3 -d '/' | rev);
 printf "$Species\t$Strain\n";
 cat $File | head -n18 | tail -n+4;printf "\n";
 done > gene_pred/cegma/cegma_results_dna_summary.txt
-  ```
+```
 
 #Gene prediction
-Copy raw_rna data from verticillium_dahliae/pathogenomics to verticillium_dahliae/clocks
-This contained the following data:
-12008PDA
+
+Copy raw_rna data from verticillium_dahliae/pathogenomics to verticillium_dahliae/clocks This contained the following data: 12008PDA
 
 12008-PDA_S2_L001_R1_001.fastq.gz 12008-PDA_S2_L001_R2_001.fastq.gz 12008-PDA_S2_L001_R1_001.fastq 12008-PDA_S2_L001_R2_001.fastq
 
@@ -473,6 +461,7 @@ This contained the following data:
 12008-CD_S1_L001_R1_001.fastq.gz 12008-CD_S1_L001_R2_001.fastq.gz 12008-CD_S1_L001_R1_001.fastq 12008-CD_S1_L001_R2_001.fastq
 
 ##Aligning
+
 Insert sizes of the RNA seq library were unknown until a draft alignment could be made. To do this tophat and cufflinks were run, aligning the reads against a single genome. The fragment length and stdev were printed to stdout while cufflinks was running.
 
 ```bash
@@ -491,3 +480,95 @@ qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
 done
 done
 ```
+
+51 --> 81.7% overall read mapping rate. 73.0% concordant pair alignment rate.
+53 --> 76.5% overall read mapping rate. 68.5% concordant pair alignment rate.
+58 --> 73.7% overall read mapping rate. 65.7% concordant pair alignment rate.
+61 --> 78.8% overall read mapping rate. 70.1% concordant pair alignment rate.
+
+Alignments were concatenated prior to running cufflinks: Cufflinks was run to produce the fragment length and stdev statistics:
+
+if run the commands in a node other than cluster, using the script:
+
+```bash
+qlogin -pe smp 8 -l virtual_free=1G
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for AcceptedHits in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/alignment/$Organism/$Strain/*/accepted_hits.bam); do
+Timepoint=$(echo $AcceptedHits | rev | cut -f2 -d '/' | rev)
+echo $Timepoint
+OutDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/cufflinks/$Organism/$Strain/"$Timepoint"_prelim
+ProgDir=/home/fanron/git_repos/tools/seq_tools/RNAseq
+# qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+done
+done
+```
+
+if run the commands on cluster other than a node:
+
+```bash
+# qlogin -pe smp 8 -l virtual_free=1G
+  for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+  Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+  Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+  echo "$Organism - $Strain"
+  for AcceptedHits in $(ls alignment/$Organism/$Strain/*/accepted_hits.bam); do
+  Timepoint=$(echo $AcceptedHits | rev | cut -f2 -d '/' | rev)
+  echo $Timepoint
+  OutDir=gene_pred/cufflinks/$Organism/$Strain/"$Timepoint"_prelim
+  ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+  qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+  # cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+  done
+  done
+  ```
+  12251
+  [11:41:29] Inspecting reads and determining fragment length distribution.
+> Processed 18133 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 11194717.42
+>	Raw Map Mass: 11194717.42
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 237.09
+>	           Estimated Std Dev: 62.78
+[12:00:19] Assembling transcripts and estimating abundances.
+> Processed 18270 loci.                        [*************************] 100%
+
+12253
+[11:41:37] Inspecting reads and determining fragment length distribution.
+> Processed 18220 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 10448663.00
+>	Raw Map Mass: 10448663.00
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 232.95
+>	           Estimated Std Dev: 59.55
+[11:57:49] Assembling transcripts and estimating abundances.
+> Processed 18359 loci.                        [*************************] 100%
+
+12158
+[11:41:16] Inspecting reads and determining fragment length distribution.
+> Processed 19135 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 10106512.62
+>	Raw Map Mass: 10106512.62
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 236.26
+>	           Estimated Std Dev: 63.98
+[11:55:35] Assembling transcripts and estimating abundances.
+> Processed 19296 loci.                        [*************************] 100%
+
+12161
+[11:47:48] Inspecting reads and determining fragment length distribution.
+> Processed 19194 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 10828749.04
+>	Raw Map Mass: 10828749.04
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 235.63
+>	           Estimated Std Dev: 63.60
+[12:04:22] Assembling transcripts and estimating abundances.
+> Processed 19343 loci.                        [*************************] 100%
