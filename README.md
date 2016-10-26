@@ -1,4 +1,4 @@
-# Verticillium_clocks
+ Verticillium_clocks
 ==========
 
 Documentation of identification of clock genes in verticillium genomes
@@ -486,6 +486,29 @@ done
 58 --> 73.7% overall read mapping rate. 65.7% concordant pair alignment rate.
 61 --> 78.8% overall read mapping rate. 70.1% concordant pair alignment rate.
 
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/V.*/12008CD); do
+Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=alignment/$Organism/$Strain/$Timepoint
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+done
+done
+```
+
+51 --> 80.4% overall read mapping rate. 70.8% concordant pair alignment rate.
+53 --> 77.4% overall read mapping rate. 68.3% concordant pair alignment rate.
+58 --> 70.2% overall read mapping rate. 61.2% concordant pair alignment rate.
+61 --> 73.2% overall read mapping rate. 63.8% concordant pair alignment rate.
+
 Alignments were concatenated prior to running cufflinks: Cufflinks was run to produce the fragment length and stdev statistics:
 
 if run the commands in a node other than cluster, using the script:
@@ -525,6 +548,9 @@ if run the commands on cluster other than a node:
   done
   done
   ```
+cat cufflinks.log
+
+PDA
   12251
   [11:41:29] Inspecting reads and determining fragment length distribution.
 > Processed 18133 loci.                        [*************************] 100%
@@ -536,6 +562,11 @@ if run the commands on cluster other than a node:
 >	           Estimated Std Dev: 62.78
 [12:00:19] Assembling transcripts and estimating abundances.
 > Processed 18270 loci.                        [*************************] 100%
+
+The Estimated Mean: 237.09 allowed calculation of of the mean insert gap to be
+-243bp 237-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
 
 12253
 [11:41:37] Inspecting reads and determining fragment length distribution.
@@ -549,6 +580,11 @@ if run the commands on cluster other than a node:
 [11:57:49] Assembling transcripts and estimating abundances.
 > Processed 18359 loci.                        [*************************] 100%
 
+The Estimated Mean: 232.95 allowed calculation of of the mean insert gap to be
+-247bp 233-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
 12158
 [11:41:16] Inspecting reads and determining fragment length distribution.
 > Processed 19135 loci.                        [*************************] 100%
@@ -561,6 +597,11 @@ if run the commands on cluster other than a node:
 [11:55:35] Assembling transcripts and estimating abundances.
 > Processed 19296 loci.                        [*************************] 100%
 
+The Estimated Mean: 236.26 allowed calculation of of the mean insert gap to be
+-244bp 236-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
 12161
 [11:47:48] Inspecting reads and determining fragment length distribution.
 > Processed 19194 loci.                        [*************************] 100%
@@ -572,3 +613,183 @@ if run the commands on cluster other than a node:
 >	           Estimated Std Dev: 63.60
 [12:04:22] Assembling transcripts and estimating abundances.
 > Processed 19343 loci.                        [*************************] 100%
+
+The Estimated Mean: 235.63 allowed calculation of of the mean insert gap to be
+-244bp 236-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
+CD
+12251
+[10:34:30] Inspecting reads and determining fragment length distribution.
+> Processed 17030 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 8313367.45
+>	Raw Map Mass: 8313367.45
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 225.19
+>	           Estimated Std Dev: 63.29
+[10:37:11] Assembling transcripts and estimating abundances.
+> Processed 17170 loci.                        [*************************] 100%
+
+The Estimated Mean: 225.19 allowed calculation of of the mean insert gap to be
+-255bp 225-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
+
+12253
+[10:34:30] Inspecting reads and determining fragment length distribution.
+> Processed 17094 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 8000277.15
+>	Raw Map Mass: 8000277.15
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 226.85
+>	           Estimated Std Dev: 64.80
+[10:36:56] Assembling transcripts and estimating abundances.
+> Processed 17239 loci.                        [*************************] 100%
+
+The Estimated Mean: 226.85 allowed calculation of of the mean insert gap to be
+-253bp 227-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
+12158
+[10:27:12] Inspecting reads and determining fragment length distribution.
+> Processed 18592 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 7320481.83
+>	Raw Map Mass: 7320481.83
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 222.72
+>	           Estimated Std Dev: 62.99
+[10:29:35] Assembling transcripts and estimating abundances.
+> Processed 18761 loci.                        [*************************] 100%
+
+The Estimated Mean: 222.72 allowed calculation of of the mean insert gap to be
+-257bp 223-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
+12161
+[10:33:29] Inspecting reads and determining fragment length distribution.
+> Processed 18620 loci.                        [*************************] 100%
+> Map Properties:
+>	Normalized Map Mass: 7639017.83
+>	Raw Map Mass: 7639017.83
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 224.52
+>	           Estimated Std Dev: 64.72
+[10:36:08] Assembling transcripts and estimating abundances.
+> Processed 18786 loci.                        [*************************] 100%
+
+The Estimated Mean: 224.52 allowed calculation of of the mean insert gap to be
+-255bp 225-(240*2) where 240? was the mean read length. This was provided to tophat
+on a second run (as the -r option) along with the fragment length stdev to
+increase the accuracy of mapping.
+
+```
+
+Then Rnaseq data was aligned to each genome assembly:
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/*/12008PDA | grep -v -e '_rep'); do
+Timepoint_PDA=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint_PDA"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=alignment/$Organism/$Strain/$Timepoint_PDA
+InsertGap='-250'
+InsertStdDev='64'
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+done
+printf "\n"
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
+done
+done
+```
+cd alignment/repeat_masked/
+mkdir 12008PDA_accurate
+cp -r 12008PDA/* 12008PDA_accurate/
+
+    51 --> 81.7% overall read mapping rate. 73.0% concordant pair alignment rate.
+    53 --> 76.5% overall read mapping rate. 68.5% concordant pair alignment rate.
+    58 --> 73.7% overall read mapping rate. 65.7% concordant pair alignment rate.
+    61 --> 78.8% overall read mapping rate. 70.1% concordant pair alignment rate.
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/*/12008CD | grep -v -e '_rep'); do
+Timepoint_CD=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint_CD"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=alignment/$Organism/$Strain/$Timepoint_CD
+InsertGap='-255'
+InsertStdDev='64'
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+done
+printf "\n"
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
+done
+done
+  ```
+  51 --> 80.4% overall read mapping rate. 70.8% concordant pair alignment rate.
+  53 --> 77.4% overall read mapping rate. 68.3% concordant pair alignment rate.
+  58 --> 70.2% overall read mapping rate. 61.2% concordant pair alignment rate.
+  61 --> 73.2% overall read mapping rate. 63.8% concordant pair alignment rate.
+
+
+##Braker prediction
+
+Before braker predictiction was performed, I double checked that I had the genemark key in my user area and copied it over from the genemark install directory:
+
+```bash
+ls ~/.gm_key
+cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
+```
+
+Braker predictiction was performed using softmasked genome, not unmasked one.
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+done
+printf "\n"
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/braker/$Organism/"$Strain"_braker_sixth
+AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+mkdir -p alignment/$Organism/$Strain/concatenated
+samtools merge -f $AcceptedHits \
+alignment/V.dahliae/*/12008CD/accepted_hits.bam \
+alignment/V.dahliae/*/12008PDA/accepted_hits.bam
+GeneModelName="$Organism"_"$Strain"_braker_sixth
+rm -r /home/lopeze/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_sixth
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/braker1
+qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+done
+  ```
