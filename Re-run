@@ -1,0 +1,124 @@
+A Bioproject and Biosample was made with NCBI genbank for submission of genomes. Following the creation of these submissions, the .fasta assembly was uploaded through the submission portal. A note was provided requesting that the assembly be run through the contamination screen to aid a more detailed resubmission in future. The returned FCSreport.txt was downloaded from the NCBI webportal and used to correct the assembly to NCBI standards.
+
+NCBI reports (FCSreport.txt) were manually downloaded to the following loactions:
+
+```bash
+for Assembly in $(ls assembly/spades/V.dahliae/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    NCBI_report_dir=genome_submission/$Organism/$Strain/initial_submission
+    mkdir -p $NCBI_report_dir
+  done
+  ```
+
+  These downloaded files were used to correct assemblies:
+
+```bash
+  for Assembly in $(ls assembly/spades/V.dahliae/*/filtered_contigs/contigs_min_500bp.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+  echo "$Organism - $Strain"
+  NCBI_report=$(ls genome_submission/$Organism/$Strain/initial_submission/FCSreport.txt)
+  OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+  mkdir -p $OutDir
+  ProgDir=/home/lopeze/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp.fasta --coord_file $NCBI_report > $OutDir/log.txt
+  done
+```
+
+Quast was used to collect details on these assemblies again
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+12251
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+# contigs (>= 0 bp)        1482               1557
+# contigs (>= 1000 bp)     1095               1165
+Total length (>= 0 bp)     33065465           33064715
+Total length (>= 1000 bp)  32803706           32800026
+# contigs                  1482               1557
+Largest contig             321888             321888
+Total length               33065465           33064715
+GC (%)                     55.93              55.93
+N50                        64178              59021
+N75                        34220              32519
+L50                        153                166
+L75                        325                351
+# N's per 100 kbp          2.40               0.14
+
+12158
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+# contigs (>= 0 bp)        1155               1257
+# contigs (>= 1000 bp)     898                997
+Total length (>= 0 bp)     32560838           32559818
+Total length (>= 1000 bp)  32385589           32382197
+# contigs                  1154               1256
+Largest contig             294690             294690
+Total length               32560355           32559335
+GC (%)                     55.89              55.89
+N50                        79211              68028
+N75                        41647              37762
+L50                        127                142
+L75                        266                304
+# N's per 100 kbp          3.25               0.11
+
+12253
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+# contigs (>= 0 bp)        1382               1473
+# contigs (>= 1000 bp)     1263               1347
+Total length (>= 0 bp)     32355537           32354561
+Total length (>= 1000 bp)  32270360           32264719
+# contigs                  1382               1473
+Largest contig             237640             193510
+Total length               32355537           32354561
+GC (%)                     56.42              56.42
+N50                        47913              45158
+N75                        26456              24013
+L50                        206                218
+L75                        427                458
+# N's per 100 kbp          3.08               0.06
+
+12161
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+# contigs (>= 0 bp)        1238               1363
+# contigs (>= 1000 bp)     964                1085
+Total length (>= 0 bp)     32862458           32861208
+Total length (>= 1000 bp)  32674045           32669822
+# contigs                  1237               1362
+Largest contig             359375             331650
+Total length               32861967           32860717
+GC (%)                     55.66              55.66
+N50                        81782              71457
+N75                        41683              36159
+L50                        126                146
+L75                        266                314
+# N's per 100 kbp          3.91               0.11
+
+
+##Repeatmasking
+
+Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
+
+The best assemblies were used to perform repeatmasking
+
+```bash
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+Organism=$(echo $BestAss | rev | cut -d "/" -f4 | rev)
+Strain=$(echo $BestAss | rev | cut -d "/" -f3 | rev)
+OutDir=repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask
+qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
+qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
+done
+  ```
