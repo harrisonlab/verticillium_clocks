@@ -1,0 +1,305 @@
+A Bioproject and Biosample was made with NCBI genbank for submission of genomes. Following the creation of these submissions, the .fasta assembly was uploaded through the submission portal. A note was provided requesting that the assembly be run through the contamination screen to aid a more detailed resubmission in future. The returned FCSreport.txt was downloaded from the NCBI webportal and used to correct the assembly to NCBI standards.
+
+NCBI reports (FCSreport.txt) were manually downloaded to the following loactions:
+
+```bash
+for Assembly in $(ls assembly/spades/V.dahliae/*/filtered_contigs/contigs_min_500bp.fasta); do
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+    NCBI_report_dir=genome_submission/$Organism/$Strain/initial_submission
+    mkdir -p $NCBI_report_dir
+  done
+  ```
+
+  These downloaded files were used to correct assemblies:
+
+```bash
+  for Assembly in $(ls assembly/spades/V.dahliae/*/filtered_contigs/contigs_min_500bp.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+  echo "$Organism - $Strain"
+  NCBI_report=$(ls genome_submission/$Organism/$Strain/initial_submission/FCSreport.txt)
+  OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+  mkdir -p $OutDir
+  ProgDir=/home/lopeze/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp.fasta --coord_file $NCBI_report > $OutDir/log.txt
+  done
+```
+
+Quast was used to collect details on these assemblies again
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+12251
+AAssembly                   contigs_min_500bp  contigs_min_500bp broken
+contigs (>= 0 bp)        1483               1555                    
+contigs (>= 1000 bp)     1096               1163                    
+Total length (>= 0 bp)     33028358           33027638                
+Total length (>= 1000 bp)  32766912           32763294                
+contigs                  1483               1555                    
+Largest contig             321888             321888                  
+Total length               33028358           33027638                
+GC (%)                     55.96              55.96                   
+N50                        63849              59021                   
+N75                        34220              32528                   
+L50                        154                166                     
+L75                        326                350                     
+N's per 100 kbp          2.32               0.14    
+
+12158
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+contigs (>= 0 bp)        1155               1257
+contigs (>= 1000 bp)     898                997
+Total length (>= 0 bp)     32560838           32559818
+Total length (>= 1000 bp)  32385589           32382197
+contigs                  1154               1256
+Largest contig             294690             294690
+Total length               32560355           32559335
+GC (%)                     55.89              55.89
+N50                        79211              68028
+N75                        41647              37762
+L50                        127                142
+L75                        266                304
+N's per 100 kbp          3.25               0.11
+
+12253
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+contigs (>= 0 bp)        1382               1473
+contigs (>= 1000 bp)     1263               1347
+Total length (>= 0 bp)     32355537           32354561
+Total length (>= 1000 bp)  32270360           32264719
+contigs                  1382               1473
+Largest contig             237640             193510
+Total length               32355537           32354561
+GC (%)                     56.42              56.42
+N50                        47913              45158
+N75                        26456              24013
+L50                        206                218
+L75                        427                458
+ N's per 100 kbp          3.08               0.06
+
+12161
+Assembly                   contigs_min_500bp  contigs_min_500bp broken
+contigs (>= 0 bp)        1238               1363
+contigs (>= 1000 bp)     964                1085
+Total length (>= 0 bp)     32862458           32861208
+Total length (>= 1000 bp)  32674045           32669822
+contigs                  1237               1362
+Largest contig             359375             331650
+Total length               32861967           32860717
+GC (%)                     55.66              55.66
+N50                        81782              71457
+N75                        41683              36159
+L50                        126                146
+L75                        266                314
+ N's per 100 kbp          3.91               0.11
+
+
+##Repeatmasking
+
+Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
+
+The best assemblies were used to perform repeatmasking
+
+```bash
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+Organism=$(echo $BestAss | rev | cut -d "/" -f4 | rev)
+Strain=$(echo $BestAss | rev | cut -d "/" -f3 | rev)
+OutDir=repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask
+qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
+qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
+done
+  ```
+
+The number of bases masked by transposonPSI and Repeatmasker were summarised using the following commands:
+
+```bash
+for RepDir in $(ls -d repeat_masked/V.*/*/ncbi_filtered_contigs_repmask | grep '51'); do
+Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)
+RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+printf "$Organism\t$Strain\n"
+printf "The number of bases masked by RepeatMasker:\t"
+sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The number of bases masked by TransposonPSI:\t"
+sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+printf "The total number of masked bases are:\t"
+cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}'
+echo
+done
+  ```
+  V.dahliae       51
+The number of bases masked by RepeatMasker:     1195031
+The number of bases masked by TransposonPSI:    310921
+The total number of masked bases are:   1377060
+
+  V.dahliae       58
+  The number of bases masked by RepeatMasker:     1258760
+  The number of bases masked by TransposonPSI:    360475
+  The total number of masked bases are:   1418679
+
+  V.dahliae       53
+  The number of bases masked by RepeatMasker:     689605
+  The number of bases masked by TransposonPSI:    221954
+  The total number of masked bases are:   863683
+
+  V.dahliae       61
+  The number of bases masked by RepeatMasker:     1549224
+  The number of bases masked by TransposonPSI:    407135
+  The total number of masked bases are:   1713807
+
+  Up till now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
+
+  ```bash
+  for File in $(ls repeat_masked/V.*/*/ncbi*/*_contigs_softmasked.fa); do
+  OutDir=$(dirname $File)
+  TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+  OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+  bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+  echo "$OutFile"
+  echo "Number of masked bases:"
+  cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+  done
+  ```
+  12151
+Number of masked bases:
+1377060
+12253
+Number of masked bases:
+863683
+12158
+Number of masked bases:
+1418679
+12161
+Number of masked bases:
+1713807
+
+#Pre-gene prediction
+
+Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
+
+  ```bash
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
+cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+for Genome in $(ls repeat_masked/V.*/51/ncbi*/*_contigs_softmasked.fa); do
+echo $Genome;
+qsub $ProgDir/sub_cegma.sh $Genome dna;
+done
+  ```
+12151
+*** Number of cegma genes present and complete: 94.76% ** Number of cegma genes present and partial: 97.98%
+12253
+*** Number of cegma genes present and complete: 94.35% ** Number of cegma genes present and partial: 97.98%
+12158
+*** Number of cegma genes present and complete: 95.16% ** Number of cegma genes present and partial: 97.18%
+12161
+*** Number of cegma genes present and complete: 95.56% ** Number of cegma genes present and partial: 97.58%
+
+
+  ```bash
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
+cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+for Genome in $(ls repeat_masked/V.*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+echo $Genome;
+ qsub $ProgDir/sub_cegma.sh $Genome dna;
+done
+    ```
+12151
+*** Number of cegma genes present and complete: 94.76% ** Number of cegma genes present and partial: 97.98%
+12253
+*** Number of cegma genes present and complete: 94.35% ** Number of cegma genes present and partial: 97.98%
+12158
+*** Number of cegma genes present and complete: 95.16% ** Number of cegma genes present and partial: 97.18%
+12161
+*** Number of cegma genes present and complete: 95.56% ** Number of cegma genes present and partial: 97.58%
+
+Outputs were summarised using the commands:
+
+  ```bash
+for File in $(ls gene_pred/cegma/V.*/*/*_dna_cegma.completeness_report); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
+Species=$(echo $File | rev | cut -f3 -d '/' | rev);
+printf "$Species\t$Strain\n";
+cat $File | head -n18 | tail -n+4;printf "\n";
+done > gene_pred/cegma/cegma_results_dna_summary.txt
+```
+
+#Gene prediction
+
+##Aligning
+
+Insert sizes of the RNA seq library were unknown until a draft alignment could be made. To do this tophat and cufflinks were run, aligning the reads against a single genome. The fragment length and stdev were printed to stdout while cufflinks was running.
+
+  ```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    for RNADir in $(ls -d qc_rna/paired/V.*/12008PDA); do
+      Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+      echo "$Timepoint"
+      FileF=$(ls $RNADir/F/*_trim.fq.gz)
+      FileR=$(ls $RNADir/R/*_trim.fq.gz)
+      OutDir=ncbi_alignment/$Organism/$Strain/$Timepoint
+      ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+      qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+    done
+  done
+    ```
+    51 --> 81.7% overall read mapping rate. 73.0% concordant pair alignment rate.
+    53 --> 76.5% overall read mapping rate. 68.5% concordant pair alignment rate.
+    58 --> 73.7% overall read mapping rate. 65.7% concordant pair alignment rate.
+    61 --> 78.8% overall read mapping rate. 70.1% concordant pair alignment rate.
+
+      ```bash
+    for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    for RNADir in $(ls -d qc_rna/paired/V.*/12008CD); do
+      Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+      echo "$Timepoint"
+      FileF=$(ls $RNADir/F/*_trim.fq.gz)
+      FileR=$(ls $RNADir/R/*_trim.fq.gz)
+      OutDir=ncbi_alignment/$Organism/$Strain/$Timepoint
+      ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+      qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir
+    done
+  done
+    ```
+    51 --> 80.4% overall read mapping rate. 70.8% concordant pair alignment rate.
+    53 --> 77.4% overall read mapping rate. 68.3% concordant pair alignment rate.
+    58 --> 70.2% overall read mapping rate. 61.2% concordant pair alignment rate.
+    61 --> 73.2% overall read mapping rate. 63.8% concordant pair alignment rate.
+
+
+Alignments were concatenated prior to running cufflinks: Cufflinks was run to produce the fragment length and stdev statistics:
+
+```bash
+    for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+  Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+  Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+  echo "$Organism - $Strain"
+  for AcceptedHits in $(ls ncbi_alignment/$Organism/$Strain/*/accepted_hits.bam); do
+  Timepoint=$(echo $AcceptedHits | rev | cut -f2 -d '/' | rev)
+  echo $Timepoint
+  OutDir=gene_pred/ncbi_cufflinks/$Organism/$Strain/"$Timepoint"_prelim
+  ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+  qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+  # cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+  done
+  done
+  ```
