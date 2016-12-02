@@ -30,7 +30,7 @@ Quast was used to collect details on these assemblies again
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+for Assembly in $(ls assembly/spades/*/61/ncbi_edits/contigs_min_500bp.fasta); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -89,21 +89,20 @@ L50                        206                218
 L75                        427                458
  N's per 100 kbp          3.08               0.06
 
-12161
-Assembly                   contigs_min_500bp  contigs_min_500bp broken
-contigs (>= 0 bp)        1238               1363
-contigs (>= 1000 bp)     964                1085
-Total length (>= 0 bp)     32862458           32861208
-Total length (>= 1000 bp)  32674045           32669822
-contigs                  1237               1362
-Largest contig             359375             331650
-Total length               32861967           32860717
-GC (%)                     55.66              55.66
-N50                        81782              71457
-N75                        41683              36159
-L50                        126                146
-L75                        266                314
- N's per 100 kbp          3.91               0.11
+ Assembly                   contigs_min_500bp  contigs_min_500bp broken
+ # contigs (>= 0 bp)        1238               1363                    
+ # contigs (>= 1000 bp)     964                1085                    
+ Total length (>= 0 bp)     32862458           32861208                
+ Total length (>= 1000 bp)  32674045           32669822                
+ # contigs                  1237               1362                    
+ Largest contig             359375             331650                  
+ Total length               32861967           32860717                
+ GC (%)                     55.66              55.66                   
+ N50                        81782              71457                   
+ N75                        41683              36159                   
+ L50                        126                146                     
+ L75                        266                314                     
+ # N's per 100 kbp          3.91               0.11     
 
 
 ##Repeatmasking
@@ -289,17 +288,261 @@ for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_T
 Alignments were concatenated prior to running cufflinks: Cufflinks was run to produce the fragment length and stdev statistics:
 
 ```bash
-    for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-  Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-  Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-  echo "$Organism - $Strain"
-  for AcceptedHits in $(ls ncbi_alignment/$Organism/$Strain/*/accepted_hits.bam); do
-  Timepoint=$(echo $AcceptedHits | rev | cut -f2 -d '/' | rev)
-  echo $Timepoint
-  OutDir=gene_pred/ncbi_cufflinks/$Organism/$Strain/"$Timepoint"_prelim
-  ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
-  qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
-  # cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
-  done
-  done
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for AcceptedHits in $(ls ncbi_alignment/$Organism/$Strain/*/accepted_hits.bam); do
+Timepoint=$(echo $AcceptedHits | rev | cut -f2 -d '/' | rev)
+echo $Timepoint
+OutDir=gene_pred/ncbi_cufflinks/$Organism/$Strain/"$Timepoint"_prelim
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+# cufflinks -o $OutDir/cufflinks -p 8 --max-intron-length 4000 $AcceptedHits 2>&1 | tee $OutDir/cufflinks/cufflinks.log
+done
+done
   ```
+
+  12251
+PDA
+> Processed 18108 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 11141720.32
+>       Raw Map Mass: 11141720.32
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 233.10
+>                  Estimated Std Dev: 59.61
+[17:57:30] Assembling transcripts and estimating abundances.
+> Processed 18245 loci.                        [*************************] 100%
+
+CDD
+> Processed 17015 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 8276688.40
+>       Raw Map Mass: 8276688.40
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 224.33
+>                  Estimated Std Dev: 62.66
+[17:43:10] Assembling transcripts and estimating abundances.
+> Processed 17155 loci.                        [*************************] 100%
+
+12253
+PDA
+> Processed 18194 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 10396226.10
+>       Raw Map Mass: 10396226.10
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 232.92
+>                  Estimated Std Dev: 59.58
+[18:04:14] Assembling transcripts and estimating abundances.
+> Processed 18333 loci.                        [*************************] 100%   7%
+
+CDD
+> Processed 17078 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 7964357.15
+>       Raw Map Mass: 7964357.15
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 224.17
+>                  Estimated Std Dev: 62.58
+[17:43:03] Assembling transcripts and estimating abundances.
+> Processed 17223 loci.                        [*************************] 100%
+
+12158
+PDA
+> Processed 19123 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 10053530.97
+>       Raw Map Mass: 10053530.97
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 230.36
+>                  Estimated Std Dev: 59.22
+[18:01:29] Assembling transcripts and estimating abundances.
+> Processed 19284 loci.                        [*************************] 100%
+
+CDD
+> Processed 18576 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 7283829.83
+>       Raw Map Mass: 7283829.83
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 221.45
+>                  Estimated Std Dev: 62.04
+[17:50:04] Assembling transcripts and estimating abundances.
+> Processed 18745 loci.                        [*************************] 100%
+
+12161
+PDA
+> Processed 19175 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 10776098.47
+>       Raw Map Mass: 10776098.47
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 230.17
+>                  Estimated Std Dev: 59.15
+[18:01:13] Assembling transcripts and estimating abundances.
+> Processed 19324 loci.                        [*************************] 100%
+
+CDD
+> Processed 18606 loci.                        [*************************] 100%
+> Map Properties:
+>       Normalized Map Mass: 7602542.83
+>       Raw Map Mass: 7602542.83
+>       Fragment Length Distribution: Empirical (learned)
+>                     Estimated Mean: 221.06
+>                  Estimated Std Dev: 61.90
+[17:47:57] Assembling transcripts and estimating abundances.
+> Processed 18772 loci.                        [*************************] 100%
+
+
+Then Rnaseq data was aligned to each genome assembly:
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/*/12008PDA | grep -v -e '_rep'); do
+Timepoint_PDA=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint_PDA"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=ncbi_alignment/$Organism/$Strain/$Timepoint_PDA
+InsertGap='-250'
+InsertStdDev='64'
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+done
+printf "\n"
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
+done
+done
+    ```
+    mkdir -p ncbi_alignment/after_cuff/12008PDA_accurate
+
+      mv -r 12008PDA/* 12008PDA_accurate/
+
+
+    51 --> 81.7% overall read mapping rate. 73.0% concordant pair alignment rate.
+    53 --> 76.5% overall read mapping rate. 68.5% concordant pair alignment rate.
+    58 --> 73.7% overall read mapping rate. 65.7% concordant pair alignment rate.
+    61 --> 78.8% overall read mapping rate. 70.1% concordant pair alignment rate.
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+for RNADir in $(ls -d qc_rna/paired/*/12008CD | grep -v -e '_rep'); do
+Timepoint_CD=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+echo "$Timepoint_CD"
+FileF=$(ls $RNADir/F/*_trim.fq.gz)
+FileR=$(ls $RNADir/R/*_trim.fq.gz)
+OutDir=ncbi_alignment/$Organism/$Strain/$Timepoint_CD
+InsertGap='-255'
+InsertStdDev='64'
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+done
+printf "\n"
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
+done
+done
+  ```
+
+
+
+  51 --> 80.4% overall read mapping rate. 70.8% concordant pair alignment rate.
+  53 --> 77.4% overall read mapping rate. 68.3% concordant pair alignment rate.
+  58 --> 70.2% overall read mapping rate. 61.2% concordant pair alignment rate.
+  61 --> 73.2% overall read mapping rate. 63.8% concordant pair alignment rate.
+
+
+#Braker prediction
+
+Before braker predictiction was performed, I double checked that I had the genemark key in my user area and copied it over from the genemark install directory:
+
+ls ~/.gm_key
+cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
+
+Braker predictiction was performed using softmasked genome, not unmasked one.
+
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'tophat' | grep -w 'r' | wc -l)
+done
+printf "\n"
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/braker/$Organism/"$Strain"
+AcceptedHits=ncbi_alignment/$Organism/$Strain/concatenated/concatenated.bam
+mkdir -p ncbi_alignment/$Organism/$Strain/concatenated
+samtools merge -f $AcceptedHits \ncbi_alignment/V.dahliae/$Strain/12008PDA/accepted_hits.bam \ncbi_alignment/V.dahliae/$Strain/12008CD/accepted_hits.bam
+GeneModelName="$Organism"_"$Strain"_braker_two
+rm -r /home/lopeze/prog/augustus-3.1/config/species/"$Organism"_"$Strain"_braker_two
+ProgDir=/home/lopeze/git_repos/tools/gene_prediction/braker1
+qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+done
+  ```
+
+##Amino acid sequences and gff files were extracted from Braker1 output.
+
+```bash
+for File in $(ls gene_pred/braker/V.dahliae/*/V.dahliae_*_braker_two/augustus.gff); do
+getAnnoFasta.pl $File
+OutDir=$(dirname $File)
+echo "##gff-version 3" > $OutDir/augustus_extracted.gff
+cat $File | grep -v '#' >> $OutDir/augustus_extracted.gff
+done
+  ```
+
+The relationship between gene models and aligned reads was investigated. To do this aligned reads needed to be sorted and indexed:
+
+Note - IGV was used to view aligned reads against the Fus2 genome on my local machine.
+
+```bash
+InBam=alignment/V.dahliae/*/concatenated/concatenated.bam
+ViewBam=alignment/V.dahliae/*/concatenated/concatenated_view.bam
+SortBam=alignment/V.dahliae/*/concatenated/concatenated_sorted
+samtools view -b $InBam > $ViewBam
+samtools sort $ViewBam $SortBam
+samtools index $SortBam.bam
+```
+
+#Supplimenting Braker gene models with CodingQuary genes
+
+Additional genes were added to Braker gene predictions, using CodingQuary in pathogen mode to predict additional regions.
+
+Fistly, aligned RNAseq data was assembled into transcripts using Cufflinks.
+
+Note - cufflinks doesn't always predict direction of a transcript and therefore features can not be restricted by strand when they are intersected.
+
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim
+mkdir -p $OutDir
+AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+ProgDir=/home/fanron/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub3_cufflinks.sh $AcceptedHits $OutDir
+done
+  ```
+  
