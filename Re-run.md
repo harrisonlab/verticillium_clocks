@@ -26,11 +26,26 @@ for Assembly in $(ls assembly/spades/V.dahliae/*/filtered_contigs/contigs_min_50
   done
 ```
 
+Strain 62 second round of correction
+
+```bash
+  for Assembly in $(ls assembly/spades/V.dahliae/61/ncbi_edits/contigs_min_500bp.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+  echo "$Organism - $Strain"
+  NCBI_report=$(ls genome_submission/$Organism/$Strain/second_submission/FCSreport.txt)
+  OutDir=assembly/spades/$Organism/$Strain/ncbi_edits_2
+  mkdir -p $OutDir
+  ProgDir=/home/lopeze/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/contigs_min_500bp.fasta --coord_file $NCBI_report > $OutDir/log.txt
+  done
+```
+
 Quast was used to collect details on these assemblies again
 
 ```bash
 ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/spades/*/61/ncbi_edits/contigs_min_500bp.fasta); do
+for Assembly in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
@@ -38,6 +53,21 @@ OutDir=assembly/spades/$Organism/$Strain/ncbi_edits
 qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 ```
+
+Quast for 61 second round
+
+
+```bash
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades/*/61/ncbi_edits_2/contigs_min_500bp.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=assembly/spades/$Organism/$Strain/ncbi_edits_2
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
 
 All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
 
@@ -113,15 +143,27 @@ The best assemblies were used to perform repeatmasking
 
 ```bash
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
-for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta); do
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits/contigs_min_500bp.fasta | grep -v '61'); do
 Organism=$(echo $BestAss | rev | cut -d "/" -f4 | rev)
 Strain=$(echo $BestAss | rev | cut -d "/" -f3 | rev)
 OutDir=repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask
 qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
 qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
 done
-  ```
+```
 
+A differemt loaction was used for isolate 61 as this required multiple rounds of ncbi edits
+
+```bash
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/ncbi_edits_2/contigs_min_500bp.fasta | grep '61'); do
+Organism=$(echo $BestAss | rev | cut -d "/" -f4 | rev)
+Strain=$(echo $BestAss | rev | cut -d "/" -f3 | rev)
+OutDir=repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask
+qsub $ProgDir/rep_modeling.sh $BestAss $OutDir
+qsub $ProgDir/transposonPSI.sh $BestAss $OutDir
+done
+  ```  
 The number of bases masked by transposonPSI and Repeatmasker were summarised using the following commands:
 
 ```bash
@@ -516,7 +558,8 @@ The relationship between gene models and aligned reads was investigated. To do t
 Note - IGV was used to view aligned reads against the Fus2 genome on my local machine.
 
 ```bash
-InBam=alignment/V.dahliae/*/concatenated/concatenated.bam
+for
+InBam=$(ls alignment/V.dahliae/*/concatenated/concatenated.bam)
 ViewBam=alignment/V.dahliae/*/concatenated/concatenated_view.bam
 SortBam=alignment/V.dahliae/*/concatenated/concatenated_sorted
 samtools view -b $InBam > $ViewBam
@@ -534,15 +577,14 @@ Note - cufflinks doesn't always predict direction of a transcript and therefore 
 
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v '61'); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
 OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim
 mkdir -p $OutDir
 AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
-ProgDir=/home/fanron/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub3_cufflinks.sh $AcceptedHits $OutDir
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
   ```
-  
