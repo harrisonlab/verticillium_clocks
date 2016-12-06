@@ -120,19 +120,19 @@ L75                        427                458
  N's per 100 kbp          3.08               0.06
 
  Assembly                   contigs_min_500bp  contigs_min_500bp broken
- # contigs (>= 0 bp)        1238               1363                    
- # contigs (>= 1000 bp)     964                1085                    
- Total length (>= 0 bp)     32862458           32861208                
- Total length (>= 1000 bp)  32674045           32669822                
- # contigs                  1237               1362                    
- Largest contig             359375             331650                  
- Total length               32861967           32860717                
- GC (%)                     55.66              55.66                   
- N50                        81782              71457                   
- N75                        41683              36159                   
- L50                        126                146                     
- L75                        266                314                     
- # N's per 100 kbp          3.91               0.11     
+contigs (>= 0 bp)        1238               1363                    
+contigs (>= 1000 bp)     964                1085                    
+Total length (>= 0 bp)     32862437           32861187                
+Total length (>= 1000 bp)  32674024           32669801                
+contigs                  1237               1362                    
+Largest contig             359375             331650                  
+Total length               32861946           32860696                
+GC (%)                     55.66              55.66                   
+N50                        81782              71457                   
+N75                        41683              36159                   
+L50                        126                146                     
+L75                        266                314                     
+N's per 100 kbp          3.91               0.11       
 
 
 ##Repeatmasking
@@ -156,7 +156,7 @@ A differemt loaction was used for isolate 61 as this required multiple rounds of
 
 ```bash
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/repeat_masking
-for BestAss in $(ls assembly/spades/*/*/ncbi_edits_2/contigs_min_500bp.fasta | grep '61'); do
+for BestAss in $(ls assembly/spades/*/61/ncbi_edits_2/contigs_min_500bp.fasta); do
 Organism=$(echo $BestAss | rev | cut -d "/" -f4 | rev)
 Strain=$(echo $BestAss | rev | cut -d "/" -f3 | rev)
 OutDir=repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask
@@ -167,7 +167,7 @@ done
 The number of bases masked by transposonPSI and Repeatmasker were summarised using the following commands:
 
 ```bash
-for RepDir in $(ls -d repeat_masked/V.*/*/ncbi_filtered_contigs_repmask | grep '51'); do
+for RepDir in $(ls -d repeat_masked/V.*/*/ncbi_filtered_contigs_repmask | grep '61'); do
 Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)
 RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
@@ -198,9 +198,9 @@ The total number of masked bases are:   1377060
   The total number of masked bases are:   863683
 
   V.dahliae       61
-  The number of bases masked by RepeatMasker:     1549224
-  The number of bases masked by TransposonPSI:    407135
-  The total number of masked bases are:   1713807
+  The number of bases masked by RepeatMasker:	1574548
+  The number of bases masked by TransposonPSI:	407135
+  The total number of masked bases are:	1726438
 
   Up till now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
 
@@ -226,7 +226,7 @@ Number of masked bases:
 1418679
 12161
 Number of masked bases:
-1713807
+1726438
 
 #Pre-gene prediction
 
@@ -235,7 +235,7 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
   ```bash
 ProgDir=/home/lopeze/git_repos/tools/gene_prediction/cegma
 cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
-for Genome in $(ls repeat_masked/V.*/51/ncbi*/*_contigs_softmasked.fa); do
+for Genome in $(ls repeat_masked/V.*/*/ncbi*/*_contigs_softmasked.fa); do
 echo $Genome;
 qsub $ProgDir/sub_cegma.sh $Genome dna;
 done
@@ -416,26 +416,26 @@ CDD
 
 12161
 PDA
-> Processed 19175 loci.                        [*************************] 100%
+> Processed 19194 loci.                        [*************************] 100%
 > Map Properties:
->       Normalized Map Mass: 10776098.47
->       Raw Map Mass: 10776098.47
->       Fragment Length Distribution: Empirical (learned)
->                     Estimated Mean: 230.17
->                  Estimated Std Dev: 59.15
-[18:01:13] Assembling transcripts and estimating abundances.
-> Processed 19324 loci.                        [*************************] 100%
+>	Normalized Map Mass: 10828749.04
+>	Raw Map Mass: 10828749.04
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 235.63
+>	           Estimated Std Dev: 63.60
+[10:50:39] Assembling transcripts and estimating abundances.
+> Processed 19343 loci.                        [*************************] 100%
 
 CDD
-> Processed 18606 loci.                        [*************************] 100%
+> Processed 18620 loci.                        [*************************] 100%
 > Map Properties:
->       Normalized Map Mass: 7602542.83
->       Raw Map Mass: 7602542.83
->       Fragment Length Distribution: Empirical (learned)
->                     Estimated Mean: 221.06
->                  Estimated Std Dev: 61.90
-[17:47:57] Assembling transcripts and estimating abundances.
-> Processed 18772 loci.                        [*************************] 100%
+>	Normalized Map Mass: 7639017.83
+>	Raw Map Mass: 7639017.83
+>	Fragment Length Distribution: Empirical (learned)
+>	              Estimated Mean: 224.52
+>	           Estimated Std Dev: 64.72
+[10:36:08] Assembling transcripts and estimating abundances.
+> Processed 18786 loci.                        [*************************] 100%
 
 
 Then Rnaseq data was aligned to each genome assembly:
@@ -465,9 +465,7 @@ qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $In
 done
 done
     ```
-    mkdir -p ncbi_alignment/after_cuff/12008PDA_accurate
 
-      mv -r 12008PDA/* 12008PDA_accurate/
 
 
     51 --> 81.7% overall read mapping rate. 73.0% concordant pair alignment rate.
@@ -486,7 +484,7 @@ echo "$Timepoint_CD"
 FileF=$(ls $RNADir/F/*_trim.fq.gz)
 FileR=$(ls $RNADir/R/*_trim.fq.gz)
 OutDir=ncbi_alignment/$Organism/$Strain/$Timepoint_CD
-InsertGap='-255'
+InsertGap='-235'
 InsertStdDev='64'
 Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
 while [ $Jobs -gt 1 ]; do
@@ -577,14 +575,202 @@ Note - cufflinks doesn't always predict direction of a transcript and therefore 
 
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa | grep -v '61'); do
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 echo "$Organism - $Strain"
-OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim
+OutDir=gene_pred/ncbi_cufflinks/$Organism/$Strain/concatenated_prelim
 mkdir -p $OutDir
-AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+AcceptedHits=ncbi_alignment/$Organism/$Strain/concatenated/concatenated.bam
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
   ```
+  Secondly, genes were predicted using CodingQuary:
+
+```bash
+  for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    OutDir=gene_pred/codingquary1/$Organism/$Strain
+    CufflinksGTF=gene_pred/ncbi_cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
+    ProgDir=/home/lopeze/git_repos/tools/gene_prediction/codingquary
+    qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+    done
+    ```
+
+#Identification of duplicated genes in additional CodingQuary gene models
+
+```bash
+for AddGenes in $(ls gene_pred/codingquary1/V.*/*/additional/additional_genes.gff); do
+Strain=$(echo $AddGenes| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $AddGenes | rev | cut -d '/' -f4 | rev)
+OutDir=$(dirname $AddGenes)
+echo "$Organism - $Strain" > $OutDir/duplicated_genes.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+$ProgDir/remove_dup_features.py --inp_gff $AddGenes >> $OutDir/duplicated_genes.txt
+cat $OutDir/duplicated_genes.txt
+echo ""
+done
+  ```
+
+  V.dahliae - 51
+Duplicate gene found:
+NODE_279_length_40998_cov_22.1969	24380	24910
+NODE_279_length_40998_cov_22.1969	CodingQuarry_v2.0	gene	24380	24910	.	+	.	ID=NS.01835;Name=;
+NODE_279_length_40998_cov_22.1969	CodingQuarry_v2.0	gene	24380	24910	.	+	.	ID=CUFF.4517.1.10;Name=;
+
+V.dahliae - 53
+Duplicate gene found:
+NODE_271_length_40835_cov_18.2922	16060	16590
+NODE_271_length_40835_cov_18.2922	CodingQuarry_v2.0	gene	16060	16590	.	-	.	ID=NS.01607;Name=;
+NODE_271_length_40835_cov_18.2922	CodingQuarry_v2.0	gene	16060	16590	.	-	.	ID=CUFF.4072.1.5;Name=;
+
+V.dahliae - 58
+
+V.dahliae - 61
+Duplicate gene found:
+NODE_223_length_50767_cov_26.2663	12238	12558
+NODE_223_length_50767_cov_26.2663	CodingQuarry_v2.0	gene	12238	12558	.	+	.	ID=CUFF.3883.1.2;Name=;
+NODE_223_length_50767_cov_26.2663	CodingQuarry_v2.0	gene	12238	12558	.	+	.	ID=CUFF.3884.1.3;Name=;
+
+
+To check how many proteins/genes were predicted by coding quary for each strain:
+gene_pred/codingquary1/V.dahliae/51/out
+
+cat PredictedPass.gff3 | grep -w 'gene' | wc -l
+
+12151: 10832
+12158: 10387
+12253: 10850
+12161: 10360
+
+
+##Remove those lines containing 'CUFF.9944.1.116' because we are not very confident for the cuff results
+
+the command used was : cd /gene_pred/codingquary1/V.dahliae//additional: cat additional_genes.gff | grep -v -w 'CUFF.9944.1.116' > new_additional_genes.gff
+
+Note that at this stage all codingquary genes contain . characters rather than _ characters
+
+
+```bash
+for Assembly in $(ls repeat_masked/*/61/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+OutDir=gene_pred/final_genes/$Organism/$Strain/edited
+mkdir -p $OutDir
+BrakerGff=$(ls gene_pred/braker/$Organism/$Strain/V.dahliae_*_braker_two/augustus.gff3)
+CodingQuaryGff=$(ls gene_pred/codingquary1/$Organism/$Strain/out/PredictedPass.gff3)
+PGNGff=$(ls gene_pred/codingquary1/$Organism/$Strain/out/PGN_predictedPass.gff3)
+cp -i $BrakerGff $OutDir/final_genes_Braker_ed.gff3
+cat $CodingQuaryGff | grep -v -w -e 'CUFF.3884.1.3' -e 'CUFF.3883.1.2' > $OutDir/PredictedPass_ed.gff3
+cp -i $PGNGff $OutDir/PGN_predictedPass_ed.gff3
+echo ""
+done
+```
+
+cat PredictedPass_ed.gff3 | grep -w 'gene' | wc -l
+
+12251: 10831
+12253: 10849
+12158: 10387
+12161: 10358
+
+To make the loop: (not done)
+    ```bash
+for Assembly in $(ls repeat_masked/*/*/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+echo "$Organism - $Strain"
+if [ $Strain == 51 ]; then
+echo ""
+cat $CodingGff | grep -v 'CUFF.4517.1.10' > $CodingGffEd
+elif [ $Strain == 53 ]; then
+echo ""
+cat $CodingGff | grep -v 'CCUFF.4072.1.5' > $CodingGffEd
+fi [ $Strain == 61 ]; then
+echo ""
+cat $CodingGff | grep -v 'CUFF.3883.1.2' > $CodingGffEd
+done
+    ```
+
+#Then additional transcripts were added to Braker gene models, when CodingQuary
+
+genes were predicted in regions of the genome, not containing Braker gene models:
+
+```bash
+for EditDir in $(ls -d gene_pred/final_genes/*/*/edited); do
+Strain=$(echo $EditDir | rev | cut -d '/' -f2 | rev)
+Organism=$(echo $EditDir | rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+Assembly=$(ls repeat_masked/$Organism/$Strain/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+BrakerGff=$EditDir/final_genes_Braker_ed.gff3
+CodingQuaryGff=$EditDir/PredictedPass_ed.gff3
+PGNGff=$EditDir/PGN_predictedPass_ed.gff3
+# ManGff=$EditDir/manual_annotations.gff3
+AddDir=$EditDir/additional
+FinalDir=gene_pred/final_genes/$Organism/$Strain/final
+AddGenesList=$AddDir/additional_genes.txt
+AddGenesGff=$AddDir/additional_genes.gff
+# FinalGff=$AddDir/combined_genes.gff
+mkdir -p $AddDir
+mkdir -p $FinalDir
+
+bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+
+$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+# cp $ManGff $FinalDir/final_genes_manual.gff3
+# $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_manual.gff3 $FinalDir/final_genes_manual
+cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+
+GffBraker=$FinalDir/final_genes_CodingQuary.gff3
+GffQuary=$FinalDir/final_genes_Braker.gff3
+# GffManual=$FinalDir/final_genes_manual.gff3
+GffAppended=$FinalDir/final_genes_appended.gff3
+cat $GffBraker $GffQuary > $GffAppended
+# cat $GffBraker $GffQuary $GffManual > $GffAppended
+done
+  ```
+
+The final number of genes per isolate was observed using:
+
+```bash
+for DirPath in $(ls -d  gene_pred/final_genes/V.dahliae/*/final); do
+  echo $DirPath;
+  cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+  cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+  cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+  echo "";
+  done
+  ```
+gene_pred/final_genes/V.dahliae/51/final
+9655
+732
+10387
+
+gene_pred/final_genes/V.dahliae/53/final
+9718
+716
+10434
+
+gene_pred/final_genes/V.dahliae/58/final
+9458
+0
+9458
+
+gene_pred/final_genes/V.dahliae/61/final
+9457
+550
+10007
