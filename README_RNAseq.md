@@ -317,9 +317,9 @@ ParentFeature="Parent"
 --genomeDir $GenomeDir \
 --genomeFastaFiles $InGenome \
 --sjdbGTFtagExonParentTranscript $ParentFeature \
---sjdbGTFfile $InGff
---runThreadN 16 \
---sjdbOverhang ReadLength-1
+--sjdbGTFfile $InGff \
+--runThreadN 8 \
+--sjdbOverhang 99
 
 
 ### To align reads with STAR
@@ -338,93 +338,17 @@ InReadR=qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/R/*.fq.gz
 --readFilesCommand zcat \
 --readFilesIn $InReadF $InReadR \
 --outSAMtype SAM \
---runThreadN 16
-
-
-##Create sub_star.sh
-
-#!/bin/bash
-#Align RNAseq data with genome using STAR
-
-#$ -S /bin/bash
-#$ -cwd
-#$ -pe smp 8
-#$ -l virtual_free=1.2G
-
-# ---------------
-# Step 1
-# Collect inputs
-# ---------------
-
-InGenome=$(basename $1)
-InGff=$(basename $2)
-InReadF=$(basename $3)
-InReadR=$(basename $4)
-# GenomeDir=$(basname $5)
-OutDir=$5
-
-CurDir=$PWD
-WorkDir=$TMPDIR/star
-mkdir -p $WorkDir
-cd $WorkDir
-
-cp $CurDir/$1 $InGenome
-cp $CurDir/$2 $InGff
-cp $CurDir/$3 $InReadF
-cp $CurDir/$4 $InReadR
-# cp $CurDir/$5 $GenomeDir
-cp $CurDir/$5 $OutDir
-
-GenomeDir=$WorkDir/index
-
-# ---------------
-# Step 2
-# Create the Index File
-# ---------------
-
-ParentFeature="Parent"
-# ParentFeature="ID"
-
-./STAR \
---runMode genomeGenerate \
---genomeDir $GenomeDir \
---genomeFastaFiles $InGenome \
---sjdbGTFtagExonParentTranscript $ParentFeature \
---sjdbGTFfile $InGff
---runThreadN 8 \
---sjdbOverhang ReadLength-1
-
-# ---------------
-# Step 2=3
-# Run STAR
-# ---------------
-
-./STAR \
---genomeDir $GenomeDir \
---outFileNamePrefix $OutDir \
---readFilesCommand zcat \
---readFilesIn $InReadF $InReadR \
---outSAMtype SAM \
 --runThreadN 8
-
-
-rm -r $GenomeDir
-rm $InGenome
-rm $InGff
-rm $InReadF
-rm $InReadR
-mkdir -p $CurDir/$OutDir
-cp -r $WorkDir $CurDir/$OutDir/.
 
 
 ## Run sub_star.sh in data set
 
 ```bash
 InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
-InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3)
-OutDir=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep2/53WT_DD12_rep2)
-InReadF=$(ls qc_rna/experiment1/V.dahliae/53WT_DD12_rep2/F/*.fq.gz)
-InReadR=$(ls qc_rna/experiment1/V.dahliae/53WT_DD12_rep2/R/*.fq.gz)
+InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
+InReadF=$(ls qc_rna/experiment1/V.dahliae/Frq08_DD18_rep2/F/*.fq.gz)
+InReadR=$(ls qc_rna/experiment1/V.dahliae/Frq08_DD18_rep2/R/*.fq.gz)
+OutDir=RNA_alignment/STAR/experiment1/V.dahliae/Frq08_DD18_rep2/
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 ```
@@ -435,11 +359,11 @@ qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 for FilePath in $(ls -d qc_rna/experiment1/V.dahliae/*); do
 Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
 InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
-InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3)
+InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 InReadF=$(ls qc_rna/experiment1/V.dahliae/$Strain/F/*.fq.gz)
 InReadR=$(ls qc_rna/experiment1/V.dahliae/$Strain/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/$Strain
+OutDir=RNA_alignment/STAR/experiment1/V.dahliae/$Strain/
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
-echo "qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir"
+qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 done
 ```
