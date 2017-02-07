@@ -317,9 +317,9 @@ ParentFeature="Parent"
 --genomeDir $GenomeDir \
 --genomeFastaFiles $InGenome \
 --sjdbGTFtagExonParentTranscript $ParentFeature \
---sjdbGTFfile $InGff \
---runThreadN 8 \
---sjdbOverhang 99
+--sjdbGTFfile $InGff
+--runThreadN 16 \
+--sjdbOverhang ReadLength-1
 
 
 ### To align reads with STAR
@@ -327,10 +327,10 @@ ParentFeature="Parent"
 screen -a
 qlogin -pe smp 16 -l virtual_free=1.1G
 
-GenomeDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/53WT_DD12_rep1
-InReadF=qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/F/*.fq.gz
-InReadR=qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/R/*.fq.gz
+GenomeDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep3
+OutDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep3/53WT_DD12_rep3
+InReadF=qc_rna/experiment1/V.dahliae/53WT_DD12_rep3/F/*.fq.gz
+InReadR=qc_rna/experiment1/V.dahliae/53WT_DD12_rep3/R/*.fq.gz
 
 ./STAR \
 --genomeDir $GenomeDir \
@@ -338,7 +338,8 @@ InReadR=qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/R/*.fq.gz
 --readFilesCommand zcat \
 --readFilesIn $InReadF $InReadR \
 --outSAMtype SAM \
---runThreadN 8
+--runThreadN 16
+
 
 
 ## Run sub_star.sh in data set
@@ -346,15 +347,15 @@ InReadR=qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/R/*.fq.gz
 ```bash
 InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
-InReadF=$(ls qc_rna/experiment1/V.dahliae/Frq08_DD18_rep2/F/*.fq.gz)
-InReadR=$(ls qc_rna/experiment1/V.dahliae/Frq08_DD18_rep2/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/Frq08_DD18_rep2/
+InReadF=$(ls qc_rna/experiment1/V.dahliae/53WT_DD18_rep1/F/*.fq.gz)
+InReadR=$(ls qc_rna/experiment1/V.dahliae/53WT_DD18_rep1/R/*.fq.gz)
+OutDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD18_rep1/
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 ```
 
 ## Run sub_star.sh in a loop
-
+q
 ```bash
 for FilePath in $(ls -d qc_rna/experiment1/V.dahliae/*); do
 Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
@@ -362,8 +363,59 @@ InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.top
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 InReadF=$(ls qc_rna/experiment1/V.dahliae/$Strain/F/*.fq.gz)
 InReadR=$(ls qc_rna/experiment1/V.dahliae/$Strain/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/$Strain/
+OutDir=RNA_alignment/STAR/experiment1/V.dahliae/$Strain/$Strain
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
+done
+```
+
+
+#FeatureCounts
+
+Is a highly efficient general-purpose read summarization program that counts mapped reads for genomic features such as genes, exons, promoter, gene bodies, genomic bins and chromosomal locations. It can be used to count both RNA-seq and genomic DNA-seq reads.
+
+
+
+```bash
+for Strain in $(ls ./* -d) ; do
+echo $Strain
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment1/V.dahliae/"$Strain"
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment1/V.dahliae/"$Strain"
+done
+```
+
+
+```bash
+InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/star/*.sam)
+InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
+#InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
+OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep1/53WT_DD12_rep1_results.txt
+
+./subread-1.5.1-source/bin/featureCounts -p -B -a $InGff -t exon -g "Parent" -o $OutDir $InBam
+
+```
+
+## Run sub_featureCounts.sh in data set
+
+```bash
+InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep2/star/*.sam)
+InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
+OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep2/
+Prefix=53WT_DD12_rep2
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir $Prefix
+```
+
+## Run sub_featureCounts.sh in a loop
+
+```bash
+for FilePath in $(ls -d qc_rna/experiment1/V.dahliae/*); do
+Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
+InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/$Strain/star/*.sam)
+InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
+OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/$Strain/
+Prefix=$Strain
+ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir
 done
 ```
