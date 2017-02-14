@@ -466,14 +466,27 @@ done
 
 
 ```bash
-InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/star/*.sam)
+InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/Wc153_LL6_rep3/star/*.sam)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 #InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
-OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep1/53WT_DD12_rep1_results.txt
-
-./subread-1.5.1-source/bin/featureCounts -p -B -a $InGff -t exon -g "Parent" -o $OutDir $InBam
+OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/Wc153_LL6_rep3/featureCounts/Wc153_LL6_rep3_gene_featurecounts.txt
+./subread-1.5.1-source/bin/featureCounts -p -B -M -R -a $InGff -t gene -g "gene_id" -o $OutDir $InBam
 
 ```
+
+Status  RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/star/star_aligmentAligned.out.sam
+Assigned        34203674
+Unassigned_Ambiguity    10911560
+Unassigned_MultiMapping 0
+Unassigned_NoFeatures   1353797
+Unassigned_Unmapped     35332
+Unassigned_MappingQuality       0
+Unassigned_FragmentLength       0
+Unassigned_Chimera      0
+Unassigned_Secondary    0
+Unassigned_Nonjunction  0
+Unassigned_Duplicate    0
+
 
 Write .sh file for featureCounts program:
 
@@ -513,7 +526,8 @@ cp $CurDir/$3 $OutDir
 # ---------------
 
 /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/subread-1.5.1-source/bin/featureCounts \
--p -B -a $InGff -t exon -g "Parent" -o "$Prefix"_featurecounts.txt $InBam
+-p -B -M -R -a $InGff -t gene -g "gene_id" -o "$Prefix"_gene_featurecounts.txt $InBam
+
 
 rm $InBam
 rm $InGff
@@ -524,10 +538,10 @@ cp -r $WorkDir $CurDir/$OutDir/.
 ## Run sub_featureCounts.sh in data set
 
 ```bash
-InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep2/star/*.sam)
+InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/star/*.sam)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
-OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep2/
-Prefix=53WT_DD12_rep2
+OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep1/
+Prefix=53WT_DD12_rep1
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir $Prefix
 ```
@@ -542,6 +556,309 @@ InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/$Strain/
 Prefix=$Strain
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir
+qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir $Prefix
 done
 ```
+
+
+#Import data from featureCounts into R
+
+Create a file with different columns about the experiment treatments:
+
+Sample  Strain  Time    Light
+53WT_LL6_rep1   53WT    6h      l
+53WT_LL6_rep2   53WT    6h      l
+53WT_LL6_rep3   53WT    6h      l
+Frq08_LL6_rep1  Frq08   6h      l
+Frq08_LL6_rep2  Frq08   6h      l
+Frq08_LL6_rep3  Frq08   6h      l
+Wc153_LL6_rep1  Wc153   6h      l
+Wc153_LL6_rep2  Wc153   6h      l
+Wc153_LL6_rep3  Wc153   6h      l
+53WT_DD6_rep1   53WT    6h      d
+53WT_DD6_rep2   53WT    6h      d
+53WT_DD6_rep3   53WT    6h      d
+Frq08_DD6_rep1  Frq08   6h      d
+Frq08_DD6_rep2  Frq08   6h      d
+Frq08_DD6_rep3  Frq08   6h      d
+Wc153_DD6_rep1  Wc153   6h      d
+Wc153_DD6_rep2  Wc153   6h      d
+Wc153_DD6_rep3  Wc153   6h      d
+53WT_DD12_rep1  53WT    12h     d
+53WT_DD12_rep2  53WT    12h     d
+53WT_DD12_rep3  53WT    12h     d
+Frq08_DD12_rep1 Frq08   12h     d
+Frq08_DD12_rep2 Frq08   12h     d
+Frq08_DD12_rep3 Frq08   12h     d
+53WT_DD18_rep1  53WT    DD18h   d
+53WT_DD18_rep2  53WT    DD18h   d
+53WT_DD18_rep3  53WT    DD18h   d
+Frq08_DD18_rep1 Frq08   DD18h   d
+Frq08_DD18_rep2 Frq08   DD18h   d
+Frq08_DD18_rep3 Frq08   DD18h   d
+53WT_DD24_rep1  53WT    24h     d
+53WT_DD24_rep2  53WT    24h     d
+53WT_DD24_rep3  53WT    24h     d
+Frq08_DD24_rep1 Frq08   24h     d
+Frq08_DD24_rep2 Frq08   24h     d
+Frq08_DD24_rep3 Frq08   24h     d
+
+
+R script to import and merge data into a formad good for DESeq2
+
+```R
+#install and load libraries             
+require(data.table)
+
+#load tables into a "list of lists"
+qq <- lapply(list.files(".",".*_gene_featurecounts.txt$",full.names=T,recursive=T),function(x) fread(x))
+
+#rename the samples column
+lapply(qq,function(x) {names(x)[7]<-sub(".*\\/","",sub("\\/star.*","",names(x)[7]))})
+
+#mm <- qq%>%Reduce(function(dtf1,dtf2) inner_join(dtf1,dtf2,by=c("Geneid","Chr","Start","End","Strand","Length")), .)
+
+#merge the "list of lists" into a single table
+m <- Reduce(function(...) merge(..., all = T,by=c("Geneid","Chr","Start","End","Strand","Length")), qq)
+
+#convert data.table to data.frame for use with DESeq2
+countData <- data.frame(m[,c(1,7:(ncol(m))),with=F])
+rownames(countData) <- countData[,1]
+countData <- countData[,-1]
+
+#output countData
+write.table(countData,"countData",sep="\t",na="",quote=F)
+#output gene details
+write.table(m[,1:6,with=F],"genes.txt",sep="\t",quote=F,row.names=F)
+```
+
+#To run DESeq2
+
+##53WT L vs D
+require(DESeq2)
+
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData",header=T,sep="\t")
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+
+design <- ~Group
+
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+
+
+
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","53WTd6h"))
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+summary(res)
+write.table(res,"WtLDtxt",sep="\t",quote=F)
+
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 22, 0.19%
+LFC < 0 (down)   : 53, 0.46%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 5083, 45%
+(mean count < 521)
+
+
+##Frq08 L vs D
+res2= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
+write.table(res2,"Frq08LD.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1163, 10%
+LFC < 0 (down)   : 1215, 11%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 441, 3.9%
+(mean count < 4)
+
+
+##Wc153 L vs D
+
+res3= results(dds, alpha=alpha,contrast=c("Group","Wc153l6h","Wc153d6h"))
+write.table(res3,"WC153LD.txt",sep="\t",quote=F)
+
+summary(res3)
+write.table(res,"Frq08LD.txt",sep="\t",quote=F)
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2202, 19%
+LFC < 0 (down)   : 2380, 21%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+
+##Light 53WT vs Wc153
+
+res4= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
+write.table(res4,"LightWt53Wc153.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 0, 0%
+LFC < 0 (down)   : 5, 0.044%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+
+##Dark 53WT vs Wc153
+
+res5= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","Wc153d6h"))
+write.table(res5,"DarkWt53Wc153.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2080, 18%
+LFC < 0 (down)   : 2325, 20%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+
+##53Wt 6h vs 12h
+
+res6= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTd12h"))
+write.table(res6,"Wt53h6h12.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1816, 16%
+LFC < 0 (down)   : 2127, 19%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##53Wt 12h vs 18
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTdDD18h"))
+write.table(res,"Wt53h12h18.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2, 0.018%
+LFC < 0 (down)   : 0, 0%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##53Wt 18h vs 24h
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTdDD18h","53WTd24h"))
+write.table(res,"Wt53h18h24.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2555, 22%
+LFC < 0 (down)   : 2408, 21%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##Frq08 6h vs 12h
+
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08d12h"))
+write.table(res6,"Frq08h6h12.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1606, 14%
+LFC < 0 (down)   : 1734, 15%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##Frq08 12h vs 18h
+
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08dDD18h"))
+write.table(res6,"Frq08h12h18.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1805, 16%
+LFC < 0 (down)   : 1916, 17%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##Frq08 18h vs 24h
+
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08dDD18h","Frq08d24h"))
+write.table(res6,"Frq08h18h24.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2836, 25%
+LFC < 0 (down)   : 2692, 24%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##53Wt 12h vs 24h
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTd24h"))
+write.table(res6,"Wt53h12h24.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2450, 21%
+LFC < 0 (down)   : 2286, 20%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##Fr08 12h vs 24h
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08d24h"))
+write.table(res6,"Frq08h12h24.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2405, 21%
+LFC < 0 (down)   : 2302, 20%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##53Wt 12h vs 24h
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTdDD18h"))
+write.table(res6,"Wt53h6h18.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2343, 21%
+LFC < 0 (down)   : 2455, 22%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+##Fr08 12h vs 24h
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08dDD18h"))
+write.table(res6,"Frq08h6h18.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1840, 16%
+LFC < 0 (down)   : 2043, 18%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+
+#plots
+vst<-varianceStabilizingTransformation(dds)
+plotPCA(vst,intgroup="Group")
+
+#time series???
