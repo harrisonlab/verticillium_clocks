@@ -857,8 +857,52 @@ sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
 
+#Sample distanes
+vst<-varianceStabilizingTransformation(dds)
+sampleDists<-dist(t(assay(vst)))
+
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vst$Group)
+colnames(sampleDistMatrix) <- paste(vst$Group)
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+
+dev.off()
+
 #plots
 vst<-varianceStabilizingTransformation(dds)
 plotPCA(vst,intgroup="Group")
 
+plotPCA(vst,intgroup=c("Strain","Time"))
+
 #time series???
+
+#Functional annotation of JR2 protein files
+##Interproscan
+Interproscan was used to give gene models functional annotations. Annotation was run using the commands below:
+
+Note: This is a long-running script. As such, these commands were run using 'screen' to allow jobs to be submitted and monitored in the background. This allows the session to be disconnected and reconnected over time.
+
+Screen ouput detailing the progress of submission of interporscan jobs was redirected to a temporary output file named interproscan_submission.log .
+
+```bash
+screen -a
+  cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+  ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+  for Genes in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.pep.all.fa); do
+  echo $Genes
+  $ProgDir/sub_interproscan.sh $Genes
+  done 2>&1 | tee -a interproscan_submisison.log
+  ```
+
+Following interproscan annotation split files were combined using the following commands:
+
+```bash
+ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+ for Proteins in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.pep.all.fa); do
+   Strain=$(echo $Proteins | rev | cut -d '/' -f2 | rev)
+   echo $Strain
+   InterProRaw=gene_pred/interproscan/$Strain/raw: url "title"
+   $ProgDir/append_interpro.sh $Proteins $InterProRaw
+ done
+ ```
