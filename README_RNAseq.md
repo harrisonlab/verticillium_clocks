@@ -561,6 +561,7 @@ done
 ```
 
 
+
 #Import data from featureCounts into R
 
 Create a file with different columns about the experiment treatments:
@@ -606,6 +607,8 @@ Frq08_DD24_rep3 Frq08   24h     d
 
 R script to import and merge data into a formad good for DESeq2
 
+install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+
 ```R
 #install and load libraries             
 require(data.table)
@@ -632,13 +635,64 @@ write.table(countData,"countData",sep="\t",na="",quote=F)
 write.table(m[,1:6,with=F],"genes.txt",sep="\t",quote=F,row.names=F)
 ```
 
+colnames(countData) <- sub("X","",colnames(countData))
+countData <- countData[,colData$Sample]
+
+===========================
 #To run DESeq2
+===========================
+```R
+require(DESeq2)
+
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+
+design <- ~Group
+
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+
+
+#Sample distanes
+vst<-varianceStabilizingTransformation(dds)
+sampleDists<-dist(t(assay(vst)))
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vst$Group)
+colnames(sampleDistMatrix) <- paste(vst$Group)
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap(sampleDistMatrix)
+
+Sample distances measured with rlog transformation:
+rld <- rlog( dds )
+sampleDists <- dist( t( assay(rld) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(rld$Group)
+colnames(sampleDistMatrix) <- paste(rld$Group)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours)
+
+dev.off()
+
+#plots
+vst<-varianceStabilizingTransformation(dds)
+plotPCA(vst,intgroup="Group")
+
+Plot using rlog transformation:
+plotPCA(rld,intgroup="Group")
+plotPCA(rld,intgroup=c("Time","Group")),col=cols)
+
 
 ##53WT L vs D
 require(DESeq2)
 
 colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
 
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
 
@@ -663,46 +717,115 @@ write.table(res,"WtLDtxt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 22, 0.19%
-LFC < 0 (down)   : 53, 0.46%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 5083, 45%
-(mean count < 521)
-
-
-##Frq08 L vs D
-res2= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
-write.table(res2,"Frq08LD.txt",sep="\t",quote=F)
-
-out of 11409 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 1163, 10%
-LFC < 0 (down)   : 1215, 11%
+LFC > 0 (up)     : 1660, 15%
+LFC < 0 (down)   : 1598, 14%
 outliers [1]     : 6, 0.053%
 low counts [2]   : 441, 3.9%
 (mean count < 4)
 
 
+##Frq08 L vs D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+write.table(res,"Frq08LD.txt",sep="\t",quote=F)
+
+oout of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1524, 13%
+LFC < 0 (down)   : 1476, 13%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 220, 1.9%
+(mean count < 1)
+
+
 ##Wc153 L vs D
 
-res3= results(dds, alpha=alpha,contrast=c("Group","Wc153l6h","Wc153d6h"))
-write.table(res3,"WC153LD.txt",sep="\t",quote=F)
+res= results(dds, alpha=alpha,contrast=c("Group","Wc153l6h","Wc153d6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"WC153LD.txt",sep="\t",quote=F)
 
-summary(res3)
-write.table(res,"Frq08LD.txt",sep="\t",quote=F)
+
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2202, 19%
-LFC < 0 (down)   : 2380, 21%
+LFC > 0 (up)     : 1563, 14%
+LFC < 0 (down)   : 1587, 14%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 441, 3.9%
+(mean count < 4)
+
+
+##Light 53WT vs Wc153
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"LightWt53Wc153.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2280, 20%
+LFC < 0 (down)   : 2203, 19%
 outliers [1]     : 6, 0.053%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 
-##Light 53WT vs Wc153
+##Dark 53WT vs Wc153
 
-res4= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
-write.table(res4,"LightWt53Wc153.txt",sep="\t",quote=F)
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","Wc153d6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"DarkWt53Wc153.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 1874, 16%
+LFC < 0 (down)   : 1761, 15%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+
+##53Wt 6h vs 12h
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTd12h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Wt53h6h12.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 53, 0.46%
+LFC < 0 (down)   : 22, 0.19%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 5083, 45%
+(mean count < 521)
+
+##53Wt 12h vs 18
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTdDD18h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Wt53h12h18.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 221, 1.9%
+LFC < 0 (down)   : 323, 2.8%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 1103, 9.7%
+(mean count < 20)
+
+##53Wt 18h vs 24h
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTdDD18h","53WTd24h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Wt53h18h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
@@ -712,170 +835,170 @@ outliers [1]     : 6, 0.053%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
-
-##Dark 53WT vs Wc153
-
-res5= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","Wc153d6h"))
-write.table(res5,"DarkWt53Wc153.txt",sep="\t",quote=F)
-
-out of 11409 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 2080, 18%
-LFC < 0 (down)   : 2325, 20%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
-
-##53Wt 6h vs 12h
-
-res6= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTd12h"))
-write.table(res6,"Wt53h6h12.txt",sep="\t",quote=F)
-
-out of 11409 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 1816, 16%
-LFC < 0 (down)   : 2127, 19%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
-##53Wt 12h vs 18
-
-res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTdDD18h"))
-write.table(res,"Wt53h12h18.txt",sep="\t",quote=F)
-
-out of 11409 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 2, 0.018%
-LFC < 0 (down)   : 0, 0%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
-##53Wt 18h vs 24h
-
-res= results(dds, alpha=alpha,contrast=c("Group","53WTdDD18h","53WTd24h"))
-write.table(res,"Wt53h18h24.txt",sep="\t",quote=F)
-
-out of 11409 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 2555, 22%
-LFC < 0 (down)   : 2408, 21%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
 ##Frq08 6h vs 12h
 
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08d12h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
 write.table(res6,"Frq08h6h12.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1606, 14%
-LFC < 0 (down)   : 1734, 15%
+LFC > 0 (up)     : 145, 1.3%
+LFC < 0 (down)   : 64, 0.56%
 outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
+low counts [2]   : 2209, 19%
+(mean count < 77)
 
 ##Frq08 12h vs 18h
 
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08dDD18h"))
-write.table(res6,"Frq08h12h18.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Frq08h12h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1805, 16%
-LFC < 0 (down)   : 1916, 17%
+LFC > 0 (up)     : 42, 0.37%
+LFC < 0 (down)   : 67, 0.59%
 outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
+low counts [2]   : 2872, 25%
+(mean count < 141)
 
 ##Frq08 18h vs 24h
 
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08dDD18h","Frq08d24h"))
-write.table(res6,"Frq08h18h24.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Frq08h18h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2836, 25%
-LFC < 0 (down)   : 2692, 24%
+LFC > 0 (up)     : 409, 3.6%
+LFC < 0 (down)   : 331, 2.9%
 outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
+low counts [2]   : 441, 3.9%
+(mean count < 4)
 
 ##53Wt 12h vs 24h
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTd24h"))
-write.table(res6,"Wt53h12h24.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Wt53h12h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2450, 21%
-LFC < 0 (down)   : 2286, 20%
+LFC > 0 (up)     : 0, 0%
+LFC < 0 (down)   : 5, 0.044%
 outliers [1]     : 6, 0.053%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 ##Fr08 12h vs 24h
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08d24h"))
-write.table(res6,"Frq08h12h24.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Frq08h12h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2405, 21%
-LFC < 0 (down)   : 2302, 20%
+LFC > 0 (up)     : 172, 1.5%
+LFC < 0 (down)   : 157, 1.4%
 outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
+low counts [2]   : 441, 3.9%
+(mean count < 4)
 
-##53Wt 12h vs 24h
+##53Wt 6h vs 18h
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTdDD18h"))
-write.table(res6,"Wt53h6h18.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Wt53h6h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2343, 21%
-LFC < 0 (down)   : 2455, 22%
+LFC > 0 (up)     : 30, 0.26%
+LFC < 0 (down)   : 30, 0.26%
 outliers [1]     : 6, 0.053%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
-##Fr08 12h vs 24h
+##Fr08 6h vs 18h
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08dDD18h"))
-write.table(res6,"Frq08h6h18.txt",sep="\t",quote=F)
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Frq08h6h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1840, 16%
-LFC < 0 (down)   : 2043, 18%
+LFC > 0 (up)     : 0, 0%
+LFC < 0 (down)   : 2, 0.018%
 outliers [1]     : 6, 0.053%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
+##Fr08 6hL vs 53WT 6hL
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","53WTl6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+write.table(res,"Frq08h6lWT53h6l.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2043, 18%
+LFC < 0 (down)   : 1840, 16%
+outliers [1]     : 6, 0.053%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
+==================
+Gene clustering
+==================
+
+rld <- rlog( dds )
+head( assay(rld) )
+
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
+#colnames(topVarGenes) <- colData[,2]
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+
+heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
+trace="none", dendrogram="column", margins = c(5, 10), col = my_palette)
+#colorRampPalette( rev(brewer.pal(9,"greenred")))(255)
+
+
+
+rld <- rlog( dds )
+head( assay(rld) )
+
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld)), decreasing=TRUE ), 50)
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+
+heatmap.2(assay(rld)[ topVarGenes[, c(1,2,3,7,8,9)],], scale="row", par(lend = 1),
+trace="none", dendrogram="column", margins = c(5, 10), col = my_palette
+
+heatmap.2(assay(rld)[ topVarGenes[, c(1,2,3,7,8,9)],], scale="row", par(lend = 1),
+===============
+Plotting results  
+===============
+
+##Light 53WT vs Wc153
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","53WTl6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
+topGene <- rownames(res)[which.min(res$padj)]
+plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Strain"))
 
-#Sample distanes
-vst<-varianceStabilizingTransformation(dds)
-sampleDists<-dist(t(assay(vst)))
 
-library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- paste(vst$Group)
-colnames(sampleDistMatrix) <- paste(vst$Group)
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-
-dev.off()
-
-#plots
-vst<-varianceStabilizingTransformation(dds)
-plotPCA(vst,intgroup="Group")
-
-plotPCA(vst,intgroup=c("Strain","Time"))
-
-#time series???
+```
 
 #Functional annotation of JR2 protein files
 ##Interproscan
@@ -906,3 +1029,19 @@ ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/inte
    $ProgDir/append_interpro.sh $Proteins $InterProRaw
  done
  ```
+
+
+ #===============================================================================
+ #       FPKM
+ #===============================================================================
+```R
+ mygenes <- read.table ("genes.txt",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+ library(naturalsort)
+ t1 <- counts(dds)
+ t1 <- mygenes[geneid(t1)]
+ rowRanges(dds) <- GRanges(t1@ranges@NAMES,t1@ranges)
+ myfpkm <- fpkm(dds,robust=T)
+ myfpkm <- cbind(myfpkm, t1@ranges@width)
+ rm(t1)
+ myfpkm <- myfpkm[naturalsort(rownames(myfpkm)),]
