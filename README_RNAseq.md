@@ -646,9 +646,7 @@ require(DESeq2)
 
 colData <- read.table("colData",header=T,sep="\t")
 countData <- read.table("countData2",header=T,sep="\t")
-
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-
 
 design <- ~Group
 
@@ -657,7 +655,27 @@ sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
 
 
-#Sample distanes
+#Run DESeq2 removing an outlier
+
+library(DESeq2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+#Eliminate Frq08_DD24_rep3 sample from colData and countData
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+
+design <- ~Group
+dds <-  DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+
+
+=================
+Sample distanes
+=================
+
 vst<-varianceStabilizingTransformation(dds)
 sampleDists<-dist(t(assay(vst)))
 library("RColorBrewer")
@@ -668,6 +686,7 @@ colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 heatmap(sampleDistMatrix)
 
 Sample distances measured with rlog transformation:
+
 rld <- rlog( dds )
 sampleDists <- dist( t( assay(rld) ) )
 library("RColorBrewer")
@@ -679,7 +698,10 @@ heatmap( sampleDistMatrix, trace="none", col=colours)
 
 dev.off()
 
-#plots
+=================
+PCA plots
+=================
+
 vst<-varianceStabilizingTransformation(dds)
 plotPCA(vst,intgroup="Group")
 
@@ -688,40 +710,62 @@ plotPCA(rld,intgroup="Group")
 plotPCA(rld,intgroup=c("Time","Group")),col=cols)
 
 
+#Plot using rlog transformation, showing sample names:
+plotPCA(rld, intgroup="Group")
+
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Group", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
+ geom_point(size=3) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+
+ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+===============
+Analysis of gene expression
+===============
+
+#Example:
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+# No threshold
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+
 ##53WT L vs D
-require(DESeq2)
-
-colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
-
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-
-
-design <- ~Group
-
-dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
-sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
-dds <- DESeq(dds, fitType="local")
-
-
-
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","53WTd6h"))
-
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
 summary(res)
-write.table(res,"WtLDtxt",sep="\t",quote=F)
+write.table(sig.res.upregulated,"WtLDtxt_up",sep="\t",quote=F)
+write.table(sig.res.downregulated,"WtLDtxt_down",sep="\t",quote=F)
+write.table(sig.res.,"WtLDtxt",sep="\t",quote=F)
 
-
-out of 11409 with nonzero total read count
+out of 3569 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1660, 15%
-LFC < 0 (down)   : 1598, 14%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 441, 3.9%
-(mean count < 4)
+LFC > 0 (up)     : 1799, 50%
+LFC < 0 (down)   : 1770, 50%
+outliers [1]     : 0, 0%
+low counts [2]   : 0, 0%
+(mean count < 8)
 
 
 ##Frq08 L vs D
@@ -730,225 +774,349 @@ res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
-write.table(res,"Frq08LD.txt",sep="\t",quote=F)
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
 
-oout of 11409 with nonzero total read count
+write.table(sig.res.upregulated,"Frq08LD_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08LD_down.txt",sep="\t",quote=F)
+
+write.table(sig.res,"Frq08LD.txt",sep="\t",quote=F)
+
+out of 3299 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1524, 13%
-LFC < 0 (down)   : 1476, 13%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 220, 1.9%
+LFC > 0 (up)     : 1675, 51%
+LFC < 0 (down)   : 1624, 49%
+outliers [1]     : 0, 0%
+low counts [2]   : 0, 0%
 (mean count < 1)
 
 
 ##Wc153 L vs D
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Wc153l6h","Wc153d6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"WC153LD_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"WC153LD_down.txt",sep="\t",quote=F)
+
 write.table(res,"WC153LD.txt",sep="\t",quote=F)
 
-
-out of 11409 with nonzero total read count
+out of 3512 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1563, 14%
-LFC < 0 (down)   : 1587, 14%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 441, 3.9%
+LFC > 0 (up)     : 1756, 50%
+LFC < 0 (down)   : 1756, 50%
+outliers [1]     : 0, 0%
+low counts [2]   : 0, 0%
 (mean count < 4)
 
 
 ##Light 53WT vs Wc153
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"LightWt53Wc153_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"LightWt53Wc153_down.text",sep="\t",quote=F)
+
 write.table(res,"LightWt53Wc153.txt",sep="\t",quote=F)
 
-out of 11409 with nonzero total read count
+out of 4793 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2280, 20%
-LFC < 0 (down)   : 2203, 19%
-outliers [1]     : 6, 0.053%
+LFC > 0 (up)     : 2391, 50%
+LFC < 0 (down)   : 2402, 50%
+outliers [1]     : 0, 0%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 
 ##Dark 53WT vs Wc153
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","Wc153d6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"DarkWt53Wc153_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"DarkWt53Wc153_down.txt",sep="\t",quote=F)
+
 write.table(res,"DarkWt53Wc153.txt",sep="\t",quote=F)
 
-out of 11409 with nonzero total read count
+out of 4004 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 1874, 16%
-LFC < 0 (down)   : 1761, 15%
-outliers [1]     : 6, 0.053%
+LFC > 0 (up)     : 2026, 51%
+LFC < 0 (down)   : 1978, 49%
+outliers [1]     : 0, 0%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 
 ##53Wt 6h vs 12h
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTd12h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Wt53h6h12_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53h6h12_down.txt",sep="\t",quote=F)
+
 write.table(res,"Wt53h6h12.txt",sep="\t",quote=F)
 
-out of 11409 with nonzero total read count
+out of 138 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 53, 0.46%
-LFC < 0 (down)   : 22, 0.19%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 5083, 45%
-(mean count < 521)
+LFC > 0 (up)     : 102, 74%
+LFC < 0 (down)   : 36, 26%
+outliers [1]     : 0, 0%
+low counts [2]   : 0, 0%
+(mean count < 195)
 
 ##53Wt 12h vs 18
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTdDD18h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Wt53h12h18_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53h12h18_down.txt",sep="\t",quote=F)
+
 write.table(res,"Wt53h12h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 221, 1.9%
-LFC < 0 (down)   : 323, 2.8%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 1103, 9.7%
-(mean count < 20)
+LFC > 0 (up)     : 306, 2.7%
+LFC < 0 (down)   : 425, 3.7%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 884, 7.7%
+(mean count < 13)
 
 ##53Wt 18h vs 24h
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTdDD18h","53WTd24h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Wt53h18h24_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53h18h24_down.txt",sep="\t",quote=F)
+
 write.table(res,"Wt53h18h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 0, 0%
-LFC < 0 (down)   : 5, 0.044%
-outliers [1]     : 6, 0.053%
+LFC > 0 (up)     : 2, 0.018%
+LFC < 0 (down)   : 12, 0.11%
+outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 ##Frq08 6h vs 12h
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08d12h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
-write.table(res6,"Frq08h6h12.txt",sep="\t",quote=F)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h6h12_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h6h12_down.txt",sep="\t",quote=F)
+
+write.table(res,"Frq08h6h12.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 145, 1.3%
-LFC < 0 (down)   : 64, 0.56%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 2209, 19%
-(mean count < 77)
+LFC > 0 (up)     : 288, 2.5%
+LFC < 0 (down)   : 142, 1.2%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 2431, 21%
+(mean count < 96)
 
 ##Frq08 12h vs 18h
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08dDD18h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h12h18_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h12h18_down.txt",sep="\t",quote=F)
+
 write.table(res,"Frq08h12h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 42, 0.37%
-LFC < 0 (down)   : 67, 0.59%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 2872, 25%
+LFC > 0 (up)     : 71, 0.62%
+LFC < 0 (down)   : 98, 0.86%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 2873, 25%
 (mean count < 141)
 
 ##Frq08 18h vs 24h
-
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08dDD18h","Frq08d24h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h18h24_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h18h24_down.txt",sep="\t",quote=F)
 write.table(res,"Frq08h18h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 409, 3.6%
-LFC < 0 (down)   : 331, 2.9%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 441, 3.9%
-(mean count < 4)
+LFC > 0 (up)     : 20, 0.18%
+LFC < 0 (down)   : 9, 0.079%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 1325, 12%
+(mean count < 26)
 
 ##53Wt 12h vs 24h
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTd24h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Wt53h12h24_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53h12h24_down.txt",sep="\t",quote=F)
 write.table(res,"Wt53h12h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
 LFC > 0 (up)     : 0, 0%
 LFC < 0 (down)   : 5, 0.044%
-outliers [1]     : 6, 0.053%
+outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 ##Fr08 12h vs 24h
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d12h","Frq08d24h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h12h24_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h12h24_down.txt",sep="\t",quote=F)
 write.table(res,"Frq08h12h24.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 172, 1.5%
-LFC < 0 (down)   : 157, 1.4%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 441, 3.9%
-(mean count < 4)
+LFC > 0 (up)     : 30, 0.26%
+LFC < 0 (down)   : 8, 0.07%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 0, 0%
+(mean count < 0)
 
 ##53Wt 6h vs 18h
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTd6h","53WTdDD18h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Wt53h6h18_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53h6h18_down.txt",sep="\t",quote=F)
 write.table(res,"Wt53h6h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 30, 0.26%
-LFC < 0 (down)   : 30, 0.26%
-outliers [1]     : 6, 0.053%
-low counts [2]   : 0, 0%
-(mean count < 0)
+LFC > 0 (up)     : 59, 0.52%
+LFC < 0 (down)   : 47, 0.41%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 884, 7.7%
+(mean count < 13)
 
 ##Fr08 6h vs 18h
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","Frq08dDD18h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h6h18_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h6h18_down.txt",sep="\t",quote=F)
 write.table(res,"Frq08h6h18.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 0, 0%
+LFC > 0 (up)     : 2, 0.018%
 LFC < 0 (down)   : 2, 0.018%
-outliers [1]     : 6, 0.053%
+outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
 
 ##Fr08 6hL vs 53WT 6hL
+alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","53WTl6h"))
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h6lWT53h6l_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h6lWT53h6l_down.txt",sep="\t",quote=F)
 write.table(res,"Frq08h6lWT53h6l.txt",sep="\t",quote=F)
 
 out of 11409 with nonzero total read count
 adjusted p-value < 0.05
-LFC > 0 (up)     : 2043, 18%
-LFC < 0 (down)   : 1840, 16%
-outliers [1]     : 6, 0.053%
+LFC > 0 (up)     : 2198, 19%
+LFC < 0 (down)   : 1987, 17%
+outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
+
+##Fr08 6hD vs 53WT 6hD
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq08d6h","53WTd6h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+write.table(sig.res.upregulated,"Frq08h6dWT53h6d_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq08h6dWT53h6d_down.txt",sep="\t",quote=F)
+write.table(res,"Frq08h6dWT53h6d.txt",sep="\t",quote=F)
+
+out of 11409 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)     : 2569, 23%
+LFC < 0 (down)   : 2498, 22%
+outliers [1]     : 3, 0.026%
+low counts [2]   : 0, 0%
+(mean count < 0)
+
 
 ==================
 Gene clustering
@@ -960,15 +1128,54 @@ head( assay(rld) )
 library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
+
 topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
-#colnames(topVarGenes) <- colData[,2]
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
-
 heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
-trace="none", dendrogram="column", margins = c(5, 10), col = my_palette)
-#colorRampPalette( rev(brewer.pal(9,"greenred")))(255)
+trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8
 
+#Gene clustering of different group of samples
+library(DESeq2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
 
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+#Eliminate Frq08_DD24_rep3 sample from colData and countData
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep3)
+
+design <- ~Group
+dds <-  DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
 
 rld <- rlog( dds )
 head( assay(rld) )
@@ -976,13 +1183,13 @@ head( assay(rld) )
 library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
-topVarGenes <- head( order( rowVars( assay(rld)), decreasing=TRUE ), 50)
+
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
+trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8
 
-heatmap.2(assay(rld)[ topVarGenes[, c(1,2,3,7,8,9)],], scale="row", par(lend = 1),
-trace="none", dendrogram="column", margins = c(5, 10), col = my_palette
 
-heatmap.2(assay(rld)[ topVarGenes[, c(1,2,3,7,8,9)],], scale="row", par(lend = 1),
 ===============
 Plotting results  
 ===============
