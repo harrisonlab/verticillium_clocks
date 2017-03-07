@@ -670,12 +670,12 @@ design <- ~Group
 dds <-  DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
-
+```
 
 =================
 Sample distanes
 =================
-
+```
 vst<-varianceStabilizingTransformation(dds)
 sampleDists<-dist(t(assay(vst)))
 library("RColorBrewer")
@@ -697,11 +697,11 @@ colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 heatmap( sampleDistMatrix, trace="none", col=colours)
 
 dev.off()
-
+```
 =================
 PCA plots
 =================
-
+```
 vst<-varianceStabilizingTransformation(dds)
 plotPCA(vst,intgroup="Group")
 
@@ -726,11 +726,11 @@ pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
  coord_fixed()
 
 ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
-
+```
 ===============
 Analysis of gene expression
 ===============
-
+```
 #Example:
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
@@ -1116,12 +1116,12 @@ LFC < 0 (down)   : 2498, 22%
 outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
-
+```
 
 ==================
 Gene clustering
 ==================
-
+```
 rld <- rlog( dds )
 head( assay(rld) )
 
@@ -1189,11 +1189,11 @@ my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
 trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8
 
-
+```
 ===============
 Plotting results  
 ===============
-
+```
 ##Light 53WT vs Wc153
 
 res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
