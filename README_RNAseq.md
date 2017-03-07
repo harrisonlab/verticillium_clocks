@@ -607,7 +607,7 @@ Frq08_DD24_rep3 Frq08   24h     d
 
 R script to import and merge data into a formad good for DESeq2
 
-install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("DESeq2", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 ```R
 #install and load libraries             
@@ -1172,6 +1172,21 @@ countData <- subset(countData, select=-Frq08_LL6_rep2)
 colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
 countData <- subset(countData, select=-Frq08_LL6_rep3)
 
+
+
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
 design <- ~Group
 dds <-  DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
@@ -1184,10 +1199,10 @@ library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
 
-topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
-trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8
+trace="none", dendrogram="column", margins = c(3, 8), col = my_palette, cexCol=0.4,cexRow=0.4
 
 
 ===============
@@ -1205,6 +1220,121 @@ topGene <- rownames(res)[which.min(res$padj)]
 plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Strain"))
 
 
+```
+========
+Time course experiment
+========
+
+Using 6hDD, 12hDD, 18hDD, 24hDD
+```R
+library(DESeq2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="WT53_LL6_rep1"),]
+countData <- subset(countData, select=-WT53_LL6_rep1)
+colData <- colData[!(colData$Sample=="WT53_LL6_rep2"),]
+countData <- subset(countData, select=-WT53_LL6_rep2)
+colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
+countData <- subset(countData, select=-WT53_LL6_rep3)
+
+library(ggplot2)
+
+design <- ~Strain + Time + Strain:Time
+ddsTC <- DESeqDataSetFromMatrix(countData,colData,design)
+ddsTC <- DESeq(ddsTC, fitType="local")
+resTC <- results(ddsTC)
+resTC$symbol <- mcols(ddsTC)$symbol
+head(resTC[order(resTC$padj),],4)
+
+data <- plotCounts(ddsTC, which.min(resTC$padj),
+                   intgroup=c("Time","Strain"), returnData=TRUE)
+ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
+dev.off()
+
+#to check a specific gene over time
+data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr2g01990",
+                   intgroup=c("Time","Strain"), returnData=TRUE)
+ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
+dev.off()
+
+#To create a list of the values
+write.table(resTC[order(resTC$padj),],"time_course1",sep="\t",quote=F)
+
+
+Using 6hDD, 12hDD, 18hDD, 24hDD
+```R
+library(DESeq2)
+library(ggplot2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+
+
+colData$TimePoint <- paste0(colData$Time,colData$Light)
+design <- ~Strain + TimePoint + Strain:TimePoint
+ddsTC <- DESeqDataSetFromMatrix(countData,colData,design)
+ddsTC <- DESeq(ddsTC, fitType="local")
+resTC <- results(ddsTC)
+resTC$symbol <- mcols(ddsTC)$symbol
+head(resTC[order(resTC$padj),],4)
+
+data <- plotCounts(ddsTC, which.min(resTC$padj),
+                   intgroup=c("Time","Light","Strain"), returnData=TRUE)
+ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
+dev.off()
+
+#to check a specific gene over time
+data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr2g01990",
+                   intgroup=c("Time","Strain"), returnData=TRUE)
+ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
+dev.off()
+
+#To create a list of the values
+write.table(resTC[order(resTC$padj),],"time_course2",sep="\t",quote=F)
 ```
 
 #Functional annotation of JR2 protein files
