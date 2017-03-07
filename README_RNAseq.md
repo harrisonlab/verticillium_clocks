@@ -1306,20 +1306,21 @@ resTC$symbol <- mcols(ddsTC)$symbol
 head(resTC[order(resTC$padj),],4)
 
 data <- plotCounts(ddsTC, which.min(resTC$padj),
-                   intgroup=c("Time","Light","Strain"), returnData=TRUE)
-ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+                   intgroup=c("Strain","TimePoint"), returnData=TRUE)
+ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
   geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
 dev.off()
 
 #to check a specific gene over time
 data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr2g01990",
-                   intgroup=c("Time","Strain"), returnData=TRUE)
-ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
+                   intgroup=c("Strain","TimePoint"), returnData=TRUE)
+ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
   geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
 dev.off()
 
 #To create a list of the values
 write.table(resTC[order(resTC$padj),],"time_course2",sep="\t",quote=F)
+```
 ```
 
 #Functional annotation of JR2 protein files
