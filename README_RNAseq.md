@@ -1270,9 +1270,9 @@ dev.off()
 
 #To create a list of the values
 write.table(resTC[order(resTC$padj),],"time_course1",sep="\t",quote=F)
+```
 
-
-Using 6hDD, 12hDD, 18hDD, 24hDD
+Using 6hLL, 6hDD, 12hDD, 18hDD, 24hDD
 ```R
 library(DESeq2)
 library(ggplot2)
