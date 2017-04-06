@@ -1246,6 +1246,25 @@ countData <- subset(countData, select=-WT53_LL6_rep2)
 colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
 countData <- subset(countData, select=-WT53_LL6_rep3)
 
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
+countData <- subset(countData, select=-WT53_DD12_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
+countData <- subset(countData, select=-WT53_DD18_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
+countData <- subset(countData, select=-WT53_DD24_rep3)
+
 library(ggplot2)
 
 design <- ~Strain + Time + Strain:Time
@@ -1276,6 +1295,7 @@ Using 6hLL, 6hDD, 12hDD, 18hDD, 24hDD
 ```R
 library(DESeq2)
 library(ggplot2)
+
 colData <- read.table("colData",header=T,sep="\t")
 countData <- read.table("countData2",header=T,sep="\t")
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
@@ -1312,7 +1332,7 @@ ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
 dev.off()
 
 #to check a specific gene over time
-data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr2g01990",
+data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr1g01960",
                    intgroup=c("Strain","TimePoint"), returnData=TRUE)
 ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
   geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
@@ -1321,7 +1341,125 @@ dev.off()
 #To create a list of the values
 write.table(resTC[order(resTC$padj),],"time_course2",sep="\t",quote=F)
 ```
+==========
+Wald tests for the log2 fold changes at individual time points
+==========
+
+```R
+resultsNames(ddsTC)
 ```
+[1] "Intercept"                 "Strain_Frq08_vs_53WT"     
+[3] "TimePoint_06hd_vs_06hbl"   "TimePoint_12hd_vs_06hbl"  
+[5] "TimePoint_18hd_vs_06hbl"   "TimePoint_24hd_vs_06hbl"  
+[7] "StrainFrq08.TimePoint06hd" "StrainFrq08.TimePoint12hd"
+[9] "StrainFrq08.TimePoint18hd" "StrainFrq08.TimePoint24hd"
+
+```R
+res30 <- results(ddsTC, name="TimePoint_06hd_vs_06hbl", test="Wald")
+res30[which.min(resTC$padj),]
+
+betas <- coef(ddsTC)
+colnames(betas)
+
+library("pheatmap")
+topGenes <- head(order(resTC$padj),20)
+mat <- betas[topGenes, -c(1,2)]
+thr <- 3
+mat[mat < -thr] <- -thr
+mat[mat > thr] <- thr
+pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
+         cluster_col=FALSE)
+dev.off()
+
+```
+=======
+Remove samples and create colData_LD and countData_LD
+=======
+
+```R
+library(DESeq2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+#Eliminate Frq08_DD24_rep3 sample from colData and countData
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
+countData <- subset(countData, select=-WT53_DD12_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
+countData <- subset(countData, select=-WT53_DD18_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
+countData <- subset(countData, select=-WT53_DD24_rep3)
+
+write.table(countData,"countData_LD",sep="\t",na="",quote=F)
+write.table(colData,"colData_LD",sep="\t",na="",quote=F)
+```
+
+=====
+Gene analysis
+=====
+
+```R
+colData <- read.table("colData_LD",header=T,sep="\t")
+countData <- read.table("countData_LD",header=T,sep="\t")
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design <- ~Group
+dds <-  DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+topGene <- rownames(res)[which.min(res$padj)]
+plotCounts(dds, gene="VDAG_JR2_Chr1g17240", intgroup=c("Group"))
+```
+
+
 
 #Functional annotation of JR2 protein files
 ##Interproscan
