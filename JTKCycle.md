@@ -4,7 +4,7 @@ install.packages("/Users/lopeze/Downloads/MetaCycle", repos = NULL, type="source
 Prepare data file for wt53 analysis
 ========
 
-
+```R
 require(DESeq2)
 
 colData <- read.table("colData",header=T,sep="\t")
@@ -66,7 +66,8 @@ colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
 countData <- subset(countData, select=-WT53_LL6_rep3)
 
 write.table(countData,"countData_WT",sep="\t",na="",quote=F)
-
+```
+```R
 ===============
 require(DESeq2)
 colData <- read.table("colData",header=T,sep="\t")
@@ -83,13 +84,13 @@ write.table(rownames(countData,"countData_annot"))
 
 #Do it in Bash
 cut -f1 countData_WT > counData_annot
-
+```
 
 
 =============
 Run programme
 =============
-
+```R
 source("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_CYCLEv3.1.R")
 project <- "WT53"
 options(stringsAsFactors=FALSE)
@@ -123,11 +124,11 @@ print(st)
 save(results,file=paste("JTK",project,"rda",sep="."))
 write.table(results,file=paste("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_WT53_2.txt"),row.names=F,col.names=T,quote=F,sep="\t")
 
-
+```
 =============
 Prepare data file for Frq KO analysis   
 =============
-
+```R
 require(DESeq2)
 
 colData <- read.table("colData",header=T,sep="\t")
@@ -189,7 +190,8 @@ colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]
 countData <- subset(countData, select=-Frq08_LL6_rep3)
 
 write.table(countData,"countData_FrqKO",sep="\t",na="",quote=F)
-
+```
+```
 ===============
 require(DESeq2)
 colData <- read.table("colData",header=T,sep="\t")
@@ -207,11 +209,11 @@ write.table(rownames(countData,"countData_annot"))
 #Do it in Bash
 cut -f1 countData_WT > counData_annot
 
-
+```
 =============
 Run programme
 =============
-
+```
 source("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_CYCLEv3.1.R")
 project <- "Frq08KO"
 options(stringsAsFactors=FALSE)
@@ -246,3 +248,4 @@ print(st)
 
 save(results,file=paste("JTK",project,"rda",sep="."))
 write.table(results,file=paste("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_WT53_2.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+```
