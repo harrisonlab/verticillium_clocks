@@ -1456,6 +1456,7 @@ Gene analysis
 =====
 
 ```R
+library(DESeq2)
 colData <- read.table("colData_LD",header=T,sep="\t")
 countData <- read.table("countData_LD",header=T,sep="\t")
 
@@ -1471,10 +1472,139 @@ sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
 topGene <- rownames(res)[which.min(res$padj)]
-plotCounts(dds, gene="VDAG_JR2_Chr1g17240", intgroup=c("Group"))
+plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Group"))
+dev.off()
+
+
+pc <- plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Group"), returnData = TRUE)
+write.table(pc,"plotCounts",sep="\t",na="",quote=F)
+
 ```
 
+###TIMECOURSE MODEL WITH TIME BUT AT THIS POINT NO STRAIN FACTOR
+source("https://bioconductor.org/biocLite.R")
 
+```R
+biocLite("DESeq2")
+require(DESeq2)
+library("RColorBrewer")
+library("ggplot2")
+library("ggrepel")
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+library(pheatmap)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData2",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design <- ~Group
+#colData <- colData[!(colData$Sample=="WT53_LL6_rep1"),]
+#countData <- subset(countData, select=-WT53_LL6_rep1)
+#colData <- colData[!(colData$Sample=="WT53_LL6_rep2"),]
+#countData <- subset(countData, select=-WT53_LL6_rep2)
+#colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
+#countData <- subset(countData, select=-WT53_LL6_rep3)
+#colData <- colData[!(colData$Sample=="WT53_DD6_rep1"),]
+#countData <- subset(countData, select=-WT53_DD6_rep1)
+#colData <- colData[!(colData$Sample=="WT53_DD6_rep2"),]
+#countData <- subset(countData, select=-WT53_DD6_rep2)
+#colData <- colData[!(colData$Sample=="WT53_DD6_rep3"),]
+#countData <- subset(countData, select=-WT53_DD6_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
+countData <- subset(countData, select=-WT53_DD12_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
+countData <- subset(countData, select=-WT53_DD18_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
+countData <- subset(countData, select=-WT53_DD24_rep3)
+#colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]
+#countData <- subset(countData, select=-Wc153_DD6_rep1)
+#colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]
+#countData <- subset(countData, select=-Wc153_DD6_rep2)
+#colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]
+#countData <- subset(countData, select=-Wc153_DD6_rep3)
+#colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]
+#countData <- subset(countData, select=-Wc153_LL6_rep1)
+#colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]
+#countData <- subset(countData, select=-Wc153_LL6_rep2)
+#colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]
+#countData <- subset(countData, select=-Wc153_LL6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]
+countData <- subset(countData, select=-Frq08_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]
+countData <- subset(countData, select=-Frq08_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]
+countData <- subset(countData, select=-Frq08_LL6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]
+countData <- subset(countData, select=-Frq08_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]
+countData <- subset(countData, select=-Frq08_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]
+countData <- subset(countData, select=-Frq08_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]
+countData <- subset(countData, select=-Frq08_DD12_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]
+countData <- subset(countData, select=-Frq08_DD12_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]
+countData <- subset(countData, select=-Frq08_DD12_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]
+countData <- subset(countData, select=-Frq08_DD18_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]
+countData <- subset(countData, select=-Frq08_DD18_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]
+countData <- subset(countData, select=-Frq08_DD18_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]
+countData <- subset(countData, select=-Frq08_DD24_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]
+countData <- subset(countData, select=-Frq08_DD24_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+
+colData=colData[1:12,]
+design <- ~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+#ddsTC <- DESeqDataSet(dds, ~   Light +Strain +Light:Strain )
+#ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ Light )
+#resTC <- results(ddsTC)
+ddsTC <- DESeqDataSet(dds, ~   Light +Strain +Light:Strain )
+ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ Light )
+resTC <- results(ddsTC)
+resTC$symbol <- mcols(ddsTC)$symbol
+#head(resTC[order(resTC$padj),], 4)
+#time_variable=resTC[which(resTC$padj<0.01),]
+#fiss <- plotCounts(ddsTC, which.min(resTC$padj),d intgroup = c("Light","Strain"), returnData = TRUE)
+#ggplot(fiss, aes(x = as.numeric(Time), y = count, group = Light)) + geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
+#fiss <- plotCounts(ddsTC, which.min(resTC$padj),intgroup = c("Time"), returnData = TRUE)
+#ggplot(fiss, aes(x = as.numeric(Time), y = count, group = Light)) + geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
+#fiss <- plotCounts(ddsTC, which.min(resTC$padj),
+#intgroup = c("Time","Strain"), returnData = TRUE)
+#ggplot(fiss,
+#aes(x = as.numeric(minute), y = count, color = strain, group = strain)) +
+#geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
+betas <- coef(ddsTC)
+colnames(betas)
+topGenes <- head(order(resTC$padj),50)
+mat <- betas[topGenes, -c(1,2)]
+thr <- 3
+mat[mat < -thr] <- -thr
+mat[mat > thr] <- thr
+pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
+cluster_col=FALSE)
+
+```
 
 #Functional annotation of JR2 protein files
 ##Interproscan
