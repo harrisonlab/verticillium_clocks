@@ -57,7 +57,7 @@ library("gplots")
 promoter<-read.table("/Users/lopeze/Desktop/Bioinformatics/Promotermotif.txt", col.names=,1, row.names=1, check.names=FALSE)
 promoter_matrix<-data.matrix(promoter)
 scale <- colorRampPalette(c("white", "lightgreen", "forestgreen", "darkgreen"), space = "rgb")(100)
-pdf(file = "/Users/lopeze/Desktop/Bioinformatics/promoter-heatmap.pdf",width=7,height=7)
+pdf(file = "/Users/lopeze/Desktop/Bioinformatics/promoter-heatmap2.pdf",width=7,height=7)
 promoter_heatmap <- heatmap.2(promoter_matrix,
 cellnote=as.matrix(promoter), #put the values in the cell
 notecol="black", #color of the values in the cell
@@ -71,3 +71,38 @@ lhei=c(1,8),
 lwid=c(2,2),#modifiy the size of the cells
 trace="none", tracecol="Gray", col=scale)
 dev.off()
+
+
+library("pheatmap")
+library("gplots")
+promoter<-read.table("/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/Promotermotif.txt", col.names=,1, row.names=1, check.names=FALSE)
+promoter_matrix<-data.matrix(promoter)
+scale <- colorRampPalette(c("white", "yellow", "orange", "red"), space = "rgb")(100)
+pdf(file = "/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/promoter-heatmap_DH.pdf",width=7,height=7)
+promoter-heatmap <- heatmap.2(promoter_matrix,
+cellnote=as.matrix(promoter), #put the values in the cell
+notecol="black", #color of the values in the cell
+margins = c(5, 12),
+dendogram="none",
+Rowv=FALSE, #implies dendrogram is not computed and reordered based on row means
+Colv=FALSE, #implies dendrogram is not computed and reordered based on column means
+cexCol=0.8, #specify the size of the column label
+cexRow=0.8,
+lhei=c(1,8),
+lwid=c(2,2),#modifiy the size of the cells
+trace="none", tracecol="Gray", col=scale)
+dev.off()
+
+
+--------------
+STATISTICS
+--------------
+
+#E1-E2 experiment
+
+ANOVA 1 Factor
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/E1-E2/E1_E2_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions)
