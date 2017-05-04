@@ -106,3 +106,5 @@ ANOVA 1 Factor
 data<-read.csv("/Users/lopeze/Desktop/Statistics_R/E1-E2/E1_E2_data.csv")
 attach(data)
 boxplot(Diameter~Strain*Conditions)
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
