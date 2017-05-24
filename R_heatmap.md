@@ -100,11 +100,133 @@ STATISTICS
 
 #E1-E2 experiment
 
-ANOVA 1 Factor
+ANOVA 2 Factors
 
 ```R
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/E1-E2/E1_E2_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/E1-E2/E1_data.csv")
 attach(data)
 boxplot(Diameter~Strain*Conditions)
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
 anv.model<-aov(Diameter~Strain*Conditions)
 summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
+groups<-cld(means, alpha= .05)
+```
+
+#D8-D10 V.spp experiment
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D8-D10_V.spp/D8-D10_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions)
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+#If the data is not normally distributed:
+data.log<-log(data$Diameter)
+shapiro.test(data.log$Diameter)
+hist(data.log)
+
+#ANOVA
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
+groups<-cld(means, alpha= .05)
+```
+
+#D5-D9 Menadione experiment
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D5-D9_Men/D9_53_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
+
+
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+#If the data is not normally distributed:
+data.log<-log(data$Diameter)
+shapiro.test(data.log$Diameter)
+hist(data.log)
+
+#ANOVA
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
+groups<-cld(means, alpha= .05)
+```
+#D3 Wc1
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/AFrq/D16_data/D16_53_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
+
+
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+#If the data is not normally distributed:
+datalog<-log(data$Diameter)
+shapiro.test(datalog$Diameter)
+hist(data.log)
+
+#ANOVA
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+```
+
+#D15 medium
+
+```R   
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D15-D16_medium/D16_data/D16_med_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
+
+
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+#If the data is not normally distributed:
+data.log<-log(data$Diameter)
+shapiro.test(data.log$Diameter)
+hist(data.log)
+
+#ANOVA
+options(max.print=1000000)
+
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+59.5
+```

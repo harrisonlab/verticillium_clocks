@@ -33,7 +33,7 @@ cp $CurDir/$3 $OutDir
 # ---------------
 
 /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/subread-1.5.1-source/bin/featureCounts \
--p -B -M -R -a $InGff -t exon -g "Parent" -o "$Prefix"_featurecounts.txt $InBam
+-p -B -M -R -a $InGff -t gene -g "gene_id" -o "$Prefix"_gene_featurecounts.txt $InBam
 
 rm $InBam
 rm $InGff

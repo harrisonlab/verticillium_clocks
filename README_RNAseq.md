@@ -1,4 +1,6 @@
 #V. dahliae RNAseq
+To download the data from internet open a new screen
+wget (+link)
 
 In order to open and extract the files from the .tar document:
 tar -xvf C101HW16120207.tar
@@ -98,12 +100,66 @@ ProjectDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/ra
     mv $RawDatDir/EC_36_2.fq.gz $ProjectDir/experiment1/V.dahliae/Wc153_LL6_rep3/R/.
 ```
 
+
+Experiment 2
+
+
+```bash
+RawDatDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNAseq_data/experiment2/C101HW17030405/raw_data
+ProjectDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/raw_rna
+    mv $RawDatDir/EC_37_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep1/F/.
+    mv $RawDatDir/EC_37_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep1/R/.
+    mv $RawDatDir/EC_38_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep2/F/.
+    mv $RawDatDir/EC_38_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep2/R/.
+    mv $RawDatDir/EC_39_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep3/F/.
+    mv $RawDatDir/EC_39_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep3/R/.
+    mv $RawDatDir/EC_40_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep1/F/.
+    mv $RawDatDir/EC_40_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep1/R/.
+    mv $RawDatDir/EC_41_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep2/F/.
+    mv $RawDatDir/EC_41_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep2/R/.
+    mv $RawDatDir/EC_42_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep3/F/.
+    mv $RawDatDir/EC_42_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep3/R/.
+    mv $RawDatDir/EC_43_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep1/F/.
+    mv $RawDatDir/EC_43_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep1/R/.
+    mv $RawDatDir/EC_44_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep2/F/.
+    mv $RawDatDir/EC_44_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep2/R/.
+    mv $RawDatDir/EC_45_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep3/F/.
+    mv $RawDatDir/EC_45_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep3/R/.
+    mv $RawDatDir/EC_46_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep1/F/.
+    mv $RawDatDir/EC_46_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep1/R/.
+    mv $RawDatDir/EC_47_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep2/F/.
+    mv $RawDatDir/EC_47_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep2/R/.
+    mv $RawDatDir/EC_48_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep3/F/.
+    mv $RawDatDir/EC_48_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep3/R/.
+    mv $RawDatDir/EC_49_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep1/F/.
+    mv $RawDatDir/EC_49_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep1/R/.
+    mv $RawDatDir/EC_50_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep2/F/.
+    mv $RawDatDir/EC_50_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep2/R/.
+    mv $RawDatDir/EC_51_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep3/F/.
+    mv $RawDatDir/EC_51_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep3/R/.
+    mv $RawDatDir/EC_52_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep1/F/.
+    mv $RawDatDir/EC_52_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep1/R/.
+    mv $RawDatDir/EC_53_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep2/F/.
+    mv $RawDatDir/EC_53_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep2/R/.
+    mv $RawDatDir/EC_54_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep3/F/.
+    mv $RawDatDir/EC_54_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep3/R/.
+    mv $RawDatDir/EC_55_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep1/F/.
+    mv $RawDatDir/EC_55_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep1/R/.
+    mv $RawDatDir/EC_56_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep2/F/.
+    mv $RawDatDir/EC_56_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep2/R/.
+    mv $RawDatDir/EC_57_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep3/F/.
+    mv $RawDatDir/EC_57_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep3/R/.
+
+```
+
+
+
 #Data QC
 Perform qc of RNAseq timecourse data
 
 ```bash
 screen -a
-for FilePath in $(ls -d raw_rna/experiment1/V.*/*); do
+for FilePath in $(ls -d raw_rna/experiment2/V.*/*); do
 #Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
 echo $FilePath
 FileF=$(ls $FilePath/F/*.fq.gz);
@@ -113,6 +169,75 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
 sleep 10m
 done
+```
+To run the jobs so they qsub when there is enough space in the nodes:
+
+```bash
+screen -a
+for FilePath in $(ls -d raw_rna/novogene/P.fragariae/Bc16/* | grep -v '0hr')
+do
+    echo $FilePath
+    FileNum=$(ls $FilePath/F/*.gz | wc -l)
+    for num in $(seq 1 $FileNum)
+    do
+        FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
+        FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
+        echo $FileF
+        echo $FileR
+        Jobs=$(qstat -u "*" | grep 'rna_qc' | grep 'qw' | wc -l)
+        while [ $Jobs -gt 16 ]
+        do
+            sleep 5m
+            printf "."
+            Jobs=$(qstat | grep 'rna_qc' | grep 'qw' | wc -l)
+        done        
+        printf "\n"
+        IlluminaAdapters=/home/adamst/git_repos/tools/seq_tools/ncbi_adapters.fa
+        ProgDir=/home/adamst/git_repos/tools/seq_tools/rna_qc
+        qsub -h $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+        JobID=cat qstat | grep 'rna' | tail -n 1 | cut -d ' ' -f1
+        load02=$(qstat -u "*" | grep 'blacklace02'| grep 'rna' | wc -l)
+        load05=$(qstat -u "*" | grep 'blacklace05'| grep 'rna' | wc -l)
+        load06=$(qstat -u "*" | grep 'blacklace06'| grep 'rna' | wc -l)
+        load10=$(qstat -u "*" | grep 'blacklace10'| grep 'rna' | wc -l)
+        if (($load02 < 3))
+        then
+            qalter $JobID -l h=blacklace02.blacklace -h U
+            echo "Submitted to node 2"
+        elif (($load05 < 3))
+        then
+            qalter $JobID -l h=blacklace05.blacklace -h U
+            echo "Submitted to node 5"
+        elif (($load06 < 3))
+        then
+            qalter $JobID -l h=blacklace06.blacklace -h U
+            echo "Submitted to node 6"
+        elif (($load10 < 3))
+        then
+            qalter $JobID -l h=blacklace10.blacklace -h U
+            echo "Submitted to node 10"
+        else
+            echo "all nodes full, waiting ten minutes"
+            sleep 10m
+            continue
+        fi
+        break    
+    done
+done
+```
+
+
+WT08_DD18_rep2
+WT08_DD18_rep3
+WT08_DD24_rep1
+WT08_DD24_rep2
+WT08_DD24_rep3
+WT08_DD6_rep1
+WT08_DD6_rep2
+WT08_DD6_rep3
+
+
+ls | grep "rna_qc_fastq-mcf.sh.o" | wc -l
 
   ```
 
@@ -670,12 +795,12 @@ design <- ~Group
 dds <-  DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
-
+```
 
 =================
 Sample distanes
 =================
-
+```
 vst<-varianceStabilizingTransformation(dds)
 sampleDists<-dist(t(assay(vst)))
 library("RColorBrewer")
@@ -697,11 +822,11 @@ colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 heatmap( sampleDistMatrix, trace="none", col=colours)
 
 dev.off()
-
+```
 =================
 PCA plots
 =================
-
+```
 vst<-varianceStabilizingTransformation(dds)
 plotPCA(vst,intgroup="Group")
 
@@ -726,11 +851,11 @@ pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
  coord_fixed()
 
 ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
-
+```
 ===============
 Analysis of gene expression
 ===============
-
+```
 #Example:
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
@@ -1116,12 +1241,12 @@ LFC < 0 (down)   : 2498, 22%
 outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
-
+```
 
 ==================
 Gene clustering
 ==================
-
+```
 rld <- rlog( dds )
 head( assay(rld) )
 
@@ -1204,11 +1329,11 @@ my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
 trace="none", dendrogram="column", margins = c(3, 8), col = my_palette, cexCol=0.4,cexRow=0.4
 
-
+```
 ===============
 Plotting results  
 ===============
-
+```
 ##Light 53WT vs Wc153
 
 res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
@@ -1456,7 +1581,10 @@ Gene analysis
 =====
 
 ```R
+<<<<<<< HEAD
 library(DESeq2)
+=======
+>>>>>>> 755ede1f2c551b92b8b315f18ba6e1cbf9206d65
 colData <- read.table("colData_LD",header=T,sep="\t")
 countData <- read.table("countData_LD",header=T,sep="\t")
 
@@ -1472,6 +1600,7 @@ sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
 
 topGene <- rownames(res)[which.min(res$padj)]
+<<<<<<< HEAD
 plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Group"))
 dev.off()
 
@@ -1605,6 +1734,12 @@ pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
 cluster_col=FALSE)
 
 ```
+=======
+plotCounts(dds, gene="VDAG_JR2_Chr1g17240", intgroup=c("Group"))
+```
+
+
+>>>>>>> 755ede1f2c551b92b8b315f18ba6e1cbf9206d65
 
 #Functional annotation of JR2 protein files
 ##Interproscan
