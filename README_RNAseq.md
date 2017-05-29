@@ -1,6 +1,4 @@
 #V. dahliae RNAseq
-To download the data from internet open a new screen
-wget (+link)
 
 In order to open and extract the files from the .tar document:
 tar -xvf C101HW16120207.tar
@@ -100,66 +98,12 @@ ProjectDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/ra
     mv $RawDatDir/EC_36_2.fq.gz $ProjectDir/experiment1/V.dahliae/Wc153_LL6_rep3/R/.
 ```
 
-
-Experiment 2
-
-
-```bash
-RawDatDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNAseq_data/experiment2/C101HW17030405/raw_data
-ProjectDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/raw_rna
-    mv $RawDatDir/EC_37_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep1/F/.
-    mv $RawDatDir/EC_37_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep1/R/.
-    mv $RawDatDir/EC_38_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep2/F/.
-    mv $RawDatDir/EC_38_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep2/R/.
-    mv $RawDatDir/EC_39_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep3/F/.
-    mv $RawDatDir/EC_39_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD18_rep3/R/.
-    mv $RawDatDir/EC_40_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep1/F/.
-    mv $RawDatDir/EC_40_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep1/R/.
-    mv $RawDatDir/EC_41_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep2/F/.
-    mv $RawDatDir/EC_41_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep2/R/.
-    mv $RawDatDir/EC_42_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep3/F/.
-    mv $RawDatDir/EC_42_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD24_rep3/R/.
-    mv $RawDatDir/EC_43_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep1/F/.
-    mv $RawDatDir/EC_43_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep1/R/.
-    mv $RawDatDir/EC_44_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep2/F/.
-    mv $RawDatDir/EC_44_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep2/R/.
-    mv $RawDatDir/EC_45_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep3/F/.
-    mv $RawDatDir/EC_45_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD6_rep3/R/.
-    mv $RawDatDir/EC_46_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep1/F/.
-    mv $RawDatDir/EC_46_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep1/R/.
-    mv $RawDatDir/EC_47_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep2/F/.
-    mv $RawDatDir/EC_47_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep2/R/.
-    mv $RawDatDir/EC_48_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep3/F/.
-    mv $RawDatDir/EC_48_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_DD6_rep3/R/.
-    mv $RawDatDir/EC_49_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep1/F/.
-    mv $RawDatDir/EC_49_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep1/R/.
-    mv $RawDatDir/EC_50_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep2/F/.
-    mv $RawDatDir/EC_50_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep2/R/.
-    mv $RawDatDir/EC_51_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep3/F/.
-    mv $RawDatDir/EC_51_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_DD12_rep3/R/.
-    mv $RawDatDir/EC_52_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep1/F/.
-    mv $RawDatDir/EC_52_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep1/R/.
-    mv $RawDatDir/EC_53_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep2/F/.
-    mv $RawDatDir/EC_53_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep2/R/.
-    mv $RawDatDir/EC_54_1.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep3/F/.
-    mv $RawDatDir/EC_54_2.fq.gz $ProjectDir/experiment2/V.dahliae/WT08_LL6_rep3/R/.
-    mv $RawDatDir/EC_55_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep1/F/.
-    mv $RawDatDir/EC_55_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep1/R/.
-    mv $RawDatDir/EC_56_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep2/F/.
-    mv $RawDatDir/EC_56_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep2/R/.
-    mv $RawDatDir/EC_57_1.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep3/F/.
-    mv $RawDatDir/EC_57_2.fq.gz $ProjectDir/experiment2/V.dahliae/Frq53_LL6_rep3/R/.
-
-```
-
-
-
 #Data QC
 Perform qc of RNAseq timecourse data
 
 ```bash
 screen -a
-for FilePath in $(ls -d raw_rna/experiment2/V.*/*); do
+for FilePath in $(ls -d raw_rna/experiment1/V.*/*); do
 #Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
 echo $FilePath
 FileF=$(ls $FilePath/F/*.fq.gz);
@@ -169,75 +113,6 @@ ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/rna_qc
 qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
 sleep 10m
 done
-```
-To run the jobs so they qsub when there is enough space in the nodes:
-
-```bash
-screen -a
-for FilePath in $(ls -d raw_rna/novogene/P.fragariae/Bc16/* | grep -v '0hr')
-do
-    echo $FilePath
-    FileNum=$(ls $FilePath/F/*.gz | wc -l)
-    for num in $(seq 1 $FileNum)
-    do
-        FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
-        FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
-        echo $FileF
-        echo $FileR
-        Jobs=$(qstat -u "*" | grep 'rna_qc' | grep 'qw' | wc -l)
-        while [ $Jobs -gt 16 ]
-        do
-            sleep 5m
-            printf "."
-            Jobs=$(qstat | grep 'rna_qc' | grep 'qw' | wc -l)
-        done        
-        printf "\n"
-        IlluminaAdapters=/home/adamst/git_repos/tools/seq_tools/ncbi_adapters.fa
-        ProgDir=/home/adamst/git_repos/tools/seq_tools/rna_qc
-        qsub -h $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
-        JobID=cat qstat | grep 'rna' | tail -n 1 | cut -d ' ' -f1
-        load02=$(qstat -u "*" | grep 'blacklace02'| grep 'rna' | wc -l)
-        load05=$(qstat -u "*" | grep 'blacklace05'| grep 'rna' | wc -l)
-        load06=$(qstat -u "*" | grep 'blacklace06'| grep 'rna' | wc -l)
-        load10=$(qstat -u "*" | grep 'blacklace10'| grep 'rna' | wc -l)
-        if (($load02 < 3))
-        then
-            qalter $JobID -l h=blacklace02.blacklace -h U
-            echo "Submitted to node 2"
-        elif (($load05 < 3))
-        then
-            qalter $JobID -l h=blacklace05.blacklace -h U
-            echo "Submitted to node 5"
-        elif (($load06 < 3))
-        then
-            qalter $JobID -l h=blacklace06.blacklace -h U
-            echo "Submitted to node 6"
-        elif (($load10 < 3))
-        then
-            qalter $JobID -l h=blacklace10.blacklace -h U
-            echo "Submitted to node 10"
-        else
-            echo "all nodes full, waiting ten minutes"
-            sleep 10m
-            continue
-        fi
-        break    
-    done
-done
-```
-
-
-WT08_DD18_rep2
-WT08_DD18_rep3
-WT08_DD24_rep1
-WT08_DD24_rep2
-WT08_DD24_rep3
-WT08_DD6_rep1
-WT08_DD6_rep2
-WT08_DD6_rep3
-
-
-ls | grep "rna_qc_fastq-mcf.sh.o" | wc -l
 
   ```
 
@@ -318,14 +193,16 @@ The program was copied to:
 ```bash
 for Strain in $(ls ./* -d) ; do
 echo $Strain
-mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment1/V.dahliae/"$Strain"
-mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment1/V.dahliae/"$Strain"
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment2/V.dahliae/"$Strain"
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment2/V.dahliae/"$Strain"
 done
 ```
 
+#Not used
+
 ```bash
 STAR
-for FilePath in $(ls -d /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment1/V.dahliae/*); do
+for FilePath in $(ls -d /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment2/V.dahliae/*); do
 Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
 echo $Strain
 F_Read=$(ls $FilePath/F/*.fq.gz)
@@ -336,11 +213,11 @@ qsub sub_star.sh
 ./STAR \
 --runThreadN 16 \
 --runMode genomeGenerate \
---genomeDir /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment1/V.dahliae \
---outFileNamePrefix /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1 \
+--genomeDir /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment2/V.dahliae \
+--outFileNamePrefix /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/STAR/experiment2/V.dahliae/WT08_DD6_rep1 \
 --readFilesCommand zcat \
-/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/F/*.fq.gz \
-/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment1/V.dahliae/53WT_DD12_rep1/R/*.fq.gz \
+/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment2/V.dahliae/WT08_DD6_rep1/F/*.fq.gz \
+/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/qc_rna/experiment2/V.dahliae/WT08_DD6_rep1/R/*.fq.gz \
 --outSAMtype SAM
 done
 ```
@@ -552,9 +429,9 @@ cp -r $WorkDir $CurDir/$OutDir/.
 ```bash
 InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
-InReadF=$(ls qc_rna/experiment1/V.dahliae/53WT_DD18_rep1/F/*.fq.gz)
-InReadR=$(ls qc_rna/experiment1/V.dahliae/53WT_DD18_rep1/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD18_rep1/
+InReadF=$(ls qc_rna/experiment2/V.dahliae/WT08_DD18_rep1/F/*.fq.gz)
+InReadR=$(ls qc_rna/experiment2/V.dahliae/WT08_DD18_rep1/R/*.fq.gz)
+OutDir=RNA_alignment/STAR/experiment2/V.dahliae/WT08_DD18_rep1/
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 ```
@@ -562,13 +439,13 @@ qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 ## Run sub_star.sh in a loop
 q
 ```bash
-for FilePath in $(ls -d qc_rna/experiment1/V.dahliae/*); do
+for FilePath in $(ls -d qc_rna/experiment2/V.dahliae/*); do
 Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
 InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
-InReadF=$(ls qc_rna/experiment1/V.dahliae/$Strain/F/*.fq.gz)
-InReadR=$(ls qc_rna/experiment1/V.dahliae/$Strain/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment1/V.dahliae/$Strain/$Strain
+InReadF=$(ls qc_rna/experiment2/V.dahliae/$Strain/F/*.fq.gz)
+InReadR=$(ls qc_rna/experiment2/V.dahliae/$Strain/R/*.fq.gz)
+OutDir=RNA_alignment/STAR/experiment2/V.dahliae/$Strain/$Strain
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 done
@@ -732,7 +609,7 @@ Frq08_DD24_rep3 Frq08   24h     d
 
 R script to import and merge data into a formad good for DESeq2
 
-install.packages("DESeq2", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 ```R
 #install and load libraries             
@@ -795,12 +672,12 @@ design <- ~Group
 dds <-  DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
-```
+
 
 =================
 Sample distanes
 =================
-```
+
 vst<-varianceStabilizingTransformation(dds)
 sampleDists<-dist(t(assay(vst)))
 library("RColorBrewer")
@@ -822,11 +699,11 @@ colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 heatmap( sampleDistMatrix, trace="none", col=colours)
 
 dev.off()
-```
+
 =================
 PCA plots
 =================
-```
+
 vst<-varianceStabilizingTransformation(dds)
 plotPCA(vst,intgroup="Group")
 
@@ -851,11 +728,11 @@ pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
  coord_fixed()
 
 ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
-```
+
 ===============
 Analysis of gene expression
 ===============
-```
+
 #Example:
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","Frq08l6h","Frq08d6h"))
@@ -1241,12 +1118,12 @@ LFC < 0 (down)   : 2498, 22%
 outliers [1]     : 3, 0.026%
 low counts [2]   : 0, 0%
 (mean count < 0)
-```
+
 
 ==================
 Gene clustering
 ==================
-```
+
 rld <- rlog( dds )
 head( assay(rld) )
 
@@ -1329,11 +1206,16 @@ my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
 trace="none", dendrogram="column", margins = c(3, 8), col = my_palette, cexCol=0.4,cexRow=0.4
 
-```
+
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="column", margins = c(3, 8), col = my_palette, cexCol=0.4,cexRow=0.4
+
 ===============
 Plotting results  
 ===============
-```
+
 ##Light 53WT vs Wc153
 
 res= results(dds, alpha=alpha,contrast=c("Group","53WTl6h","Wc153l6h"))
@@ -1346,400 +1228,6 @@ plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Strain"))
 
 
 ```
-========
-Time course experiment
-========
-
-Using 6hDD, 12hDD, 18hDD, 24hDD
-```R
-library(DESeq2)
-colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep1)
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep2)
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep3)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep1)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep2)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep3)
-
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD24_rep3)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep1)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep2)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep3)
-
-colData <- colData[!(colData$Sample=="WT53_LL6_rep1"),]
-countData <- subset(countData, select=-WT53_LL6_rep1)
-colData <- colData[!(colData$Sample=="WT53_LL6_rep2"),]
-countData <- subset(countData, select=-WT53_LL6_rep2)
-colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
-countData <- subset(countData, select=-WT53_LL6_rep3)
-
-colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
-countData <- subset(countData, select=-WT53_DD12_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
-countData <- subset(countData, select=-WT53_DD12_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
-countData <- subset(countData, select=-WT53_DD12_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
-countData <- subset(countData, select=-WT53_DD18_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
-countData <- subset(countData, select=-WT53_DD18_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
-countData <- subset(countData, select=-WT53_DD18_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
-countData <- subset(countData, select=-WT53_DD24_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
-countData <- subset(countData, select=-WT53_DD24_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
-countData <- subset(countData, select=-WT53_DD24_rep3)
-
-library(ggplot2)
-
-design <- ~Strain + Time + Strain:Time
-ddsTC <- DESeqDataSetFromMatrix(countData,colData,design)
-ddsTC <- DESeq(ddsTC, fitType="local")
-resTC <- results(ddsTC)
-resTC$symbol <- mcols(ddsTC)$symbol
-head(resTC[order(resTC$padj),],4)
-
-data <- plotCounts(ddsTC, which.min(resTC$padj),
-                   intgroup=c("Time","Strain"), returnData=TRUE)
-ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
-  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
-dev.off()
-
-#to check a specific gene over time
-data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr2g01990",
-                   intgroup=c("Time","Strain"), returnData=TRUE)
-ggplot(data, aes(x=Time, y=count, color=Strain, group=Strain)) +
-  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
-dev.off()
-
-#To create a list of the values
-write.table(resTC[order(resTC$padj),],"time_course1",sep="\t",quote=F)
-```
-
-Using 6hLL, 6hDD, 12hDD, 18hDD, 24hDD
-```R
-library(DESeq2)
-library(ggplot2)
-
-colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep1)
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep2)
-colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
-countData <- subset(countData, select=-Wc153_DD6_rep3)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep1)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep2)
-colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
-countData <- subset(countData, select=-Wc153_LL6_rep3)
-
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD24_rep3)
-
-
-colData$TimePoint <- paste0(colData$Time,colData$Light)
-design <- ~Strain + TimePoint + Strain:TimePoint
-ddsTC <- DESeqDataSetFromMatrix(countData,colData,design)
-ddsTC <- DESeq(ddsTC, fitType="local")
-resTC <- results(ddsTC)
-resTC$symbol <- mcols(ddsTC)$symbol
-head(resTC[order(resTC$padj),],4)
-
-data <- plotCounts(ddsTC, which.min(resTC$padj),
-                   intgroup=c("Strain","TimePoint"), returnData=TRUE)
-ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
-  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
-dev.off()
-
-#to check a specific gene over time
-data <- plotCounts(ddsTC, gene="VDAG_JR2_Chr1g01960",
-                   intgroup=c("Strain","TimePoint"), returnData=TRUE)
-ggplot(data, aes(x=TimePoint, y=count, color=Strain, group=Strain)) +
-  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
-dev.off()
-
-#To create a list of the values
-write.table(resTC[order(resTC$padj),],"time_course2",sep="\t",quote=F)
-```
-==========
-Wald tests for the log2 fold changes at individual time points
-==========
-
-```R
-resultsNames(ddsTC)
-```
-[1] "Intercept"                 "Strain_Frq08_vs_53WT"     
-[3] "TimePoint_06hd_vs_06hbl"   "TimePoint_12hd_vs_06hbl"  
-[5] "TimePoint_18hd_vs_06hbl"   "TimePoint_24hd_vs_06hbl"  
-[7] "StrainFrq08.TimePoint06hd" "StrainFrq08.TimePoint12hd"
-[9] "StrainFrq08.TimePoint18hd" "StrainFrq08.TimePoint24hd"
-
-```R
-res30 <- results(ddsTC, name="TimePoint_06hd_vs_06hbl", test="Wald")
-res30[which.min(resTC$padj),]
-
-betas <- coef(ddsTC)
-colnames(betas)
-
-library("pheatmap")
-topGenes <- head(order(resTC$padj),20)
-mat <- betas[topGenes, -c(1,2)]
-thr <- 3
-mat[mat < -thr] <- -thr
-mat[mat > thr] <- thr
-pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
-         cluster_col=FALSE)
-dev.off()
-
-```
-=======
-Remove samples and create colData_LD and countData_LD
-=======
-
-```R
-library(DESeq2)
-colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
-
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-#Eliminate Frq08_DD24_rep3 sample from colData and countData
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]      
-countData <- subset(countData, select=-Frq08_DD24_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]      
-countData <- subset(countData, select=-Frq08_DD24_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD24_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]      
-countData <- subset(countData, select=-Frq08_DD18_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]      
-countData <- subset(countData, select=-Frq08_DD18_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD18_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]      
-countData <- subset(countData, select=-Frq08_DD12_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]      
-countData <- subset(countData, select=-Frq08_DD12_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD12_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]      
-countData <- subset(countData, select=-Frq08_DD6_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]      
-countData <- subset(countData, select=-Frq08_DD6_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]      
-countData <- subset(countData, select=-Frq08_DD6_rep3)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep1)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep2)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
-countData <- subset(countData, select=-Frq08_LL6_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
-countData <- subset(countData, select=-WT53_DD12_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
-countData <- subset(countData, select=-WT53_DD12_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
-countData <- subset(countData, select=-WT53_DD12_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
-countData <- subset(countData, select=-WT53_DD18_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
-countData <- subset(countData, select=-WT53_DD18_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
-countData <- subset(countData, select=-WT53_DD18_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
-countData <- subset(countData, select=-WT53_DD24_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
-countData <- subset(countData, select=-WT53_DD24_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
-countData <- subset(countData, select=-WT53_DD24_rep3)
-
-write.table(countData,"countData_LD",sep="\t",na="",quote=F)
-write.table(colData,"colData_LD",sep="\t",na="",quote=F)
-```
-
-=====
-Gene analysis
-=====
-
-```R
-<<<<<<< HEAD
-library(DESeq2)
-=======
->>>>>>> 755ede1f2c551b92b8b315f18ba6e1cbf9206d65
-colData <- read.table("colData_LD",header=T,sep="\t")
-countData <- read.table("countData_LD",header=T,sep="\t")
-
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-design <- ~Group
-dds <-  DESeqDataSetFromMatrix(countData,colData,design)
-sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
-dds <- DESeq(dds, fitType="local")
-
-alpha <- 0.05
-res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
-sig.res <- subset(res,padj<=alpha)
-sig.res <- sig.res[order(sig.res$padj),]
-
-topGene <- rownames(res)[which.min(res$padj)]
-<<<<<<< HEAD
-plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Group"))
-dev.off()
-
-
-pc <- plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Group"), returnData = TRUE)
-write.table(pc,"plotCounts",sep="\t",na="",quote=F)
-
-```
-
-###TIMECOURSE MODEL WITH TIME BUT AT THIS POINT NO STRAIN FACTOR
-source("https://bioconductor.org/biocLite.R")
-
-```R
-biocLite("DESeq2")
-require(DESeq2)
-library("RColorBrewer")
-library("ggplot2")
-library("ggrepel")
-library("RColorBrewer")
-library("gplots")
-library( "genefilter" )
-library(pheatmap)
-colData <- read.table("colData",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
-colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-design <- ~Group
-#colData <- colData[!(colData$Sample=="WT53_LL6_rep1"),]
-#countData <- subset(countData, select=-WT53_LL6_rep1)
-#colData <- colData[!(colData$Sample=="WT53_LL6_rep2"),]
-#countData <- subset(countData, select=-WT53_LL6_rep2)
-#colData <- colData[!(colData$Sample=="WT53_LL6_rep3"),]
-#countData <- subset(countData, select=-WT53_LL6_rep3)
-#colData <- colData[!(colData$Sample=="WT53_DD6_rep1"),]
-#countData <- subset(countData, select=-WT53_DD6_rep1)
-#colData <- colData[!(colData$Sample=="WT53_DD6_rep2"),]
-#countData <- subset(countData, select=-WT53_DD6_rep2)
-#colData <- colData[!(colData$Sample=="WT53_DD6_rep3"),]
-#countData <- subset(countData, select=-WT53_DD6_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]
-countData <- subset(countData, select=-WT53_DD12_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]
-countData <- subset(countData, select=-WT53_DD12_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]
-countData <- subset(countData, select=-WT53_DD12_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]
-countData <- subset(countData, select=-WT53_DD18_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]
-countData <- subset(countData, select=-WT53_DD18_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]
-countData <- subset(countData, select=-WT53_DD18_rep3)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]
-countData <- subset(countData, select=-WT53_DD24_rep1)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]
-countData <- subset(countData, select=-WT53_DD24_rep2)
-colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]
-countData <- subset(countData, select=-WT53_DD24_rep3)
-#colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]
-#countData <- subset(countData, select=-Wc153_DD6_rep1)
-#colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]
-#countData <- subset(countData, select=-Wc153_DD6_rep2)
-#colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]
-#countData <- subset(countData, select=-Wc153_DD6_rep3)
-#colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]
-#countData <- subset(countData, select=-Wc153_LL6_rep1)
-#colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]
-#countData <- subset(countData, select=-Wc153_LL6_rep2)
-#colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]
-#countData <- subset(countData, select=-Wc153_LL6_rep3)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]
-countData <- subset(countData, select=-Frq08_LL6_rep1)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]
-countData <- subset(countData, select=-Frq08_LL6_rep2)
-colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]
-countData <- subset(countData, select=-Frq08_LL6_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]
-countData <- subset(countData, select=-Frq08_DD6_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]
-countData <- subset(countData, select=-Frq08_DD6_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]
-countData <- subset(countData, select=-Frq08_DD6_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]
-countData <- subset(countData, select=-Frq08_DD12_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]
-countData <- subset(countData, select=-Frq08_DD12_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]
-countData <- subset(countData, select=-Frq08_DD12_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]
-countData <- subset(countData, select=-Frq08_DD18_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]
-countData <- subset(countData, select=-Frq08_DD18_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]
-countData <- subset(countData, select=-Frq08_DD18_rep3)
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]
-countData <- subset(countData, select=-Frq08_DD24_rep1)
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]
-countData <- subset(countData, select=-Frq08_DD24_rep2)
-colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]
-countData <- subset(countData, select=-Frq08_DD24_rep3)
-
-colData=colData[1:12,]
-design <- ~Group
-dds <-   DESeqDataSetFromMatrix(countData,colData,design)
-sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
-dds <- DESeq(dds, fitType="local")
-#ddsTC <- DESeqDataSet(dds, ~   Light +Strain +Light:Strain )
-#ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ Light )
-#resTC <- results(ddsTC)
-ddsTC <- DESeqDataSet(dds, ~   Light +Strain +Light:Strain )
-ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ Light )
-resTC <- results(ddsTC)
-resTC$symbol <- mcols(ddsTC)$symbol
-#head(resTC[order(resTC$padj),], 4)
-#time_variable=resTC[which(resTC$padj<0.01),]
-#fiss <- plotCounts(ddsTC, which.min(resTC$padj),d intgroup = c("Light","Strain"), returnData = TRUE)
-#ggplot(fiss, aes(x = as.numeric(Time), y = count, group = Light)) + geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
-#fiss <- plotCounts(ddsTC, which.min(resTC$padj),intgroup = c("Time"), returnData = TRUE)
-#ggplot(fiss, aes(x = as.numeric(Time), y = count, group = Light)) + geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
-#fiss <- plotCounts(ddsTC, which.min(resTC$padj),
-#intgroup = c("Time","Strain"), returnData = TRUE)
-#ggplot(fiss,
-#aes(x = as.numeric(minute), y = count, color = strain, group = strain)) +
-#geom_point() + geom_smooth(se = FALSE, method = "loess") + scale_y_log10()
-betas <- coef(ddsTC)
-colnames(betas)
-topGenes <- head(order(resTC$padj),50)
-mat <- betas[topGenes, -c(1,2)]
-thr <- 3
-mat[mat < -thr] <- -thr
-mat[mat > thr] <- thr
-pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
-cluster_col=FALSE)
-
-```
-=======
-plotCounts(dds, gene="VDAG_JR2_Chr1g17240", intgroup=c("Group"))
-```
-
-
->>>>>>> 755ede1f2c551b92b8b315f18ba6e1cbf9206d65
 
 #Functional annotation of JR2 protein files
 ##Interproscan
