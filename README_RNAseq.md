@@ -445,7 +445,7 @@ InGenome=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.top
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 InReadF=$(ls qc_rna/experiment2/V.dahliae/$Strain/F/*.fq.gz)
 InReadR=$(ls qc_rna/experiment2/V.dahliae/$Strain/R/*.fq.gz)
-OutDir=RNA_alignment/STAR/experiment2/V.dahliae/$Strain/$Strain
+OutDir=RNA_alignment/STAR/experiment2/V.dahliae/$Strain/
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_star.sh $InGenome $InGff $InReadF $InReadR $OutDir
 done
@@ -461,8 +461,8 @@ Is a highly efficient general-purpose read summarization program that counts map
 ```bash
 for Strain in $(ls ./* -d) ; do
 echo $Strain
-mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment1/V.dahliae/"$Strain"
-mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment1/V.dahliae/"$Strain"
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/"$Strain"
+mkdir -p /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/"$Strain"
 done
 ```
 
@@ -540,9 +540,9 @@ cp -r $WorkDir $CurDir/$OutDir/.
 ## Run sub_featureCounts.sh in data set
 
 ```bash
-InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/53WT_DD12_rep1/star/*.sam)
+InBam=$(ls RNA_alignment/STAR/experiment2/V.dahliae/WT08_DD12_rep1/star/*.sam)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
-OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/53WT_DD12_rep1/
+OutDir=RNA_alignment/featureCounts/experiment2/V.dahliae/WT08_DD12_rep1/
 Prefix=53WT_DD12_rep1
 ProgDir=/home/lopeze/git_repos/tools/seq_tools/RNAseq
 qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir $Prefix
@@ -551,9 +551,9 @@ qsub $ProgDir/sub_featureCounts.sh $InBam $InGff $OutDir $Prefix
 ## Run sub_featureCounts.sh in a loop
 
 ```bash
-for FilePath in $(ls -d qc_rna/experiment1/V.dahliae/*); do
+for FilePath in $(ls -d qc_rna/experiment2/V.dahliae/*); do
 Strain=$(echo $FilePath | rev | cut -f1 -d '/' | rev)
-InBam=$(ls RNA_alignment/STAR/experiment1/V.dahliae/$Strain/star/*.sam)
+InBam=$(ls RNA_alignment/STAR/experiment2/V.dahliae/$Strain/star/*.sam)
 InGff=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33.gff3)
 OutDir=RNA_alignment/featureCounts/experiment1/V.dahliae/$Strain/
 Prefix=$Strain
@@ -606,14 +606,31 @@ Frq08_DD24_rep1 Frq08   24h     d
 Frq08_DD24_rep2 Frq08   24h     d
 Frq08_DD24_rep3 Frq08   24h     d
 
+# Edit header lines of feature coutn files to ensure they have the treament name rather than file name
+```bash
 
-R script to import and merge data into a formad good for DESeq2
+
+ for File in $(/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/*/featureCounts/*_featurecounts.txt); do
+   echo $File;
+  Strain=$(echo $File | rev | cut -f1 -d '/' | rev)
+  OutDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/$Strain/
+   cp $File $OutDir/.;
+ done
+ for File in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/*/featureCounts/*_featurecounts.txt); do
+   Prefix=$(echo $File | rev | cut -f1 -d '/' | rev | sed 's/_featurecounts.txt//g' | sed "s/_totRNA_S.*_L/_L/g")
+   sed -ie "s/star_aligmentAligned.sortedByCoord.out.bam/$Prefix/g" $File
+done
+```
+
+R script to import and merge data into a format good for DESeq2
 
 install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
+
 ```R
-#install and load libraries             
-require(data.table)
+#install and load libraries
+require("pheatmap")             
+require("data.table")
 
 #load tables into a "list of lists"
 qq <- lapply(list.files(".",".*_gene_featurecounts.txt$",full.names=T,recursive=T),function(x) fread(x))
@@ -632,9 +649,9 @@ rownames(countData) <- countData[,1]
 countData <- countData[,-1]
 
 #output countData
-write.table(countData,"countData",sep="\t",na="",quote=F)
+write.table(countData,"countData_e2",sep="\t",na="",quote=F)
 #output gene details
-write.table(m[,1:6,with=F],"genes.txt",sep="\t",quote=F,row.names=F)
+write.table(m[,1:6,with=F],"genes_e2.txt",sep="\t",quote=F,row.names=F)
 ```
 
 colnames(countData) <- sub("X","",colnames(countData))
