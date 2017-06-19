@@ -208,7 +208,7 @@ H
 #D15 medium
 
 ```R   
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D15-D16_medium/D16_data/D16_med_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D15-D16_medium/D15_data/D15_med_data.csv")
 attach(data)
 boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
 
@@ -228,5 +228,99 @@ anv.model<-aov(Diameter~Strain*Conditions)
 summary(anv.model)
 print(posthoc <- TukeyHSD(anv.model ))
 
-59.5
+```
+#Pathogenicity test E1
+
+```R   
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_data.csv")
+attach(data)
+
+#ANOVA
+options(max.print=1000000)
+
+anv.model<-aov(Score~Strain*Time)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Strain", group=TRUE)
+H
+
+#Standard error
+df <- with(data , aggregate(Score, list(Strain=Strain, Time=Time), mean))
+df$se <- with(data , aggregate(Score, list(Strain=Strain, Time=Time),
+              function(x) sd(x)/sqrt(10)))
+
+#-------------#
+
+data_summary <- function(data, Score, Strain){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      se = sd(x[[col]]/sqrt(10), na.rm=TRUE))
+  }
+  data_sum<-ddply(data, Strain, .fun=summary_func,
+                  Score)
+  data_sum <- rename(data_sum, c("mean" = Score))
+ return(data_sum)
+}
+
+df <- data_summary(data, Score="Score",
+                    Strain=c("Strain", "Time"))
+
+df$Strain=as.factor(df$Strain)
+head(df)
+
+
+#Standard deviation
+data_summary <- function(data, Score, Strain){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE))
+  }
+  data_sum<-ddply(data, Strain, .fun=summary_func,
+                  Score)
+  data_sum <- rename(data_sum, c("mean" = Score))
+ return(data_sum)
+}
+
+df2 <- data_summary(data, Score="Score",
+                    Strain=c("Strain", "Time"))
+
+df2$Strain=as.factor(df2$Strain)
+head(df2)
+
+#Line plot with error bars
+library("ggplot2")
+m4 <- lm(Score ~ Strain * Time, data=data)
+dats$y.hat <- predict(m4)
+ggplot(df, aes(x=Time, color=Strain, y=Score)) +
+    geom_point(size=1) +
+    geom_line(aes(y=Score, x=as.integer(Time))) +
+    labs(x="Days after inoculation", y=("Disease score")) +
+    geom_errorbar(aes(ymin=Score - df$se, ymax=Score + df$se), width=.2,
+                 position=position_dodge(0)) +
+    ylim(0,10)+
+    scale_fill_manual(values=c("blue", "red", "green", "grey")) +
+      theme_bw() +
+      theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(size=12),
+        aspect.ratio=1/1,
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10))
+
+
+#Area under the curve
+days<-c(15,23,30,37,44,51,58)
+
+AGNd08[,13]=audpc(AGNd08[,6:12],days)
+AGNd08[,14]=audpc(AGNd08[,6:12],days,“relative”)
+colnames(AGNd08)[13]=c(‘audpc’)
+colnames(AGNd08)[14]=c(‘audpc_r’)
+
 ```
