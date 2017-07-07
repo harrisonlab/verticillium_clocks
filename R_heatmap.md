@@ -10,7 +10,7 @@ dev.off()
 
 
 Script used:
-
+```R
 install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 library("gplots")
@@ -20,7 +20,7 @@ scale <- colorRampPalette(c("white", "forestgreen", "darkgreen"), space = "rgb")
 pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs-heatmap.pdf",width=7,height=7)
 orthologs_heatmap <- heatmap.2(orthologs_matrix, margins = c(6, 12), dendogram="column", Colv=FALSE, cexCol=0.8, cexRow=0.8 , trace="none", tracecol="Gray", col=scale)
 dev.off()
-
+```
 
 Alternative script:
 /Users/lopeze/Desktop/Bioinformatics
@@ -93,7 +93,6 @@ lwid=c(2,2),#modifiy the size of the cells
 trace="none", tracecol="Gray", col=scale)
 dev.off()
 
-
 --------------
 STATISTICS
 --------------
@@ -150,34 +149,7 @@ means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
 groups<-cld(means, alpha= .05)
 ```
 
-#D5-D9 Menadione experiment
 
-```R
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D5-D9_Men/D9_53_data.csv")
-attach(data)
-boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
-
-
-hist(Diameter)
-shapiro.test(data$Diameter) #p-value has to be over 0.5
-
-#If the data is not normally distributed:
-data.log<-log(data$Diameter)
-shapiro.test(data.log$Diameter)
-hist(data.log)
-
-#ANOVA
-anv.model<-aov(Diameter~Strain*Conditions)
-summary(anv.model)
-print(posthoc <- TukeyHSD(anv.model ))
-
-library(agricolae)
-H<-HSD.test(anv.model, "Conditions", group=TRUE)
-H
-
-library(lsmeans)
-means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
-groups<-cld(means, alpha= .05)
 ```
 #D3 Wc1
 
@@ -234,6 +206,7 @@ print(posthoc <- TukeyHSD(anv.model ))
 ```R   
 data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_data.csv")
 attach(data)
+boxplot(Score~Strain*Time, las = 2, cex.axis=0.6)
 
 #ANOVA
 options(max.print=1000000)
@@ -246,81 +219,441 @@ library(agricolae)
 H<-HSD.test(anv.model, "Strain", group=TRUE)
 H
 
-#Standard error
-df <- with(data , aggregate(Score, list(Strain=Strain, Time=Time), mean))
-df$se <- with(data , aggregate(Score, list(Strain=Strain, Time=Time),
-              function(x) sd(x)/sqrt(10)))
-
-#-------------#
-
+#Standard Error
 data_summary <- function(data, Score, Strain){
-  require(plyr)
-  summary_func <- function(x, col){
-    c(mean = mean(x[[col]], na.rm=TRUE),
-      se = sd(x[[col]]/sqrt(10), na.rm=TRUE))
-  }
-  data_sum<-ddply(data, Strain, .fun=summary_func,
-                  Score)
-  data_sum <- rename(data_sum, c("mean" = Score))
- return(data_sum)
-}
+     require(plyr)
+     summary_func <- function(x, col){
+         c(mean = mean(x[[col]], na.rm=TRUE),
+          se = sd(x[[col]]/sqrt(10), na.rm=TRUE))
+     }
+     data_sum<-ddply(data, Strain, .fun=summary_func, Score)
+     data_sum <- rename(data_sum, c("mean" = Score))
+     return(data_sum)
+ }
 
 df <- data_summary(data, Score="Score",
-                    Strain=c("Strain", "Time"))
+                  Strain=c("Strain", "Time"))
 
 df$Strain=as.factor(df$Strain)
 head(df)
 
+#Ggplot curve
 
-#Standard deviation
-data_summary <- function(data, Score, Strain){
-  require(plyr)
-  summary_func <- function(x, col){
-    c(mean = mean(x[[col]], na.rm=TRUE),
-      sd = sd(x[[col]], na.rm=TRUE))
-  }
-  data_sum<-ddply(data, Strain, .fun=summary_func,
-                  Score)
-  data_sum <- rename(data_sum, c("mean" = Score))
- return(data_sum)
-}
+library(ggplot2)
+ggplot(df, aes(x=Time, color=Strain, y=Score, shape=Strain)) + geom_point(size=5)
 
-df2 <- data_summary(data, Score="Score",
-                    Strain=c("Strain", "Time"))
-
-df2$Strain=as.factor(df2$Strain)
-head(df2)
-
-#Line plot with error bars
-library("ggplot2")
 m4 <- lm(Score ~ Strain * Time, data=data)
-dats$y.hat <- predict(m4)
-ggplot(df, aes(x=Time, color=Strain, y=Score)) +
-    geom_point(size=1) +
-    geom_line(aes(y=Score, x=as.integer(Time))) +
-    labs(x="Days after inoculation", y=("Disease score")) +
-    geom_errorbar(aes(ymin=Score - df$se, ymax=Score + df$se), width=.2,
-                 position=position_dodge(0)) +
-    ylim(0,10)+
-    scale_fill_manual(values=c("blue", "red", "green", "grey")) +
-      theme_bw() +
+data$y.hat <- predict(m4)
+
+ggplot(df, aes(x=Time, color=Strain, shape=Strain, y=Score)) +
+geom_errorbar(aes(ymin=Score - se, ymax=Score + se), width=.1, size=0.6) +
+geom_point(size=1) +
+geom_line(aes(x=as.integer(Time)), size=0.6)+
+ylab("Disease score") +
+xlab("Days after inoculation")+
+coord_fixed(ratio = 0.5)+
+ylim(0,10)+
+scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9))+
+theme_bw() +
       theme(axis.line = element_line(colour = "black"),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         panel.background = element_blank(),
         text = element_text(size=12),
-        aspect.ratio=1/1,
-        axis.text.x = element_text(size=10),
-        axis.text.y = element_text(size=10))
+        legend.text=element_text(size=12),
+        legend.title=element_text(size=15),
+        axis.text.x = element_text(size=12),
+        axis.text.y = element_text(size=12),
+        axis.title.x = element_text(size=15),
+        axis.title.y = element_text(size=15))
 
 
-#Area under the curve
-days<-c(15,23,30,37,44,51,58)
 
-AGNd08[,13]=audpc(AGNd08[,6:12],days)
-AGNd08[,14]=audpc(AGNd08[,6:12],days,“relative”)
-colnames(AGNd08)[13]=c(‘audpc’)
-colnames(AGNd08)[14]=c(‘audpc_r’)
 
 ```
+#RING experiment
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light/Interspecies/Intersp.csv")
+attach(data)
+
+#ANOVA
+anv.model<-aov(Diameter~Conditions*Strain)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+# Check normality with hist, qqplots
+hist(Diameter)
+shapiro.test(data$Diameter)
+qqnorm(Diameter)
+qqline(Diameter)
+
+# If data isnt normal Run a Box-Cox proceedure to obtain optimal transformation
+library("MASS")
+boxcox(anv.model)
+# Produces a plot of likelihood of the parameter lambda against values of lambda
+# from -2 to 2
+# Dotted vertical lines indicate the ideal value of lambda
+# Refine range of lambda eg from 0 to 0.5 in increments of 0.1
+boxcox(anv.model, lambda = seq(0, 2, 0.5))
+
+# Plot boxcoxs
+par(mfrow=c(1,1))
+boxcox(anv.model)
+boxcox(anv.model, lambda = seq(0, 0.5, 0.1))
+
+
+# Create a variable with transformed values
+Dm1<-(Diameter^0.05) #More normally distributed
+Dm2<-(Diameter^1.27)
+Dm3<-(Diameter^1.95)
+
+# Check normality with hist, qqplots
+par(mfrow=c(3,3))
+hist(Dm1)
+qqnorm(Dm1)
+qqline(Dm1)
+hist(Dm2)
+qqnorm(Dm2)
+qqline(Dm2)
+hist(Dm3)
+qqnorm(Dm3)
+qqline(Dm3)
+
+# Check normalitly with shapiro-wilks on all transformed data eg Ex1 Ex2
+shapiro.test(Dm2)
+
+# Run 2-way Anova with normalised data Ex2 was the best transformation
+anv.model<-aov(Dm2~Experiment*Strain)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+anv.model<-aov(Dm1~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+
+#Boxplot
+library("ggplot2")
+ggplot(data, aes(x=Conditions, fill=Conditions, y=Diameter)) +
+stat_boxplot(geom="errorbar", size=0.5) +
+     geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+     #labs(y=("Colony diameter(mm)")) +
+     facet_grid(~Strain, scale="free") +
+     scale_fill_brewer(palette="Paired") +
+     #scale_fill_manual(breaks=c("WT_12008","ΔFrq_12008"), values=c("royalblue","steelblue1")) +
+     #scale_fill_manual(breaks=c("WT_12253","ΔWc1_12253"), values=c("firebrick","antiquewhite")) +
+     #scale_fill_manual(breaks=c("WT_12008","ΔWc2_12008"), values=c("royalblue","azure3")) +
+     ylim(20,55)+
+     ylab("Colony diameter (mm)")+
+     theme_bw() +
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_blank(),
+           panel.background = element_blank(),
+           text = element_text(size=12),
+           axis.text.x = element_text(size=11),
+           axis.text.y = element_text(size=11),
+           axis.title.x = element_text(size=15),
+           axis.title.y = element_text(size=15),
+           strip.text = element_text(face="bold", size=10),
+           strip.background = element_rect(colour="black",size=0.5))
+
+
+
+           library("ggplot2")
+           ggplot(data, aes(x=Strain, fill=Strain, y=Diameter)) +
+           stat_boxplot(geom="errorbar", size=0.5) +
+                geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+                #labs(y=("Colony diameter(mm)")) +
+                facet_grid(~Conditions, scale="free") +
+                scale_fill_brewer(palette="Paired") +
+                #scale_fill_brewer(palette="Greens") +
+                #scale_fill_brewer(palette="Paired") +
+                ylim(20,60)+
+                ylab("Colony diameter (mm)")+
+                theme_bw() +
+                theme(axis.line = element_line(colour = "black"),
+                      panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      panel.border = element_blank(),
+                      panel.background = element_blank(),
+                      text = element_text(size=12),
+                      axis.text.x = element_text(size=11, angle=45, hjust=1),
+                      axis.text.y = element_text(size=11),
+                      axis.title.x = element_text(size=15),
+                      axis.title.y = element_text(size=15),
+                      strip.text = element_text(face="bold", size=10),
+                      strip.background = element_rect(colour="black",size=0.5))
+
+#LIGHT PULSE experiment
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light_Pulse/LP_0102.csv")
+attach(data)
+
+#ANOVA
+anv.model<-aov(Expression~Conditions*Strain)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+# Check normality with hist, qqplots
+par(mfrow=c(4,2))
+hist(Expression)
+shapiro.test(data$Expression)
+qqnorm(Expression)
+qqline(Expression)
+
+# If data isnt normal Run a Box-Cox proceedure to obtain optimal transformation
+library("MASS")
+boxcox(anv.model)
+# Produces a plot of likelihood of the parameter lambda against values of lambda
+# from -2 to 2
+# Dotted vertical lines indicate the ideal value of lambda
+# Refine range of lambda eg from 0 to 0.5 in increments of 0.1
+boxcox(anv.model, lambda = seq(-2, -0.5, 0.5))
+
+# Plot boxcoxs
+par(mfrow=c(1,1))
+boxcox(anv.model)
+boxcox(anv.model, lambda = seq(0, 0.5, 0.1))
+
+# Add data to original data set (Not done)
+lamEx1<-cbind(anv.data, anv.data$Expression^0.17)
+lamEx2<-cbind(anv.data, anv.data$Expression^0.26)
+lamEx2<-cbind(anv.data, anv.data$Expression^0.26)
+
+# Create a variable with transformed values
+Ex1<-(Expression^-1.42)
+Ex2<-(Expression^-0.62)
+Ex3<-(Expression^-0.52)
+
+
+# Check normality with hist, qqplots
+par(mfrow=c(2,2))
+hist(Ex1)
+qqnorm(Ex1)
+qqline(Ex1)
+hist(Ex2)
+qqnorm(Ex2)
+qqline(Ex2)
+hist(Ex3)
+qqnorm(Ex3)
+qqline(Ex3)
+
+# Check normalitly with shapiro-wilks on all transformed data eg Ex1 Ex2
+shapiro.test(Ex1)
+
+# Run 2-way Anova with normalised data Ex2 was the best transformation
+anv.model<-aov(Ex1~Experiment*Strain)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+anv.model<-aov(Ex1~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+
+
+
+library("ggplot2")
+library("Rmisc")
+#calculate means
+mn <- summarySE(data, measurevar="Expression", groupvars=c("Strain","Conditions"))
+mn
+
+
+ggplot(mn, aes(x=Conditions, fill=Conditions, y=Expression)) +
+     geom_bar(stat="identity", width=0.5) +
+     facet_grid(~Strain) +
+     geom_errorbar(aes(ymin=Expression-se, ymax=Expression+se), width=.1) +
+     theme_bw() +
+     #scale_fill_brewer(palette="YIOrRd") +
+     scale_fill_brewer(palette="Paired") +
+     ylim(0,12)+
+     ylab("Normalized relative expression (ddCt)")+
+     coord_fixed(ratio = 1)+
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_rect(),
+           panel.background = element_blank(),
+           text = element_text(size=12),
+           strip.text = element_text(face="bold", size=10),
+           strip.background = element_rect(colour="black",size=1),
+           axis.text.x = element_text(size=10),
+           axis.text.y = element_text(size=10))
+
+
+#TEMPERATURE PULSE experiment
+ ```R
+ data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Temp_Pulse/TP_2820.csv")
+ attach(data)
+
+ #ANOVA
+ anv.model<-aov(Expression~Conditions*Gene)
+ summary(anv.model)
+ print(posthoc <- TukeyHSD(anv.model ))
+
+ # Check normality with hist, qqplots
+ par(mfrow=c(4,2))
+ hist(Expression)
+ shapiro.test(data$Expression)
+ qqnorm(Expression)
+ qqline(Expression)
+
+ # If data isnt normal Run a Box-Cox proceedure to obtain optimal transformation
+ library("MASS")
+ boxcox(anv.model)
+ # Produces a plot of likelihood of the parameter lambda against values of lambda
+ # from -2 to 2
+ # Dotted vertical lines indicate the ideal value of lambda
+ # Refine range of lambda eg from 0 to 0.5 in increments of 0.1
+ boxcox(anv.model, lambda = seq(-2, -0.5, 0.5))
+
+ # Plot boxcoxs
+ par(mfrow=c(1,1))
+ boxcox(anv.model)
+ boxcox(anv.model, lambda = seq(0, 0.5, 0.1))
+
+ # Add data to original data set (Not done)
+ lamEx1<-cbind(anv.data, anv.data$Expression^0.17)
+ lamEx2<-cbind(anv.data, anv.data$Expression^0.26)
+ lamEx2<-cbind(anv.data, anv.data$Expression^0.26)
+
+ # Create a variable with transformed values
+ Ex1<-(Expression^-1.42)
+ Ex2<-(Expression^-0.52)
+ Ex3<-(Expression^-0.52)
+
+
+ # Check normality with hist, qqplots
+ par(mfrow=c(2,2))
+ hist(Ex1)
+ qqnorm(Ex1)
+ qqline(Ex1)
+ hist(Ex2)
+ qqnorm(Ex2)
+ qqline(Ex2)
+ hist(Ex3)
+ qqnorm(Ex3)
+ qqline(Ex3)
+
+ # Check normalitly with shapiro-wilks on all transformed data eg Ex1 Ex2
+ shapiro.test(Ex1)
+
+ # Run 2-way Anova with normalised data Ex2 was the best transformatio
+
+ anv.model<-aov(Ex2~Gene*Conditions)
+ summary(anv.model)
+ print(posthoc <- TukeyHSD(anv.model ))
+
+
+ library(lsmeans)
+ means<-(lsmeans(anv.model, pairwise~Conditions|Gene, adjust="tukey"))
+ groups<-cld(means, alpha= .05)
+ groups
+
+
+
+
+ library("ggplot2")
+ library("Rmisc")
+ #calculate means
+ mn <- summarySE(data, measurevar="Expression", groupvars=c("Gene","Conditions"))
+ mn
+
+mn$Conditions= factor(mn$Conditions, levels=c("28°C","20°C"), labels=c("28°C","20°C"))
+mn$Gene_f = factor(mn$Gene, levels=c('frq','wc-1','wc-2','ccg-16'))
+ ggplot(mn, aes(x=Conditions, fill=Conditions, y=Expression)) +
+      geom_bar(stat="identity", width=0.5) +
+      facet_grid(~Gene_f, switch="x") +
+      geom_errorbar(aes(ymin=Expression-se, ymax=Expression+se), width=.1) +
+      theme_bw() +
+      #scale_fill_manual(breaks=c("28°C","20°C"), values=c("maroon4","lightskyblue1")) +
+      scale_fill_manual(breaks=c("20°C","28°C"), values=c("lightskyblue1","maroon4")) +
+      ylim(0,2)+
+      ylab("Normalized relative expression (ddCt)")+
+      #coord_fixed(ratio = 1)+
+      theme(axis.line = element_line(colour = "black"),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            panel.border = element_blank(),
+            panel.background = element_blank(),
+            text = element_text(size=12),
+            strip.text = element_text(face="bold", size=10),
+            #strip.background = element_rect(colour="black",size=1),
+            axis.text.x = element_text(size=10),
+            axis.text.y = element_text(size=10))
+```
+
+#D5-D9 Menadione experiment
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D5-D9_Men/D9_53_data.csv")
+attach(data)
+boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
+
+
+hist(Diameter)
+shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+
+#ANOVA
+anv.model<-aov(Diameter~Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+
+#Plot results Bar Plot
+library("ggplot2")
+library("Rmisc")
+#calculate means
+mn <- summarySE(data, measurevar="Diameter", groupvars=c("Strain","Conditions"))
+mn
+
+#mn$Conditions= factor(mn$Conditions, levels=c("28°C","20°C"), labels=c("28°C","20°C"))
+#mn$Gene_f = factor(mn$Gene, levels=c('frq','wc-1','wc-2','ccg-16'))
+
+ggplot(mn, aes(x=Strain, fill=Strain, y=Diameter)) +
+     geom_bar(stat="identity", width=0.5) +
+     facet_grid(~Conditions) +
+     geom_errorbar(aes(ymin=Diameter-se, ymax=Diameter+se), width=.1) +
+     theme_bw() +
+     #scale_fill_manual(breaks=c("28°C","20°C"), values=c("maroon4","lightskyblue1")) +
+     #scale_fill_manual(breaks=c("20°C","28°C"), values=c("lightskyblue1","maroon4")) +
+     ylim(0,60)+
+     ylab("Colony diameter (mm)")+
+     #coord_fixed(ratio = 1)+
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_blank(),
+           panel.background = element_blank(),
+           text = element_text(size=12),
+           #strip.text = element_text(face="bold", size=10),
+           strip.background = element_rect(colour = "white"),
+           axis.text.x = element_text(size=10, angle=45, hjust=1),
+           axis.text.y = element_text(size=10))
