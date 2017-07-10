@@ -1647,10 +1647,10 @@ colnames(sampleDistMatrix) <- paste(rld$Group)
 
 require(DESeq2)
 
-colData <- read.table("colData_53_Wc1",header=T,sep="\t")
+colData <- read.table("colData_53",header=T,sep="\t")
 
 #countData <- read.table("countData2",header=T,sep="\t")
-countData <- read.table("countData_53_Wc1",header=T,sep="\t")
+countData <- read.table("countData_53",header=T,sep="\t")
 
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
 
@@ -1791,6 +1791,24 @@ summary(res)
 ==================
 Gene clustering
 ==================
+#Group the replicates and remove outliers
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
+
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+
 
 rld <- rlog( dds )
 head( assay(rld) )
@@ -1799,17 +1817,13 @@ library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
 
-topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
-heatmap.2( assay(rld)[ topVarGenes,], par(lend = 1), scale="row",
-trace="none", dendrogram="both", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4)
 dev.off()
 
 
-
-heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
-trace="none", margins = c(5, 10), col = my_palette, , cexCol=0.4,cexRow=0.4)
-dev.off()
 
 
  #===============================================================================
