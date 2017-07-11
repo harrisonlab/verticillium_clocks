@@ -1250,36 +1250,6 @@ plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Strain"))
 
 ```
 
-#Functional annotation of JR2 protein files
-##Interproscan
-Interproscan was used to give gene models functional annotations. Annotation was run using the commands below:
-
-Note: This is a long-running script. As such, these commands were run using 'screen' to allow jobs to be submitted and monitored in the background. This allows the session to be disconnected and reconnected over time.
-
-Screen ouput detailing the progress of submission of interporscan jobs was redirected to a temporary output file named interproscan_submission.log .
-
-```bash
-screen -a
-  cd /home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
-  ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-  for Genes in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.pep.all.fa); do
-  echo $Genes
-  $ProgDir/sub_interproscan.sh $Genes
-  done 2>&1 | tee -a interproscan_submisison.log
-  ```
-
-Following interproscan annotation split files were combined using the following commands:
-
-```bash
-ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
- for Proteins in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.pep.all.fa); do
-   Strain=$(echo $Proteins | rev | cut -d '/' -f2 | rev)
-   echo $Strain
-   InterProRaw=gene_pred/interproscan/$Strain/raw: url "title"
-   $ProgDir/append_interpro.sh $Proteins $InterProRaw
- done
- ```
-
 
 #Create a new colData and countData: mix experiments
 
@@ -1431,33 +1401,25 @@ write.table(colData,"colData_53_Wc1",sep="\t",na="",quote=F)
 
 ```
 
-#Experiment samples 08
+##Experiment samples 08
 
 ```R
 
 require(DESeq2)
-
 colData <- read.table("colData_08",header=T,sep="\t")
-
-#countData <- read.table("countData2",header=T,sep="\t")
 countData <- read.table("countData_08",header=T,sep="\t")
-
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
-
 design <- ~Group
 
 dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 #dds$Strain <- relevel(dds$Strain, "WT08")
 dds <- DESeq(dds, fitType="local")
-
-
+rld <- rlog( dds )
 
 =================
 PCA plots
 =================
-rld <- rlog( dds )
-
 #Plot using rlog transformation:
 plotPCA(rld,intgroup="Group")
 plotPCA(rld,intgroup=c("Time","Group"))
@@ -1518,15 +1480,6 @@ write.table(res,"WT08_Frq08_bl06h.txt",sep="\t",quote=F)
 
 summary(res)
 
-#Results
-out of 11402 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 2773, 24%
-LFC < 0 (down)   : 2705, 24%
-outliers [1]     : 17, 0.15%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
 
 ##WT08 d vs Frq08 d
 alpha <- 0.05
@@ -1546,14 +1499,6 @@ write.table(sig.res.downregulated,"WT08_Frq08_d06h_down.txt",sep="\t",quote=F)
 write.table(res,"WT08_Frq08_d06h.txt",sep="\t",quote=F)
 
 summary(res)
-
-#Results
-adjusted p-value < 0.05
-LFC > 0 (up)     : 1668, 15%
-LFC < 0 (down)   : 1863, 16%
-outliers [1]     : 17, 0.15%
-low counts [2]   : 0, 0%
-(mean count < 0)
 
 
 ##Frq08 d vs Frq08 bl
@@ -1575,15 +1520,6 @@ write.table(res,"WT08_Frq08_d06h.txt",sep="\t",quote=F)
 
 summary(res)
 
-#Results
-out of 11402 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 1, 0.0088%
-LFC < 0 (down)   : 4, 0.035%
-outliers [1]     : 17, 0.15%
-low counts [2]   : 0, 0%
-(mean count < 0)
-
 
 ##WT08 d vs WT08 bl
 alpha <- 0.05
@@ -1604,17 +1540,6 @@ write.table(res,"WT08_Frq08_d06h.txt",sep="\t",quote=F)
 
 summary(res)
 
-#Results
-out of 11382 with nonzero total read count
-adjusted p-value < 0.05
-LFC > 0 (up)     : 1029, 9%
-LFC < 0 (down)   : 1207, 11%
-outliers [1]     : 37, 0.33%
-low counts [2]   : 220, 1.9%
-(mean count < 1)
-
-
-
 ==================
 Gene clustering
 ==================
@@ -1626,17 +1551,55 @@ library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
 
-topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 50)
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+StrainCols <- brewer.pal(11, "RdGy")[c( 7,8, 9, 11)]
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
-heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
-trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="column", margins = c(5, 10), col = my_palette,par(lend = 1), cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
+legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
 dev.off()
 
-#Gene clustering WT08
+
+#Group the replicates
+require(DESeq2)
+colData <- read.table("colData_08",header=T,sep="\t")
+countData <- read.table("countData_08",sep="\t",header=T,row.names=1)
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+rld <- rlog( dds )
+head( assay(rld) )
+
+#TopVarGenes
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 200)
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 8, 9, 11)]
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 20), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Time)])
+legend("topright", levels(dds$Time), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+===============
+Plotting results  
+===============
+
+plotCounts(dds, gene="VDAG_JR2_Chr1g01960", intgroup=c("Group"), normalized=TRUE)
+dev.off()
 
 ```
 
-#Experiment samples 53
+##Experiment samples 53
 
 ```R
 
@@ -1928,9 +1891,18 @@ df <- as.data.frame(colData(rld)[,c("Strain","Light")])
 my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
 pheatmap(mat, annotation_col=df, border_color=NA, scale="row", fontsize_row=3, col = my_palette, cluster_cols=FALSE)
 dev.off()
+
+
+===============
+Plotting results  
+===============
+topGene <- rownames(res)[which.min(res$padj)]
+plotCounts(dds, gene="VDAG_JR2_Chr1g01960", intgroup=c("Group"), normalized=TRUE)
+dev.off()
+
 ```
 
-#Experiment 53_Wc1
+##Experiment 53_Wc1
 
 ```R
 
@@ -2076,7 +2048,7 @@ dev.off()
 ```
 
 
-#Experiment 53_Frq
+##Experiment 53_Frq
 
 ```R
 
@@ -2261,7 +2233,7 @@ dev.off()
 ```
 
 
-#Experiment WT53 timecourse
+##Experiment WT53 timecourse
 
 ```R
 
@@ -2570,4 +2542,35 @@ legend("topright", levels(dds$Time), col = StrainCols, lty = 1, lwd = 5,
     cex = 0.5)
 dev.off()
 
+
+===============
+Plotting results  
+===============
+
+res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+
+topGene <- rownames(res)[which.min(res$padj)]
+plotCounts(dds, gene="VDAG_JR2_Chr2g01990", intgroup=c("Group"), normalized=TRUE)
+dev.off()
+
 ```
+
+#Make a table of raw counts, normalised counts and fpkm values:
+
+```R
+raw_counts <- data.frame(counts(dds, normalized=FALSE))
+colnames(raw_counts) <- paste(colData$Group)
+write.table(raw_counts,"alignment/star/P.fragariae/Bc16/DeSeq/raw_counts.txt",sep="\t",na="",quote=F)
+norm_counts <- data.frame(counts(dds, normalized=TRUE))
+colnames(norm_counts) <- paste(colData$Group)
+write.table(norm_counts,"alignment/star/P.fragariae/Bc16/DeSeq/normalised_counts.txt",sep="\t",na="",quote=F)
+
+
+library(Biostrings)
+library(naturalsort)
+mygenes <- readDNAStringSet("gene_pred/annotation/P.fragariae/Bc16/Bc16_genes_incl_ORFeffectors.cdna.fasta")
+t1 <- counts(dds)
+t1 <- mygenes[rownames(t1)]
+rowRanges(dds) <- GRanges(t1@ranges@NAMES,t1@ranges)
