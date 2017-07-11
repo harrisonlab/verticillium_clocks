@@ -624,7 +624,7 @@ done
 
 R script to import and merge data into a format good for DESeq2
 
-install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("devtools", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 
 ```R
@@ -1632,11 +1632,6 @@ heatmap.2( assay(rld)[ topVarGenes,], scale="row", par(lend = 1),
 trace="none", dendrogram="column", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.8)
 dev.off()
 
-
-sampleDistMatrix <- as.matrix( sampleDists )
-rownames(sampleDistMatrix) <- paste(rld$Group)
-colnames(sampleDistMatrix) <- paste(rld$Group)
-
 #Gene clustering WT08
 
 ```
@@ -1648,14 +1643,15 @@ colnames(sampleDistMatrix) <- paste(rld$Group)
 require(DESeq2)
 
 colData <- read.table("colData_53",header=T,sep="\t")
-
-#countData <- read.table("countData2",header=T,sep="\t")
 countData <- read.table("countData_53",header=T,sep="\t")
-
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
 
-design <- ~Group
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
 
+design <- ~Group
 dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
@@ -1709,7 +1705,7 @@ Analysis of gene expression
 
 ##WT53 vs Wc153
 alpha <- 0.05
-res= results(dds, alpha=alpha,contrast=c("Strain","Wc153","53WT"))
+res= results(dds, alpha=alpha,contrast=c("Strain","Frq53","53WT"))
 
 mcols(res, use.names=TRUE)
 
@@ -1768,6 +1764,586 @@ write.table(res,"Wt53_Wc153_d06h.txt",sep="\t",quote=F)
 
 
 
+##WT53 bl vs Frq53 bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53bl06h","53WTbl06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Frq53_bl06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Frq53_bl06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Frq53_bl06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+##WT53 d vs Frq53 d
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53d06h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Frq53_d06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Frq53_d06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Frq53_d06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d vs bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_LD_06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_LD_06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_LD_06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+##Wc153 d vs bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Wc153bl06h","Wc153d06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wc153_LD_06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wc153_LD_06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wc153_LD_06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##Frq53 d vs bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53bl06h","Frq53d06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Frq53_LD_06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Frq53_LD_06h_down.txt",sep="\t",quote=F)
+write.table(res,"Frq53_LD_06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+==================
+Gene clustering
+==================
+#Group the replicates and remove outliers
+require(DESeq2)
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
+
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+rld <- rlog( dds )
+head( assay(rld) )
+
+#TopVarGenes
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+
+#Heatmap with ColSideColors
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
+my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
+legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+#Heatmap option 2
+library("gplots")
+library("devtools")
+
+StrainCols <- sample(c("grey", "black", "lightgrey"), length(dds$Strain), replace=TRUE, prob=NULL)
+LightCols <- sample(c("grey", "black"), length(dds$Light), replace=TRUE, prob=NULL)
+TimeCols <- sample(c("grey", "black", "lightgrey", "darkred"), length(dds$Time), replace=TRUE, prob=NULL)
+clab=cbind(StrainCols, LightCols, TimeCols)
+colnames(clab)=c("Strain", "Light", "Time")
+my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), cexCol=0.8,cexRow=0.4, ColSideColors=clab, col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+#Pheatmap
+library(pheatmap)
+library(RColorBrewer)
+library(viridis)
+
+mat <- assay(rld)[ topVarGenes, ]
+mat <- mat - rowMeans(mat)
+df <- as.data.frame(colData(rld)[,c("Strain","Light")])
+my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+pheatmap(mat, annotation_col=df, border_color=NA, scale="row", fontsize_row=3, col = my_palette, cluster_cols=FALSE)
+dev.off()
+```
+
+#Experiment 53_Wc1
+
+```R
+
+require(DESeq2)
+
+colData <- read.table("colData_53_Wc1",header=T,sep="\t")
+countData <- read.table("countData_53_Wc1",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+design <- ~Group
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+
+
+=================
+PCA plots
+=================
+rld <- rlog( dds )
+
+#Plot using rlog transformation:
+plotPCA(rld,intgroup="Group")
+plotPCA(rld,intgroup=c("Time","Group"))
+
+
+#Plot using rlog transformation, showing sample names:
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Group", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
+ geom_point(size=3) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+
+ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+
+=================
+Sample distanes
+=================
+
+rld <- rlog( dds )
+sampleDists <- dist( t( assay(rld) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(rld$Group)
+colnames(sampleDistMatrix) <- paste(rld$Group)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours)
+
+dev.off()
+
+===============
+Analysis of gene expression
+===============
+
+##WT53 bl vs Wc153 bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Wc153bl06h","53WTbl06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Wc153_bl06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Wc153_bl06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Wc153_bl06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+
+##WT53 d vs Wc153 d
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Wc153d06h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Wc153_d06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Wc153_d06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Wc153_d06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+==================
+Gene clustering
+==================
+#Group the replicates and remove outliers
+require(DESeq2)
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
+
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+rld <- rlog( dds )
+head( assay(rld) )
+
+#TopVarGenes
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+
+#Heatmap with ColSideColors
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
+my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
+legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+```
+
+
+#Experiment 53_Frq
+
+```R
+
+require(DESeq2)
+
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+
+design <- ~Group
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+rld <- rlog( dds )
+
+
+=================
+PCA plots
+=================
+#Plot using rlog transformation, showing sample names:
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Group", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
+ geom_point(size=3) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+
+ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+
+=================
+Sample distanes
+=================
+
+rld <- rlog( dds )
+sampleDists <- dist( t( assay(rld) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(rld$Group)
+colnames(sampleDistMatrix) <- paste(rld$Group)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours)
+
+dev.off()
+
+===============
+Analysis of gene expression
+===============
+
+##WT53 bl vs Frq153 bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53bl06h","53WTbl06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Frq53_bl06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Frq53_bl06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Frq53_bl06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+
+##WT53 d vs Wc153 d
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53d06h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_Frq53_d06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_Frq53_d06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_Frq53_d06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+==================
+Gene clustering
+==================
+#TopVarGenes without groupingby
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+
+
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
+legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+#Group the replicates and remove outliers
+require(DESeq2)
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
+
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+rld <- rlog( dds )
+head( assay(rld) )
+
+#TopVarGenes
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+
+#Heatmap with ColSideColors
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
+my_palette <- colorRampPalette(c("red", "ywllow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
+legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+```
+
+
+#Experiment WT53 timecourse
+
+```R
+
+require(DESeq2)
+
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+design <- ~Group
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+rld <- rlog( dds )
+
+
+=================
+PCA plots
+=================
+#Plot using rlog transformation, showing sample names:
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Group", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
+ geom_point(size=3) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+
+ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+
+=================
+Sample distanes
+=================
+
+rld <- rlog( dds )
+sampleDists <- dist( t( assay(rld) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(rld$Group)
+colnames(sampleDistMatrix) <- paste(rld$Group)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours)
+
+dev.off()
+
+===============
+Analysis of gene expression
+===============
+
 ##WT53 bl vs WT53 d
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
@@ -1781,9 +2357,136 @@ sig.res <- sig.res[order(sig.res$padj),]
 sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
 sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
-write.table(sig.res.upregulated,"Wt53_d_bl06h_up.txt",sep="\t",quote=F)
-write.table(sig.res.downregulated,"Wt53_d_bl06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d_bl06h.txt",sep="\t",quote=F)
+write.table(sig.res.upregulated,"Wt53_LD_06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_LD_06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_LD_06h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+
+##WT53 d06h vs WT53 d12h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd12h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d06h_d12h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d06h_d12h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d06h_d12h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d06h vs WT53 d18h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd18h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d06h_d18h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d06h_d18h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d06h_d18h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d06h vs WT53 d24h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd24h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d06h_d24h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d06h_d24h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d06h_d24h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d12h vs WT53 d24h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd24h","53WTd12h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d12h_d24h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d12h_d24h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d12h_d24h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d12h vs WT53 d18h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd18h","53WTd12h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d12h_d18h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d12h_d18h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d12h_d18h.txt",sep="\t",quote=F)
+
+summary(res)
+
+
+##WT53 d18h vs WT53 d24h
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd24h","53WTd18h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+
+sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d24h_d18h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d24h_d18h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d24h_d18h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1791,52 +2494,80 @@ summary(res)
 ==================
 Gene clustering
 ==================
+#TopVarGenes without groupingby
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+
+
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+StrainCols <- brewer.pal(11, "RdGy")[c( 7,8, 9, 11)]
+my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 10), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Time)])
+legend("topright", levels(dds$Time), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
 #Group the replicates and remove outliers
+require(DESeq2)
 colData <- read.table("colData_53",header=T,sep="\t")
 countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
 
+
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep1)
 colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
 countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+
 colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
 countData <- subset(countData, select=-WT53_DD18_rep3)
 
 colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
 design=~Group
-dds <-   DESeqDataSetFromMatrix(countData,colData,design)
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds$groupby <- paste(dds$Group)
 dds <- collapseReplicates(dds,groupby=dds$groupby)
 design(dds) <- design
 dds <- DESeq(dds,parallel=T)
-
-
 rld <- rlog( dds )
 head( assay(rld) )
 
+#TopVarGenes
 library("RColorBrewer")
 library("gplots")
 library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 200)
 
-topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+#Heatmap with ColSideColors
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 8, 9, 11)]
 my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row",
-trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4)
+trace="none", dendrogram="row", margins = c(5, 20), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Time)])
+legend("topright", levels(dds$Time), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
 dev.off()
 
-
-
-
- #===============================================================================
- #       FPKM
- #===============================================================================
-```R
- mygenes <- read.table ("genes.txt",header=T,sep="\t")
-countData <- read.table("countData2",header=T,sep="\t")
- library(naturalsort)
- t1 <- counts(dds)
- t1 <- mygenes[geneid(t1)]
- rowRanges(dds) <- GRanges(t1@ranges@NAMES,t1@ranges)
- myfpkm <- fpkm(dds,robust=T)
- myfpkm <- cbind(myfpkm, t1@ranges@width)
- rm(t1)
- myfpkm <- myfpkm[naturalsort(rownames(myfpkm)),]
+```
