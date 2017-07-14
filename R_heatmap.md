@@ -201,7 +201,7 @@ summary(anv.model)
 print(posthoc <- TukeyHSD(anv.model ))
 
 ```
-#Pathogenicity test E1
+#Pathogenicity test E1, E2
 
 ```R   
 data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_data.csv")
@@ -246,13 +246,16 @@ m4 <- lm(Score ~ Strain * Time, data=data)
 data$y.hat <- predict(m4)
 
 ggplot(df, aes(x=Time, color=Strain, shape=Strain, y=Score)) +
+#scale_color_brewer(palette="Paired")+
+scale_color_manual(values=c(WT_12253="#009900",Frq_12253="#CC0000",Wc1_12253="#FFCC00",Mock="#999999"))+
+#scale_color_manual(values=c(WT_12008="#0099CC",Frq_12008="#CC0099",Wc2_12008="#FF9900",Mock="#999999"))+
 geom_errorbar(aes(ymin=Score - se, ymax=Score + se), width=.1, size=0.6) +
 geom_point(size=1) +
 geom_line(aes(x=as.integer(Time)), size=0.6)+
 ylab("Disease score") +
 xlab("Days after inoculation")+
 coord_fixed(ratio = 0.5)+
-ylim(0,10)+
+#ylim(0,10)+
 scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9))+
 theme_bw() +
       theme(axis.line = element_line(colour = "black"),
@@ -262,20 +265,60 @@ theme_bw() +
         panel.background = element_blank(),
         text = element_text(size=12),
         legend.text=element_text(size=12),
-        legend.title=element_text(size=15),
-        axis.text.x = element_text(size=12),
-        axis.text.y = element_text(size=12),
-        axis.title.x = element_text(size=15),
-        axis.title.y = element_text(size=15))
+        legend.title=element_text(size=12),
+        axis.text.x = element_text(colour="black",size=12),
+        axis.text.y = element_text(colour="black",size=12),
+        axis.title.x = element_text(size=12),
+        axis.title.y = element_text(size=12))
 
+#AUDCP
+
+sym<-read.table("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_audcp.txt", col.names=,1)
+attach(sym)
+sym[,1]=as.factor(sym[,1]) #Make leaf a factor  
+attach(sym)
+
+evaluation <- sym [ ,c (2,3,4,5,6)]
+days<-c(0,7,14,21,28)
+sym[,7]=audpc(evaluation,days)
+write.table(sym, "/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E2/audcp_E2_53.txt")
+
+#ANOVA from AUDCP
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/audcp_E1_53.csv")
+attach(data)
+options(max.print=1000000)
+
+anv.model<-aov(Value~Strain)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Strain", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Strain|Time, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
 
 
 
 ```
+
+
 #RING experiment
 
 ```R
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light/Interspecies/Intersp.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/AFrq/Frq08_fix.csv")
+attach(data)
+
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/AFrq/Frq53_fix.csv")
+attach(data)
+
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/AWc1/Wc1_53_fix.csv")
+attach(data)
+
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/AWc2/Wc2_08_all.csv")
 attach(data)
 
 #ANOVA
@@ -340,18 +383,23 @@ groups<-cld(means, alpha= .05)
 groups
 
 
-#Boxplot
+#Boxplot Afrq
 library("ggplot2")
-ggplot(data, aes(x=Conditions, fill=Conditions, y=Diameter)) +
+ggplot(data, aes(x=Strain, fill=Strain, y=Diameter)) +
 stat_boxplot(geom="errorbar", size=0.5) +
      geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
      #labs(y=("Colony diameter(mm)")) +
-     facet_grid(~Strain, scale="free") +
-     scale_fill_brewer(palette="Paired") +
-     #scale_fill_manual(breaks=c("WT_12008","ΔFrq_12008"), values=c("royalblue","steelblue1")) +
-     #scale_fill_manual(breaks=c("WT_12253","ΔWc1_12253"), values=c("firebrick","antiquewhite")) +
-     #scale_fill_manual(breaks=c("WT_12008","ΔWc2_12008"), values=c("royalblue","azure3")) +
-     ylim(20,55)+
+     facet_grid(~Conditions, scale="free") +
+     #scale_fill_manual(values=c(WT_12008="#0099CC",Frq_12008="#CC0099"))+
+     #scale_fill_manual(values=c(WT_12253="#009900",Frq_12253="#CC0000"))+
+     scale_fill_manual(values=c(WT_12253="#009900",Wc1_12253="#FFCC00"))+
+     #scale_fill_manual(values=c(WT_12008="#CC0099",Wc2_1="#FF9900", Wc2_10="#FFCC66"))+
+     #scale_fill_brewer(palette="Paired") +
+     #scale_x_discrete(limits=c("WT_12008","Wc2_1","Wc2_10"))+
+     #scale_x_discrete(limits=c("WT_12008","Frq_12008"))+
+     #scale_x_discrete(limits=c("WT_12253","Frq_12253"))+
+     scale_x_discrete(limits=c("WT_12253","Wc1_12253"))+
+     ylim(20,60)+
      ylab("Colony diameter (mm)")+
      theme_bw() +
      theme(axis.line = element_line(colour = "black"),
@@ -360,12 +408,12 @@ stat_boxplot(geom="errorbar", size=0.5) +
            panel.border = element_blank(),
            panel.background = element_blank(),
            text = element_text(size=12),
-           axis.text.x = element_text(size=11),
-           axis.text.y = element_text(size=11),
-           axis.title.x = element_text(size=15),
-           axis.title.y = element_text(size=15),
-           strip.text = element_text(face="bold", size=10),
-           strip.background = element_rect(colour="black",size=0.5))
+           axis.text.x = element_text(colour="black", size=12),
+           axis.text.y = element_text(colour="black", size=12),
+           axis.title.x = element_text(size=14),
+           axis.title.y = element_text(size=14),
+           strip.text = element_text(size=12),
+           strip.background = element_rect(colour = "white"))
 
 
 
