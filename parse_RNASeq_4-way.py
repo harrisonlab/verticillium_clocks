@@ -142,7 +142,7 @@ for x in genes:
 #These commands reshape the array to ensure it writes to a file correctly
 
 z = len(genes) + 1
-a = numpy.reshape(a, (z, 4))
+a = numpy.reshape(a, (z, 5))
 
 #These commands write out the results generated above as .tsv specified above
 
