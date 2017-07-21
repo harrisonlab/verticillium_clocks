@@ -75,6 +75,8 @@ genes = set(genes_list)
 
 a = numpy.array(["Gene_Name", "24hr", "48hr", "96hr"])
 
+#These commands test if a gene is present in the DEG file or not
+
 for x in genes:
     to_add = []
     to_add.append(x)
