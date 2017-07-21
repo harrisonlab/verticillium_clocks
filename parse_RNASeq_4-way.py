@@ -126,6 +126,17 @@ for x in genes:
                 to_add.append('1')
             else:
                 to_add.append('0')
+    try:
+        e = inp4.index(x)
+    except ValueError:
+        to_add.append('0')
+    else:
+        for y in inp4_dict[x]:
+            test = abs(y)
+            if test > 1:
+                to_add.append('1')
+            else:
+                to_add.append('0')
     a = numpy.append(a, to_add, axis=0)
 
 #These commands reshape the array to ensure it writes to a file correctly
