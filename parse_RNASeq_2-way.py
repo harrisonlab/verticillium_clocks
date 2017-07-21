@@ -21,7 +21,6 @@ import csv
 ap = argparse.ArgumentParser()
 ap.add_argument('--input_1',required=True,type=str,help='text file of genes at 24hrs')
 ap.add_argument('--input_2',required=True,type=str,help='text file of genes at 48hrs')
-ap.add_argument('--input_3',required=True,type=str,help='text file of genes at 96hrs')
 ap.add_argument('--out_file',required=True,type=str,help='the tsv file where the count table is output to')
 conf = ap.parse_args()
 
@@ -50,17 +49,6 @@ with open(conf.input_2) as f2:
         value = float(x.split('\t')[2])
         inp2_dict[gene_name].append(value)
 
-inp3_dict = defaultdict(list)
-with open(conf.input_3) as f3:
-    inp3_lines = f3.readlines()[1:]
-    inp3 = []
-    for x in inp3_lines:
-        genes_list.append(x.split('\t')[0])
-        inp3.append(x.split('\t')[0])
-        gene_name = x.split('\t')[0]
-        value = float(x.split('\t')[2])
-        inp3_dict[gene_name].append(value)
-
 #This removes all duplicate entries from the list
 
 genes = set(genes_list)
@@ -73,7 +61,7 @@ genes = set(genes_list)
 
 #This creates a numpy array, the headings are arbitrary, this does not have to be a timecourse, but the original script was
 
-a = numpy.array(["Gene_Name", "24hr", "48hr", "96hr"])
+a = numpy.array(["Gene_Name", "24hr", "48hr"])
 
 #These commands test if a gene is present in the DEG file or not, then if it has an absolute log2 fold change greater than the threshold of 1
 #It then adds the name of the gene and the result of the test (1 or 0) to a numpy array
@@ -103,23 +91,12 @@ for x in genes:
                 to_add.append('1')
             else:
                 to_add.append('0')
-    try:
-        d = inp3.index(x)
-    except ValueError:
-        to_add.append('0')
-    else:
-        for y in inp3_dict[x]:
-            test = abs(y)
-            if test > 1:
-                to_add.append('1')
-            else:
-                to_add.append('0')
     a = numpy.append(a, to_add, axis=0)
 
 #These commands reshape the array to ensure it writes to a file correctly
 
 z = len(genes) + 1
-a = numpy.reshape(a, (z, 4))
+a = numpy.reshape(a, (z, 3))
 
 #These commands write out the results generated above as .tsv specified above
 
