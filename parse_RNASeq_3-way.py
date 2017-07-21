@@ -22,7 +22,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--input_1',required=True,type=str,help='text file of genes at 24hrs')
 ap.add_argument('--input_2',required=True,type=str,help='text file of genes at 48hrs')
 ap.add_argument('--input_3',required=True,type=str,help='text file of genes at 96hrs')
-ap.add_argument('--out_dir',required=True,type=str,help='the tsv file where the count table is output to')
+ap.add_argument('--out_file',required=True,type=str,help='the tsv file where the count table is output to')
 conf = ap.parse_args()
 
 #These commands create a list of the genes and loads the text files into a dictionary where
@@ -121,7 +121,9 @@ for x in genes:
 z = len(genes) + 1
 a = numpy.reshape(a, (z, 4))
 
-outfile = str(conf.out_dir)
+#These commands write out the results generated above as .tsv specified above
+
+outfile = str(conf.out_file)
 with open(outfile, "w") as o:
     writer = csv.writer(o, delimiter='\t')
     writer.writerows(a)
