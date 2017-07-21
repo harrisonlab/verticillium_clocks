@@ -25,7 +25,7 @@ ap.add_argument('--input_3',required=True,type=str,help='text file of genes at 9
 ap.add_argument('--out_dir',required=True,type=str,help='the tsv file where the count table is output to')
 conf = ap.parse_args()
 
-#These commands create a list of the genes
+#These commands create a list of the genes and loads the text files into a dictionary where
 
 inp1_dict = defaultdict(list)
 with open(conf.input_1) as f1:
@@ -75,7 +75,7 @@ genes = set(genes_list)
 
 a = numpy.array(["Gene_Name", "24hr", "48hr", "96hr"])
 
-#These commands test if a gene is present in the DEG file or not
+#These commands test if a gene is present in the DEG file or not, then if it has an absolute log2 fold change greater than the threshold of 1
 
 for x in genes:
     to_add = []
