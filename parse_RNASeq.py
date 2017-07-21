@@ -17,6 +17,7 @@ import csv
 # If using a different number of files, arguments & appending to list of genes will need to be changed
 #-----------------------------------------------------
 
+#These commands use the argparse module to import files specified in the command line
 ap = argparse.ArgumentParser()
 ap.add_argument('--input_1',required=True,type=str,help='text file of genes at 24hrs')
 ap.add_argument('--input_2',required=True,type=str,help='text file of genes at 48hrs')
