@@ -25,6 +25,8 @@ ap.add_argument('--input_3',required=True,type=str,help='text file of genes at 9
 ap.add_argument('--out_dir',required=True,type=str,help='the tsv file where the count table is output to')
 conf = ap.parse_args()
 
+#These commands create a list of the genes
+
 inp1_dict = defaultdict(list)
 with open(conf.input_1) as f1:
     inp1_lines = f1.readlines()[1:]
@@ -58,6 +60,8 @@ with open(conf.input_3) as f3:
         gene_name = x.split('\t')[0]
         value = float(x.split('\t')[2])
         inp3_dict[gene_name].append(value)
+
+#This removes all duplicate entries from the list
 
 genes = set(genes_list)
 
