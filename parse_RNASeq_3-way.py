@@ -71,6 +71,8 @@ genes = set(genes_list)
 # If doing with a different number of files, change the number in the numpy.reshape() command
 #-----------------------------------------------------
 
+#This creates a numpy array, the headings are arbitrary, this does not have to be a timecourse, but the original script was
+
 a = numpy.array(["Gene_Name", "24hr", "48hr", "96hr"])
 
 for x in genes:
