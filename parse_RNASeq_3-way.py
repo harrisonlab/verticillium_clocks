@@ -116,6 +116,8 @@ for x in genes:
                 to_add.append('0')
     a = numpy.append(a, to_add, axis=0)
 
+#These commands reshape the array to ensure it writes to a file correctly
+
 z = len(genes) + 1
 a = numpy.reshape(a, (z, 4))
 
