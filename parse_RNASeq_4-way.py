@@ -62,6 +62,17 @@ with open(conf.input_3) as f3:
         value = float(x.split('\t')[2])
         inp3_dict[gene_name].append(value)
 
+inp4_dict = defaultdict(list)
+with open(conf.input_4) as f4:
+    inp4_lines = f4.readlines()[1:]
+    inp4 = []
+    for x in inp4_lines:
+        genes_list.append(x.split('\t')[0])
+        inp4.append(x.split('\t')[0])
+        gene_name = x.split('\t')[0]
+        value = float(x.split('\t')[2])
+        inp4_dict[gene_name].append(value)
+
 #This removes all duplicate entries from the list
 
 genes = set(genes_list)
