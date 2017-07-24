@@ -32,22 +32,28 @@ with open(conf.input_1) as f1:
     genes_list = []
     inp1 = []
     for x in inp1_lines:
-        genes_list.append(x.split('\t')[0])
-        inp1.append(x.split('\t')[0])
-        gene_name = x.split('\t')[0]
-        value = float(x.split('\t')[2])
-        inp1_dict[gene_name].append(value)
+        if ("NA" in x):
+            continue
+        else:
+            genes_list.append(x.split('\t')[0])
+            inp1.append(x.split('\t')[0])
+            gene_name = x.split('\t')[0]
+            value = float(x.split('\t')[2])
+            inp1_dict[gene_name].append(value)
 
 inp2_dict = defaultdict(list)
 with open(conf.input_2) as f2:
     inp2_lines = f2.readlines()[1:]
     inp2 = []
     for x in inp2_lines:
-        genes_list.append(x.split('\t')[0])
-        inp2.append(x.split('\t')[0])
-        gene_name = x.split('\t')[0]
-        value = float(x.split('\t')[2])
-        inp2_dict[gene_name].append(value)
+        if ("NA" in x):
+            continue
+        else:
+            genes_list.append(x.split('\t')[0])
+            inp2.append(x.split('\t')[0])
+            gene_name = x.split('\t')[0]
+            value = float(x.split('\t')[2])
+            inp2_dict[gene_name].append(value)
 
 #This removes all duplicate entries from the list
 
