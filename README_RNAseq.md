@@ -373,7 +373,7 @@ ls $genomeDir
 cd $WorkDir
 
 cp $CurDir/$1 $InGenome
-cp $CurDir/$2 $InGff
+cp $CurDir/$2 $In
 cp $CurDir/$3 $InReadF
 cp $CurDir/$4 $InReadR
 # cp $CurDir/$5 $GenomeDir
@@ -624,7 +624,7 @@ done
 
 R script to import and merge data into a format good for DESeq2
 
-install.packages("devtools", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("Biostrings", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 
 ```R
@@ -1424,7 +1424,6 @@ PCA plots
 plotPCA(rld,intgroup="Group")
 plotPCA(rld,intgroup=c("Time","Group"))
 
-
 #Plot using rlog transformation, showing sample names:
 library("ggplot2")
 library("ggrepel")
@@ -1434,11 +1433,43 @@ percentVar <- round(100 * attr(data, "percentVar"))
 
 pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
  geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
  ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
  coord_fixed()
 
 ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+#Plot using rlog transformation, showing sample names and elipses
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Strain", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Strain, shape=Strain)) +
+ geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
+ stat_ellipse(aes(x=PC1,y=PC2, fill=Strain),
+              geom="polygon", level=0.95, alpha=0.2) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+ geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+ggsave("PCA_sample_names_elipses.pdf", pca_plot, dpi=300, height=15, width=20)
+
 
 
 =================
@@ -1618,14 +1649,13 @@ design <- ~Group
 dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
+rld <- rlog( dds )
 
 
 
 =================
 PCA plots
 =================
-rld <- rlog( dds )
-
 #Plot using rlog transformation:
 plotPCA(rld,intgroup="Group")
 plotPCA(rld,intgroup=c("Time","Group"))
@@ -1640,11 +1670,42 @@ percentVar <- round(100 * attr(data, "percentVar"))
 
 pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
  geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
  ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
  coord_fixed()
 
 ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+#Plot using rlog transformation, showing sample names and elipses
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Strain", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Strain, shape=Strain)) +
+ geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
+ stat_ellipse(aes(x=PC1,y=PC2, fill=Strain),
+              geom="polygon", level=0.95, alpha=0.2) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+ geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+ggsave("PCA_sample_names_elipses.pdf", pca_plot, dpi=300, height=15, width=20)
 
 
 =================
@@ -1766,7 +1827,7 @@ write.table(res,"Wt53_Frq53_d06h.txt",sep="\t",quote=F)
 summary(res)
 
 
-##WT53 d vs bl
+##WT53 bl vs d
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
 
@@ -1779,11 +1840,32 @@ sig.res <- sig.res[order(sig.res$padj),]
 sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
 sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
-write.table(sig.res.upregulated,"Wt53_LD_06h_up.txt",sep="\t",quote=F)
-write.table(sig.res.downregulated,"Wt53_LD_06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_LD_06h.txt",sep="\t",quote=F)
+write.table(sig.res.upregulated,"Wt53_bl06h_vs_d06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_bl06h_vs_d06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_bl06h_vs_d06h.txt",sep="\t",quote=F)
 
 summary(res)
+
+
+##WT53 d vs bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTd06h","53WTbl06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_d06h_vs_bl06h_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_d06h_vs_bl06h_down.txt",sep="\t",quote=F)
+write.table(res,"Wt53_d06h_vs_bl06h.txt",sep="\t",quote=F)
+
+summary(res)
+
 
 ##Wc153 d vs bl
 alpha <- 0.05
@@ -1919,13 +2001,11 @@ design <- ~Group
 dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
 dds <- DESeq(dds, fitType="local")
-
+rld <- rlog( dds )
 
 =================
 PCA plots
 =================
-rld <- rlog( dds )
-
 #Plot using rlog transformation:
 plotPCA(rld,intgroup="Group")
 plotPCA(rld,intgroup=c("Time","Group"))
@@ -2562,15 +2642,90 @@ dev.off()
 ```R
 raw_counts <- data.frame(counts(dds, normalized=FALSE))
 colnames(raw_counts) <- paste(colData$Group)
-write.table(raw_counts,"alignment/star/P.fragariae/Bc16/DeSeq/raw_counts.txt",sep="\t",na="",quote=F)
+write.table(raw_counts,"raw_counts.txt",sep="\t",na="",quote=F)
 norm_counts <- data.frame(counts(dds, normalized=TRUE))
 colnames(norm_counts) <- paste(colData$Group)
-write.table(norm_counts,"alignment/star/P.fragariae/Bc16/DeSeq/normalised_counts.txt",sep="\t",na="",quote=F)
+write.table(norm_counts,"normalised_counts.txt",sep="\t",na="",quote=F)
+
+## When the raw_data is created, the column names are shifted, due to the lack of column name for the genes. To fx it, do nano filex, and then added the word "Gene", press tab and save ctr+x
 
 
+install.packages("XVector", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+
+library(XVector)
 library(Biostrings)
 library(naturalsort)
-mygenes <- readDNAStringSet("gene_pred/annotation/P.fragariae/Bc16/Bc16_genes_incl_ORFeffectors.cdna.fasta")
+mygenes <- readDNAStringSet("/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa")
 t1 <- counts(dds)
 t1 <- mygenes[rownames(t1)]
 rowRanges(dds) <- GRanges(t1@ranges@NAMES,t1@ranges)
+
+
+
+# robust may be better set at fasle to normalise based on total counts rather than 'library normalisation factors'
+#Maria produced the FPKM files
+fpkm_counts <- data.frame(fpkm(dds, robust = TRUE))
+colnames(fpkm_counts) <- paste(colData$Group)
+write.table(fpkm_counts,"fpkm_norm_counts.txt",sep="\t",na="",quote=F)
+fpkm_counts <- data.frame(fpkm(dds, robust = FALSE))
+colnames(fpkm_counts) <- paste(colData$Group)
+write.table(fpkm_counts,"fpkm_counts.txt",sep="\t",na="",quote=F)
+```
+
+#Produce a detailed table of analyses
+'''python
+This program parses information from fasta files and gff files for the location,
+sequence and functional information for annotated gene models and RxLRs.
+'''
+
+```
+Run with commands:
+
+for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3); do
+    Strain=JR2
+    Organism=V.dahliae
+    Assembly=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
+    InterPro=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv)
+    SwissProt=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/swissprot/V.dahliae/12008/swissprot_vJul2016_tophit_parsed.tbl)
+    OutDir=gene_pred/annotation/$Organism/$Strain
+    mkdir -p $OutDir
+    GeneFasta=$(ls public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa)
+    Dir1=$(ls -d RNA_alignment/featureCounts/experiment_53)
+    Dir2=$(ls -d RNA_alignment/featureCounts/experiment_53/WT53)
+    DEG_Files=$(ls \
+        $Dir1/Frq53_LD_06h.txt \
+        $Dir1/Wc153_LD_06h.txt \
+        $Dir1/Wt53_Frq53_bl06h.txt \
+        $Dir1/Wt53_Frq53_d06h.txt \
+        $Dir1/Wt53_LD_06h.txt \
+        $Dir1/Wt53_Wc153_bl06h.txt \
+        $Dir2/Wt53_d06h_d12h.txt \
+        $Dir2/Wt53_d06h_d18h.txt \
+        $Dir2/Wt53_d06h_d24h.txt \
+        $Dir2/Wt53_d12h_d18h.txt \
+        $Dir2/Wt53_d12h_d24h.txt \
+        $Dir2/Wt53_d24h_d18h.txt \
+        $Dir2/Wt53_LD_06h.txt \
+        | sed -e "s/$/ /g" | tr -d "\n")
+
+    RawCount=$(ls $Dir1/raw_counts_53.txt)
+    FPKM=$(ls $Dir1/countData_53.fpkm)
+    ProgDir=/home/armita/git_repos/emr_repos/scripts/verticillium_clocks/annotation
+    $ProgDir/Vd_annotation_tables.py --gene_gff $GeneGff --gene_fasta $GeneFasta --DEG_files $DEG_Files --raw_counts $RawCount --fpkm $FPKM --InterPro $InterPro --Swissprot $SwissProt > $OutDir/"$Strain"_gene_table_incl_exp.tsv
+done
+
+```
+
+#Draw venn diagrams of differenitally expressed genes
+
+##All genes
+
+###All DEGs
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_bl06h.txt
+inp2=Wt53_Frq53_bl06h.txt
+OutDir=Wc1bl_vs_Frqbl_all_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
