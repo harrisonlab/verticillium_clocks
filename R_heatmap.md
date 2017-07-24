@@ -204,7 +204,7 @@ print(posthoc <- TukeyHSD(anv.model ))
 #Pathogenicity test E1, E2
 
 ```R   
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_12253.csv")
 attach(data)
 boxplot(Score~Strain*Time, las = 2, cex.axis=0.6)
 
@@ -218,6 +218,11 @@ print(posthoc <- TukeyHSD(anv.model ))
 library(agricolae)
 H<-HSD.test(anv.model, "Strain", group=TRUE)
 H
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Strain|Time, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
 
 #Standard Error
 data_summary <- function(data, Score, Strain){
@@ -240,12 +245,15 @@ head(df)
 #Ggplot curve
 
 library(ggplot2)
+library(Cairo)
 ggplot(df, aes(x=Time, color=Strain, y=Score, shape=Strain)) + geom_point(size=5)
-
 m4 <- lm(Score ~ Strain * Time, data=data)
 data$y.hat <- predict(m4)
 
-ggplot(df, aes(x=Time, color=Strain, shape=Strain, y=Score)) +
+library(ggplot2)
+library(Cairo)
+svg("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_12253.svg", width=10, height=8)
+image = ggplot(df, aes(x=Time, color=Strain, shape=Strain, y=Score)) +
 #scale_color_brewer(palette="Paired")+
 scale_color_manual(values=c(WT_12253="#009900",Frq_12253="#CC0000",Wc1_12253="#FFCC00",Mock="#999999"))+
 #scale_color_manual(values=c(WT_12008="#0099CC",Frq_12008="#CC0099",Wc2_12008="#FF9900",Mock="#999999"))+
@@ -268,12 +276,13 @@ theme_bw() +
         legend.title=element_text(size=12),
         axis.text.x = element_text(colour="black",size=12),
         axis.text.y = element_text(colour="black",size=12),
-        axis.title.x = element_text(size=12),
-        axis.title.y = element_text(size=12))
-
+        axis.title.x = element_text(size=14),
+        axis.title.y = element_text(size=14))
+plot(image)
+dev.off()
 #AUDCP
 
-sym<-read.table("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/E1_53_audcp.txt", col.names=,1)
+sym<-read.table("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E3/E3_12253_audpc.txt", col.names=,1)
 attach(sym)
 sym[,1]=as.factor(sym[,1]) #Make leaf a factor  
 attach(sym)
@@ -281,10 +290,11 @@ attach(sym)
 evaluation <- sym [ ,c (2,3,4,5,6)]
 days<-c(0,7,14,21,28)
 sym[,7]=audpc(evaluation,days)
-write.table(sym, "/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E2/audcp_E2_53.txt")
+sym
+#write.table(sym, "/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E2/audcp_E2_53.txt")
 
 #ANOVA from AUDCP
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E1/audcp_E1_53.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Pathogenicity/E3/audcp_E3_08.csv")
 attach(data)
 options(max.print=1000000)
 
@@ -444,7 +454,10 @@ stat_boxplot(geom="errorbar", size=0.5) +
 
 #LIGHT PULSE experiment
 ```R
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light_Pulse/LP_0102.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light_Pulse/LP0102.csv")
+attach(data)
+
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light_Pulse/LP_Nc.csv")
 attach(data)
 
 #ANOVA
@@ -533,17 +546,19 @@ ggplot(mn, aes(x=Conditions, fill=Conditions, y=Expression)) +
      scale_fill_brewer(palette="Paired") +
      ylim(0,12)+
      ylab("Normalized relative expression (ddCt)")+
-     coord_fixed(ratio = 1)+
+     coord_fixed(ratio = 0.2)+
      theme(axis.line = element_line(colour = "black"),
            panel.grid.major = element_blank(),
            panel.grid.minor = element_blank(),
-           panel.border = element_rect(),
+           #panel.border = element_rect(),
+           panel.border = element_blank(),
            panel.background = element_blank(),
-           text = element_text(size=12),
-           strip.text = element_text(face="bold", size=10),
-           strip.background = element_rect(colour="black",size=1),
-           axis.text.x = element_text(size=10),
-           axis.text.y = element_text(size=10))
+           text = element_text(size=14),
+           strip.text = element_text(face="bold", size=12),
+           axis.text.x = element_text(colour="black", size=12),
+           axis.text.y = element_text(colour="black", size=12),
+           strip.background = element_rect(colour = "white"))
+
 
 
 #TEMPERATURE PULSE experiment
