@@ -32,7 +32,7 @@ with open(conf.input_1) as f1:
     genes_list = []
     inp1 = []
     for x in inp1_lines:
-        if (NA in x):
+        if ("NA" in x):
             continue
         else:
             genes_list.append(x.split('\t')[0])
@@ -46,7 +46,7 @@ with open(conf.input_2) as f2:
     inp2_lines = f2.readlines()[1:]
     inp2 = []
     for x in inp2_lines:
-        if (NA in x):
+        if ("NA" in x):
             continue
         else:
             genes_list.append(x.split('\t')[0])
