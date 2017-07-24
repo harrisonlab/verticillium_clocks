@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-'''
+'''python
 This program parses information from fasta files and gff files for the location,
 sequence and functional information for annotated gene models and RxLRs.
 '''
