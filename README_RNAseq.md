@@ -674,7 +674,7 @@ design <- ~Group
 
 dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
 sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
-dds <- DESeq(dds, fitType="local")
+dds <- DESeq(dds, fitType="local", parallel=T)
 
 
 #Run DESeq2 removing an outlier
@@ -1729,7 +1729,7 @@ Analysis of gene expression
 
 ##WT53 vs Wc153
 alpha <- 0.05
-res= results(dds, alpha=alpha,contrast=c("Strain","Frq53","53WT"))
+res= results(dds, alpha=alpha,contrast=c("Group","Frq53","53WT"))
 
 mcols(res, use.names=TRUE)
 
@@ -1742,7 +1742,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_Wc153_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_Wc153_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_Wc153.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_Wc153.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1762,7 +1762,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_Wc153_bl06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_Wc153_bl06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_Wc153_bl06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_Wc153_bl06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1779,12 +1779,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_Wc153_d06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_Wc153_d06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_Wc153_d06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_Wc153_d06h.txt",sep="\t",quote=F)
 
 
 
@@ -1803,7 +1803,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_Frq53_bl06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_Frq53_bl06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_Frq53_bl06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_Frq53_bl06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1822,7 +1822,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_Frq53_d06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_Frq53_d06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_Frq53_d06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_Frq53_d06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1842,27 +1842,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_bl06h_vs_d06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_bl06h_vs_d06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_bl06h_vs_d06h.txt",sep="\t",quote=F)
-
-summary(res)
-
-
-##WT53 d vs bl
-alpha <- 0.05
-res= results(dds, alpha=alpha,contrast=c("Group","53WTd06h","53WTbl06h"))
-
-mcols(res, use.names=TRUE)
-
-sig.res <- subset(res,padj<=alpha)
-sig.res <- sig.res[order(sig.res$padj),]
-#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
-#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
-sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
-
-write.table(sig.res.upregulated,"Wt53_d06h_vs_bl06h_up.txt",sep="\t",quote=F)
-write.table(sig.res.downregulated,"Wt53_d06h_vs_bl06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d06h_vs_bl06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_bl06h_vs_d06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1882,7 +1862,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wc153_LD_06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wc153_LD_06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wc153_LD_06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wc153_LD_06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1902,7 +1882,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Frq53_LD_06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Frq53_LD_06h_down.txt",sep="\t",quote=F)
-write.table(res,"Frq53_LD_06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Frq53_LD_06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -1938,7 +1918,7 @@ topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
 
 #Heatmap with ColSideColors
 StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
-my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+my_palette <- colorRampPalette(c("red", "white", "darkblue"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row",
 trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
 legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
@@ -1970,7 +1950,7 @@ library(viridis)
 mat <- assay(rld)[ topVarGenes, ]
 mat <- mat - rowMeans(mat)
 df <- as.data.frame(colData(rld)[,c("Strain","Light")])
-my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+my_palette <- colorRampPalette(c("red", "white", "darkblue"))(n = 299)
 pheatmap(mat, annotation_col=df, border_color=NA, scale="row", fontsize_row=3, col = my_palette, cluster_cols=FALSE)
 dev.off()
 
@@ -2119,7 +2099,7 @@ topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
 
 #Heatmap with ColSideColors
 StrainCols <- brewer.pal(11, "RdGy")[c(7, 9, 11)]
-my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+my_palette <- colorRampPalette(c("red", "white", "darkblue"))(n = 299)
 heatmap.2( assay(rld)[ topVarGenes,], scale="row",
 trace="none", dendrogram="row", margins = c(5, 7), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Strain)])
 legend("topright", levels(dds$Strain), col = StrainCols, lty = 1, lwd = 5,
@@ -2411,7 +2391,7 @@ sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_LD_06h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_LD_06h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_LD_06h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_LD_06h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2428,12 +2408,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d06h_d12h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d06h_d12h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d06h_d12h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d06h_d12h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2449,12 +2429,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d06h_d18h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d06h_d18h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d06h_d18h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d06h_d18h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2470,12 +2450,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d06h_d24h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d06h_d24h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d06h_d24h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d06h_d24h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2491,12 +2471,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d12h_d24h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d12h_d24h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d12h_d24h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d12h_d24h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2512,12 +2492,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d12h_d18h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d12h_d18h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d12h_d18h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d12h_d18h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2533,12 +2513,12 @@ sig.res <- sig.res[order(sig.res$padj),]
 #Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
 #               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
 
-sig.res.upregulated2 <- sig.res[sig.res$log2FoldChange >0, ]
-sig.res.downregulated2 <- sig.res[sig.res$log2FoldChange <0, ]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
 
 write.table(sig.res.upregulated,"Wt53_d24h_d18h_up.txt",sep="\t",quote=F)
 write.table(sig.res.downregulated,"Wt53_d24h_d18h_down.txt",sep="\t",quote=F)
-write.table(res,"Wt53_d24h_d18h.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_d24h_d18h.txt",sep="\t",quote=F)
 
 summary(res)
 
@@ -2697,8 +2677,9 @@ for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.3
         $Dir1/Wc153_LD_06h.txt \
         $Dir1/Wt53_Frq53_bl06h.txt \
         $Dir1/Wt53_Frq53_d06h.txt \
-        $Dir1/Wt53_LD_06h.txt \
+        $Dir1/Wt53_bl06h_vs_d06h.txt \
         $Dir1/Wt53_Wc153_bl06h.txt \
+        $Dir1/Wt53_Wc153_d06h.txt \
         $Dir2/Wt53_d06h_d12h.txt \
         $Dir2/Wt53_d06h_d18h.txt \
         $Dir2/Wt53_d06h_d24h.txt \
@@ -2729,3 +2710,116 @@ inp2=Wt53_Frq53_bl06h.txt
 OutDir=Wc1bl_vs_Frqbl_all_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_d06h.txt
+inp2=Wt53_Frq53_d06h.txt
+OutDir=Wc1d_vs_Frqd_all_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=WT53/Wt53_d06h_d12h.txt
+inp2=WT53/Wt53_d06h_d18h.txt
+inp3=WT53/Wt53_d06h_d24h.txt
+OutDir=Wt53_timelapse_all_DEGs.tsv
+$ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 --out_file $OutDir
+```
+
+###Upregulated DEGs
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_bl06h_up.txt
+inp2=Wt53_Frq53_bl06h_up.txt
+OutDir=Wc1bl_vs_Frqbl_up_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_d06h_up.txt
+inp2=Wt53_Frq53_d06h_up.txt
+OutDir=Wc1d_vs_Frqd_up_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=WT53/Wt53_d06h_d12h_up.txt
+inp2=WT53/Wt53_d06h_d18h_up.txt
+inp3=WT53/Wt53_d06h_d24h_up.txt
+OutDir=Wt53_timelapse_up_DEGs.tsv
+$ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 --out_file $OutDir
+```
+###Downregulated DEGs
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_bl06h_down.txt
+inp2=Wt53_Frq53_bl06h_down.txt
+OutDir=Wc1bl_vs_Frqbl_down_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=Wt53_Wc153_d06h_down.txt
+inp2=Wt53_Frq53_d06h_down.txt
+OutDir=Wc1d_vs_Frqd_down_DEGs.tsv
+$ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
+```
+
+```
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+inp1=WT53/Wt53_d06h_d12h_down.txt
+inp2=WT53/Wt53_d06h_d18h_down.txt
+inp3=WT53/Wt53_d06h_d24h_down.txt
+OutDir=Wt53_timelapse_down_DEGs.tsv
+$ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 --out_file $OutDir
+```
+
+
+###Venn diagrams
+#Mutants in light
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
+$ProgDir/All_DEGs_venn_diag_2.r  --inp $WorkDir/Wc1bl_vs_Frqbl_all_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_all_DEGs.pdf
+$ProgDir/All_DEGs_venn_diag_2.r --inp $WorkDir/Wc1bl_vs_Frqbl_up_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_up_DEGs.pdf
+$ProgDir/All_DEGs_venn_diag_2.r --inp $WorkDir/Wc1bl_vs_Frqbl_down_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_down_DEGs.pdf
+
+#Timecourse WT
+
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
+$ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_all_DEGs.tsv --out $WorkDir/Wt53_timelapse_all_DEGs.pdf
+$ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_up_DEGs.tsv --out $WorkDir/Wt53_timelapse_up_DEGs.pdf
+$ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_down_DEGs.tsv --out $WorkDir/Wt53_timelapse_down_DEGs.pdf
+
+
+
+##Investigate enriched functional annotations in DEGs vs all genes
+
+##Analysis of DEGs vs all genes
+
+OutDir=analysis/enrichment/experiment_53/Whole_Genome
+mkdir -p $OutDir
+InterProTSV=/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv
+ProgDir=/home/adamst/git_repos/scripts/fusarium/analysis/gene_enrichment
+$ProgDir/GO_prep_table.py --interpro $InterProTSV > $OutDir/experiment_53_gene_GO_annots.tsv
+
+ProgDir=/home/adamst/git_repos/scripts/phytophthora_fragariae
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=alignment/star/P.fragariae/Bc16/DeSeq/Bc16_all_DEGs_names.txt
+AllGenes=$OutDir/Bc16_all_genes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Bc16_DEGs.txt
+Set2Genes=$OutDir/Bc16_all_genes2.txt
+AllGenes=$OutDir/Bc16_all_genes.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $OutDir/Bc16_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
