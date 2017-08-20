@@ -2784,42 +2784,174 @@ $ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 -
 
 ###Venn diagrams
 #Mutants in light
+
+```
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
 $ProgDir/All_DEGs_venn_diag_2.r  --inp $WorkDir/Wc1bl_vs_Frqbl_all_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_all_DEGs.pdf
 $ProgDir/All_DEGs_venn_diag_2.r --inp $WorkDir/Wc1bl_vs_Frqbl_up_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_up_DEGs.pdf
 $ProgDir/All_DEGs_venn_diag_2.r --inp $WorkDir/Wc1bl_vs_Frqbl_down_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_down_DEGs.pdf
-
+```
 #Timecourse WT
 
+```
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
 $ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_all_DEGs.tsv --out $WorkDir/Wt53_timelapse_all_DEGs.pdf
 $ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_up_DEGs.tsv --out $WorkDir/Wt53_timelapse_up_DEGs.pdf
 $ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_down_DEGs.tsv --out $WorkDir/Wt53_timelapse_down_DEGs.pdf
-
+```
 
 
 ##Investigate enriched functional annotations in DEGs vs all genes
 
 ##Analysis of DEGs vs all genes
-
+```
 OutDir=analysis/enrichment/experiment_53/Whole_Genome
 mkdir -p $OutDir
 InterProTSV=/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv
 ProgDir=/home/adamst/git_repos/scripts/fusarium/analysis/gene_enrichment
 $ProgDir/GO_prep_table.py --interpro $InterProTSV > $OutDir/experiment_53_gene_GO_annots.tsv
+```
 
-ProgDir=/home/adamst/git_repos/scripts/phytophthora_fragariae
+#Functional annotation of WT bl vs d
+
+```
+#Extract the first column of one file and save it as a *_name.file
+cut -f1 file > file2
+
+#Remove .pi from column and save to other file
+sed -i.bak 's/.p1//' experiment_53_gene_GO_annots.tsv
+```
+
+#WT53_LD up and down regulated
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/WT53_LD/DOWN
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
-DEGs=alignment/star/P.fragariae/Bc16/DeSeq/Bc16_all_DEGs_names.txt
-AllGenes=$OutDir/Bc16_all_genes.txt
+DEGs=analysis/enrichment/experiment_53/WT53_LD/DOWN/Wt53_bl06h_vs_d06h_down_names.txt
+AllGenes=$OutDir/WT53_LD_up.txt
 cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
-Set1Genes=$OutDir/Bc16_DEGs.txt
-Set2Genes=$OutDir/Bc16_all_genes2.txt
-AllGenes=$OutDir/Bc16_all_genes.txt
+Set1Genes=$OutDir/WT53_LD_up_DEGs.txt
+Set2Genes=$OutDir/WT53_LD_up2.txt
+AllGenes=$OutDir/WT53_LD_up.txt
 cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
-cat $AnnotTable | tail -n+2 | cut -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
 cat $Set1Genes $Set2Genes > $AllGenes
 
-$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $OutDir/Bc16_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#Frq53_LD
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/Frq53_LD/DOWN
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/Frq53_LD/DOWN/Frq53_LD_06h_down_names.txt
+AllGenes=$OutDir/Frq53_LD_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Frq53_LD_up_DEGs.txt
+Set2Genes=$OutDir/Frq53_LD_up2.txt
+AllGenes=$OutDir/Frq53_LD_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#Wc1_LD
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/Wc1_LD/UP
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/Wc1_LD/UP/Wc153_LD_06h_up_names.txt
+AllGenes=$OutDir/Wc1_LD_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1_LD_up_DEGs.txt
+Set2Genes=$OutDir/Wc1_LD_up2.txt
+AllGenes=$OutDir/Wc1_LD_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#WT53_Wc1_D
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/WT53_Wc1_D/UP
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/WT53_Wc1_D/UP/Wt53_Wc153_d06h_up_names.txt
+AllGenes=$OutDir/WT53_Wc1_D_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_Wc1_up_DEGs.txt
+Set2Genes=$OutDir/WT53_Wc1_up2.txt
+AllGenes=$OutDir/WT53_Wc1_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#WT53_Wc1_L
+
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/WT53_Wc1_L/DOWN
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/WT53_Wc1_L/DOWN/Wt53_Wc153_bl06h_down_names.txt
+AllGenes=$OutDir/WT53_Wc1_L_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_Wc1_L_up_DEGs.txt
+Set2Genes=$OutDir/WT53_Wc1_L_up2.txt
+AllGenes=$OutDir/WT53_Wc1_L_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#WT53_Frq53_L
+
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/WT53_Frq53_L/UP
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/WT53_Frq53_L/UP/Wt53_Frq53_bl06h_up_names.txt
+AllGenes=$OutDir/WT53_Frq53_L_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_Frq53_L_up_DEGs.txt
+Set2Genes=$OutDir/WT53_Frq53_L_up2.txt
+AllGenes=$OutDir/WT53_Frq53_L_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#WT53_Frq53_D
+
+```
+WorkDir=analysis/enrichment/experiment_53
+OutDir=analysis/enrichment/experiment_53/WT53_Frq53_D/DOWN
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
+DEGs=analysis/enrichment/experiment_53/WT53_Frq53_D/DOWN/Wt53_Frq53_d06h_down_names.txt
+AllGenes=$OutDir/WT53_Frq53_D_up.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_Frq53_D_up_DEGs.txt
+Set2Genes=$OutDir/WT53_Frq53_D_up2.txt
+AllGenes=$OutDir/WT53_Frq53_D_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
