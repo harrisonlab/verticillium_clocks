@@ -377,9 +377,9 @@ for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contig
   SubmissionID=$(cat genome_submission/Vd_PRJNA352681_locus_tags.txt | grep "$Strain" | cut -f1 -d ' ')
   echo $SubmissionID
   mkdir -p $OutDir/gag/edited
-  ProgDir=/home/armita/git_repos/emr_repos/tools/genbank_submission
+  ProgDir=/home/lopeze/git_repos/tools/genbank_submission
   $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
-  # $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "g" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
+  $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "g" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
 done
 ```
 
