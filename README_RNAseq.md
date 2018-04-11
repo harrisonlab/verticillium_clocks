@@ -608,8 +608,6 @@ Frq08_DD24_rep3 Frq08   24h     d
 
 # Edit header lines of feature coutn files to ensure they have the treament name rather than file name
 ```bash
-
-
  for File in $(/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment2/V.dahliae/*/featureCounts/*_featurecounts.txt); do
    echo $File;
   Strain=$(echo $File | rev | cut -f1 -d '/' | rev)
@@ -624,7 +622,7 @@ done
 
 R script to import and merge data into a format good for DESeq2
 
-install.packages("Biostrings", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("sva", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 
 ```R
@@ -1396,7 +1394,7 @@ countData <- subset(countData, select=-WT08_LL6_rep3)
 
 
 write.table(countData,"countData_53_Wc1",sep="\t",na="",quote=F)
-write.table(colData,"colData_53_Wc1",sep="\t",na="",quote=F)
+write.table(colData,"colData_LDmutants",sep="\t",na="",quote=F)
 
 
 ```
@@ -2617,6 +2615,233 @@ dev.off()
 
 ```
 
+
+##Experiment WT53 L vs D
+
+```R
+require(DESeq2)
+
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]      
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]      
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]      
+countData <- subset(countData, select=-WT53_DD24_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]      
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]      
+countData <- subset(countData, select=-WT53_DD18_rep2)
+
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]      
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]      
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]      
+countData <- subset(countData, select=-WT53_DD12_rep3)
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+design <- ~Group
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds, fitType="local")
+rld <- rlog( dds )
+
+
+=================
+PCA plots
+=================
+#Plot using rlog transformation, showing sample names:
+library("ggplot2")
+library("ggrepel")
+
+data <- plotPCA(rld, intgroup="Group", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Group)) +
+ geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) + geom_text_repel(aes(label=colnames(rld)))
+ coord_fixed()
+
+ggsave("PCA_sample_names.pdf", pca_plot, dpi=300, height=15, width=20)
+
+
+
+=================
+Sample distanes
+=================
+
+rld <- rlog( dds )
+sampleDists <- dist( t( assay(rld) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(rld$Group)
+colnames(sampleDistMatrix) <- paste(rld$Group)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours, margins = c(10, 10))
+
+dev.off()
+
+
+===============
+Analysis of gene expression
+===============
+
+##WT53 d vs WT53 bl
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group","53WTbl06h","53WTd06h"))
+
+mcols(res, use.names=TRUE)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+#Settings used: upregulated: min. 2x fold change, ie. log2foldchange min 1.
+#               downregulated: min. 0.5x fold change, ie. log2foldchange max -1.
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >0, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <0, ]
+
+write.table(sig.res.upregulated,"Wt53_LD_up.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wt53_LD_down.txt",sep="\t",quote=F)
+write.table(sig.res,"Wt53_LD.txt",sep="\t",quote=F)
+
+summary(res)
+
+==================
+Gene clustering
+==================
+#Group the replicates and remove outliers
+require(DESeq2)
+colData <- read.table("colData_53",header=T,sep="\t")
+countData <- read.table("countData_53",sep="\t",header=T,row.names=1)
+
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep1"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep2"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_DD6_rep3"),]      
+countData <- subset(countData, select=-Wc153_DD6_rep3)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep1"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep1)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep2"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep2)
+colData <- colData[!(colData$Sample=="Wc153_LL6_rep3"),]      
+countData <- subset(countData, select=-Wc153_LL6_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]      
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]      
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]      
+countData <- subset(countData, select=-WT53_DD24_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]      
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]      
+countData <- subset(countData, select=-WT53_DD18_rep2)
+
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]      
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]      
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]      
+countData <- subset(countData, select=-WT53_DD12_rep3)
+
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+design=~Group
+dds <-   DESeqDataSetFromMatrix(countData,colData,~1)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds$groupby <- paste(dds$Group)
+dds <- collapseReplicates(dds,groupby=dds$groupby)
+design(dds) <- design
+dds <- DESeq(dds,parallel=T)
+rld <- rlog( dds )
+head( assay(rld) )
+
+#TopVarGenes
+library("RColorBrewer")
+library("gplots")
+library( "genefilter" )
+topVarGenes <- head( order( rowVars( assay(rld) ), decreasing=TRUE ), 100)
+
+#Heatmap with ColSideColors
+StrainCols <- brewer.pal(11, "RdGy")[c(7, 11)]
+my_palette <- colorRampPalette(c("darkgreen", "lightgreen"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 30), col = my_palette, cexCol=0.8,cexRow=0.4,ColSideColors=StrainCols[unclass(dds$Light)])
+legend("topright", levels(dds$Light), col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+#Heatmap option 2
+library("gplots")
+library("devtools")
+
+StrainCols <- sample(c("grey", "black", "lightgrey"), length(dds$Strain), replace=TRUE, prob=NULL)
+LightCols <- sample(c("grey", "black"), length(dds$Light), replace=TRUE, prob=NULL)
+TimeCols <- sample(c("grey", "black", "lightgrey", "darkred"), length(dds$Time), replace=TRUE, prob=NULL)
+clab=cbind(StrainCols, LightCols, TimeCols)
+colnames(clab)=c("Strain", "Light", "Time")
+my_palette <- colorRampPalette(c("red", "black", "green"))(n = 299)
+heatmap.2( assay(rld)[ topVarGenes,], scale="row",
+trace="none", dendrogram="row", margins = c(5, 7), cexCol=0.8,cexRow=0.4, ColSideColors=clab, col = StrainCols, lty = 1, lwd = 5,
+    cex = 0.5)
+dev.off()
+
+
+
+```
+
 #Make a table of raw counts, normalised counts and fpkm values:
 
 ```R
@@ -2652,15 +2877,15 @@ colnames(fpkm_counts) <- paste(colData$Group)
 write.table(fpkm_counts,"fpkm_counts.txt",sep="\t",na="",quote=F)
 ```
 
+
 #Produce a detailed table of analyses
 '''python
 This program parses information from fasta files and gff files for the location,
 sequence and functional information for annotated gene models and RxLRs.
 '''
 
-```
 Run with commands:
-
+```bash
 for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3); do
     Strain=JR2
     Organism=V.dahliae
@@ -2694,16 +2919,15 @@ for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.3
     ProgDir=/home/armita/git_repos/emr_repos/scripts/verticillium_clocks/annotation
     $ProgDir/Vd_annotation_tables.py --gene_gff $GeneGff --gene_fasta $GeneFasta --DEG_files $DEG_Files --raw_counts $RawCount --fpkm $FPKM --InterPro $InterPro --Swissprot $SwissProt > $OutDir/"$Strain"_gene_table_incl_exp.tsv
 done
-
 ```
+
 
 #Draw venn diagrams of differenitally expressed genes
 
 ##All genes
 
 ###All DEGs
-
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_bl06h.txt
 inp2=Wt53_Frq53_bl06h.txt
@@ -2711,7 +2935,7 @@ OutDir=Wc1bl_vs_Frqbl_all_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_d06h.txt
 inp2=Wt53_Frq53_d06h.txt
@@ -2719,7 +2943,7 @@ OutDir=Wc1d_vs_Frqd_all_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=WT53/Wt53_d06h_d12h.txt
 inp2=WT53/Wt53_d06h_d18h.txt
@@ -2730,7 +2954,7 @@ $ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 -
 
 ###Upregulated DEGs
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_bl06h_up.txt
 inp2=Wt53_Frq53_bl06h_up.txt
@@ -2738,7 +2962,7 @@ OutDir=Wc1bl_vs_Frqbl_up_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_d06h_up.txt
 inp2=Wt53_Frq53_d06h_up.txt
@@ -2746,7 +2970,7 @@ OutDir=Wc1d_vs_Frqd_up_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=WT53/Wt53_d06h_d12h_up.txt
 inp2=WT53/Wt53_d06h_d18h_up.txt
@@ -2756,7 +2980,7 @@ $ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 -
 ```
 ###Downregulated DEGs
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_bl06h_down.txt
 inp2=Wt53_Frq53_bl06h_down.txt
@@ -2764,7 +2988,7 @@ OutDir=Wc1bl_vs_Frqbl_down_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=Wt53_Wc153_d06h_down.txt
 inp2=Wt53_Frq53_d06h_down.txt
@@ -2772,7 +2996,7 @@ OutDir=Wc1d_vs_Frqd_down_DEGs.tsv
 $ProgDir/parse_RNASeq_2-way.py --input_1 $inp1 --input_2 $inp2 --out_file $OutDir
 ```
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 inp1=WT53/Wt53_d06h_d12h_down.txt
 inp2=WT53/Wt53_d06h_d18h_down.txt
@@ -2785,7 +3009,7 @@ $ProgDir/parse_RNASeq_3-way.py --input_1 $inp1 --input_2 $inp2 --input_3 $inp3 -
 ###Venn diagrams
 #Mutants in light
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
 $ProgDir/All_DEGs_venn_diag_2.r  --inp $WorkDir/Wc1bl_vs_Frqbl_all_DEGs.tsv --out $WorkDir/Wc1bl_Frqbl_all_DEGs.pdf
@@ -2794,7 +3018,7 @@ $ProgDir/All_DEGs_venn_diag_2.r --inp $WorkDir/Wc1bl_vs_Frqbl_down_DEGs.tsv --ou
 ```
 #Timecourse WT
 
-```
+```bash
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 WorkDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_53
 $ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_all_DEGs.tsv --out $WorkDir/Wt53_timelapse_all_DEGs.pdf
@@ -2806,7 +3030,7 @@ $ProgDir/All_DEGs_venn_diag.r --inp $WorkDir/Wt53_timelapse_down_DEGs.tsv --out 
 ##Investigate enriched functional annotations in DEGs vs all genes
 
 ##Analysis of DEGs vs all genes
-```
+```bash
 OutDir=analysis/enrichment/experiment_53/Whole_Genome
 mkdir -p $OutDir
 InterProTSV=/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv
@@ -2816,7 +3040,7 @@ $ProgDir/GO_prep_table.py --interpro $InterProTSV > $OutDir/experiment_53_gene_G
 
 #Functional annotation of WT bl vs d
 
-```
+```bash
 #Extract the first column of one file and save it as a *_name.file
 cut -f1 file > file2
 
@@ -2825,7 +3049,7 @@ sed -i.bak 's/.p1//' experiment_53_gene_GO_annots.tsv
 ```
 
 #WT53_LD up and down regulated
-```
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/WT53_LD/DOWN
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2842,8 +3066,10 @@ cat $Set1Genes $Set2Genes > $AllGenes
 
 $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
 ```
+
 #Frq53_LD
-```
+
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/Frq53_LD/DOWN
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2860,8 +3086,10 @@ cat $Set1Genes $Set2Genes > $AllGenes
 
 $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
 ```
+
 #Wc1_LD
-```
+
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/Wc1_LD/UP
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2880,7 +3108,8 @@ $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experim
 ```
 
 #WT53_Wc1_D
-```
+
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/WT53_Wc1_D/UP
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2899,7 +3128,7 @@ $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experim
 ```
 #WT53_Wc1_L
 
-```
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/WT53_Wc1_L/DOWN
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2919,7 +3148,7 @@ $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experim
 
 #WT53_Frq53_L
 
-```
+```bash
 WorkDir=analysis/enrichment/experiment_53
 OutDir=analysis/enrichment/experiment_53/WT53_Frq53_L/UP
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
@@ -2939,9 +3168,9 @@ $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experim
 
 #WT53_Frq53_D
 
-```
+```bash
 WorkDir=analysis/enrichment/experiment_53
-OutDir=analysis/enrichment/experiment_53/WT53_Frq53_D/DOWN
+OutDir=analysis/enrichment/experiment_53/WT53_D/DOWN
 ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
 AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv
 DEGs=analysis/enrichment/experiment_53/WT53_Frq53_D/DOWN/Wt53_Frq53_d06h_down_names.txt
@@ -2955,3 +3184,117 @@ cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed
 cat $Set1Genes $Set2Genes > $AllGenes
 
 $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_53_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+=================================
+# Looking for Transcription Factors
+=================================
+
+```bash
+for Interpro in $(ls gene_pred/interproscan/*/*/*_interproscan.tsv | grep 'JR2'); do
+    Organism=$(echo $Interpro | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $Interpro | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    OutDir=analysis/transcription_factors/$Organism/$Strain
+    mkdir -p $OutDir
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/transcription_factors
+    $ProgDir/interpro2TFs.py --InterPro $Interpro > $OutDir/"$Strain"_TF_domains.tsv
+    echo "total number of transcription factors"
+    cat $OutDir/"$Strain"_TF_domains.tsv | cut -f1 | sort | uniq > $OutDir/"$Strain"_TF_gene_headers.txt
+    cat $OutDir/"$Strain"_TF_gene_headers.txt | wc -l
+  done
+```
+  V.dahliae - 51
+  total number of transcription factors
+  583
+  V.dahliae - 53
+  total number of transcription factors
+  575
+  V.dahliae - 58
+  total number of transcription factors
+  561
+  V.dahliae - 61
+  total number of transcription factors
+  563
+  V.dahliae - JR2
+  total number of transcription factors
+  640
+
+
+JR2 interproscan results use protein IDs rather transcript IDs. As such these
+were changed using sed:
+
+```bash
+
+sed -i "s/.p1/.t1/g" $OutDir/"$Strain"_TF_domains.tsv
+cat $OutDir/"$Strain"_TF_domains.tsv | cut -f1 | sort | uniq > $OutDir/"$Strain"_TF_gene_headers.txt
+cat $OutDir/"$Strain"_TF_gene_headers.txt | wc -l
+
+```
+
+  =================================
+  # Secondary metabolites (Antismash and SMURF)
+  =================================
+
+  Antismash was run to identify clusters of secondary metabolite genes within the genome. Antismash was run using the weserver at: http://antismash.secondarymetabolites.org
+
+Results of web-annotation of gene clusters within the assembly were downloaded to the following directories:
+
+```bash
+ls analysis/secondary_metabolites/antismash
+```
+
+  ```bash
+  for Zip in $(ls analysis/secondary_metabolites/antismash/JR2/*.zip); do
+    OutDir=$(dirname $Zip)
+    unzip -d $OutDir $Zip
+  done
+  ```
+
+  ```bash
+  sed -i "s/.p1/.t1/g"  analysis/secondary_metabolites/antismash/JR2/fungi-38c21e2b-ce4f-4026-8f65-536412b28aee/geneclusters.txt
+  ```
+
+```bash
+for AntiSmash in $(ls analysis/secondary_metabolites/antismash/JR2/bacteria-089b335b-eb2b-4d27-8152-e4a51b772002/*.final.gbk); do
+    OutDir=analysis/secondary_metabolites/antismash/JR2
+    Prefix=$OutDir/JR2_antismash
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/secondary_metabolites
+    $ProgDir/antismash2gff.py --inp_antismash $AntiSmash --out_prefix $Prefix
+
+    # Identify secondary metabolites within predicted clusters
+    printf "Number of secondary metabolite detected:\t"
+    cat "$Prefix"_secmet_clusters.gff | wc -l
+    GeneGff=public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3
+    bedtools intersect -u -a $GeneGff -b "$Prefix"_secmet_clusters.gff > "$Prefix"_secmet_genes.gff
+    cat "$Prefix"_secmet_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > "$Prefix"_secmet_genes.txt
+    bedtools intersect -wo -a $GeneGff -b "$Prefix"_secmet_clusters.gff | grep 'mRNA' | cut -f9,10,12,18 | sed "s/ID=//g" | perl -p -i -e "s/;Parent=g\w+//g" | perl -p -i -e "s/;Notes=.*//g" > "$Prefix"_secmet_genes.tsv
+    printf "Number of predicted proteins in secondary metabolite clusters:\t"
+    cat "$Prefix"_secmet_genes.txt | wc -l
+    printf "Number of predicted genes in secondary metabolite clusters:\t"
+    cat "$Prefix"_secmet_genes.gff | grep -w 'gene' | wc -l
+
+      # Identify cluster finder additional non-secondary metabolite clusters
+      printf "Number of cluster finder non-SecMet clusters detected:\t"
+      cat "$Prefix"_clusterfinder_clusters.gff | wc -l
+      GeneGff=public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3
+      bedtools intersect -u -a $GeneGff -b "$Prefix"_clusterfinder_clusters.gff > "$Prefix"_clusterfinder_genes.gff
+      cat "$Prefix"_clusterfinder_genes.gff | grep -w 'mRNA' | cut -f9 | cut -f2 -d '=' | cut -f1 -d ';' > "$Prefix"_clusterfinder_genes.txt
+
+      printf "Number of predicted proteins in cluster finder non-SecMet clusters:\t"
+      cat "$Prefix"_clusterfinder_genes.txt | wc -l
+      printf "Number of predicted genes in cluster finder non-SecMet clusters:\t"
+      cat "$Prefix"_clusterfinder_genes.gff | grep -w 'gene' | wc -l
+  done
+  ```
+
+  These clusters represented the following genes. Note that these numbers just show the number of intersected genes with gff clusters and are not confirmed by function
+
+  ```
+  Number of secondary metabolite detected:	24
+Number of predicted proteins in secondary metabolite clusters:	346
+Number of predicted genes in secondary metabolite clusters:	710
+Number of cluster finder non-SecMet clusters detected:	62
+Number of predicted proteins in cluster finder non-SecMet clusters:	1533
+Number of predicted genes in cluster finder non-SecMet clusters:	3148
+```
