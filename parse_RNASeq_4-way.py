@@ -112,7 +112,7 @@ for x in genes:
     else:
         for y in inp1_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
@@ -123,7 +123,7 @@ for x in genes:
     else:
         for y in inp2_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
@@ -134,7 +134,7 @@ for x in genes:
     else:
         for y in inp3_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
@@ -145,7 +145,7 @@ for x in genes:
     else:
         for y in inp4_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
