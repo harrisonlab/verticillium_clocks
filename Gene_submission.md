@@ -255,11 +255,11 @@ VD0004 SAMN05929042 12161" \
  An output and working directory was made for genome submission:
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev);
   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev);
   echo "$Organism - $Strain"
-  ProjDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks
+  ProjDir=/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics
   cd $ProjDir
   OutDir="genome_submission/$Organism/$Strain"
   mkdir -p $OutDir
@@ -282,19 +282,6 @@ ProgDir="/home/armita/git_repos/emr_repos/tools/genbank_submission"
 SbtFile="genome_submission/template.sbt"
 LabID="ArmitageEMR"
 
-
-<!## Preparing Gff input file
-
-Parse the Augustus Gff file.
-Transcripts should be renamed as mRNA features. Exons should be added to the
-Gff and unique IDs should be given to all features in the file.
-
-
-```bash
-# cat $GffFile | sed 's/transcript/mRNA/g' > $OutDir/GffMRNA.gff
-# $ProgDir/generate_tbl_file/exon_generator.pl $OutDir/GffMRNA.gff > $OutDir/corrected_exons.gff
-# $ProgDir/generate_tbl_file/gff_add_id.py --inp_gff $OutDir/corrected_exons.gff --out_gff $OutDir/corrected_exons_id.gff
-```
 ## Generating .tbl file (GAG)
 
 The Genome Annotation Generator (GAG.py) can be used to convert gff files into
@@ -312,15 +299,15 @@ Note - It is important that transcripts have been re-labelled as mRNA by this
 point.
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
   echo "$Organism - $Strain"
   OutDir="genome_submission/$Organism/$Strain"
-  GffFile=$(ls gene_pred/final_genes/$Organism/"$Strain"*/final/final_genes_appended.gff3)
+  GffFile=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/final/$Organism/"$Strain"*/final/final_genes_appended_renamed.gff3)
 
-  InterProTab=$(ls gene_pred/interproscan/$Organism/"$Strain"*/"$Strain"*_interproscan.tsv)
-  SwissProtBlast=$(ls gene_pred/swissprot/$Organism/"$Strain"*/swissprot_vJul2016_tophit_parsed.tbl)
+  InterProTab=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/"$Strain"*/"$Strain"*_interproscan.tsv)
+  SwissProtBlast=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/swissprot/$Organism/"$Strain"*/swissprot_vJul2016_tophit_parsed.tbl)
   SwissProtFasta=$(ls /home/groups/harrisonlab/uniprot/swissprot/uniprot_sprot.fasta)
   python3 $AnnieDir/annie.py -ipr $InterProTab -g $GffFile -b $SwissProtBlast -db $SwissProtFasta -o $OutDir/annie_output.csv --fix_bad_products
   ProgDir=/home/armita/git_repos/emr_repos/tools/genbank_submission
@@ -333,12 +320,12 @@ done
 Gag was run using the modified gff file as well as the annie annotation file. Gag was noted to output database references incorrectly, so these were modified.
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
 OutDir="genome_submission/$Organism/$Strain"
-GffFile=$(ls gene_pred/final_genes/$Organism/"$Strain"*/final/final_genes_appended.gff3)
+GffFile=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/final/$Organism/"$Strain"*/final/final_genes_appended_renamed.gff3)
 mkdir -p $OutDir/gag/round1
 gag.py -f $Assembly -g $GffFile -a $OutDir/annie_corrected_output.csv --fix_start_stop -o $OutDir/gag/round1 2>&1 | tee $OutDir/gag_log1.txt
 sed -i 's/Dbxref/db_xref/g' $OutDir/gag/round1/genome.tbl
@@ -350,7 +337,7 @@ done
 tbl2asn was run an initial time to collect error reports on the current formatting of the .tbl file. Note - all input files for tbl2asn need to be in the same directory and have the same basename.
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
@@ -369,7 +356,7 @@ done
 The tbl2asn .val output files were observed and errors corrected. This was done with an in house script. The .val file indicated that some cds had premature stops, so these were marked as pseudogenes ('pseudo' - SEQ_FEAT.InternalStop) and that some genes had cds coordinates that did not match the end of the gene if the protein was hanging off a contig ('stop' - SEQ_FEAT.NoStop). Furthermore a number of other edits were made to bring the .tbl file in line with ncbi guidelines. This included: Marking the source of gene predictions and annotations ('add_inference'); Correcting locus_tags to use the given ncbi_id ('locus_tag'); Correcting the protein and transcript_ids to include the locus_tag and reference to submitter/lab id ('lab_id'), removal of annotated names of genes if you don't have high confidence in their validity (--gene_id 'remove'). If 5'-UTR and 3'-UTR were not predicted during gene annotation then genes, mRNA and exon features need to reflect this by marking them as incomplete ('unknown_UTR').
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
   echo "$Organism - $Strain"
@@ -378,15 +365,15 @@ for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contig
   echo $SubmissionID
   mkdir -p $OutDir/gag/edited
   ProgDir=/home/lopeze/git_repos/tools/genbank_submission
-  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
-  $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "g" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
+  $ProgDir/edit_tbl_file/ncbi_tbl_corrector.py --inp_tbl $OutDir/gag/round1/genome.tbl --inp_val $OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --rename_genes "g" --remove_product_locus_tags "True" --out_tbl $OutDir/gag/edited/genome.tbl
+  #$OutDir/tbl2asn/round1/genome.val --locus_tag $SubmissionID --lab_id $LabID --gene_id "remove" --edits stop pseudo unknown_UTR correct_partial --remove_product_locus_tags "True" --out_tbl #OutDir/gag/edited/genome.tbl
 done
 ```
 
 #Generating a structured comment detailing annotation methods
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
   echo "$Organism - $Strain"
@@ -407,11 +394,12 @@ Following correction of the GAG .tbl file, tbl2asn was re-run to provide the fin
 The options -l paired-ends -a r10k inform how to handle runs of Ns in the sequence, these options show that paired-ends have been used to estimate gaps and that runs of N's longer than 10 bp should be labelled as gaps.
 
 ```bash
-for Assembly in $(ls repeat_masked/V.dahliae/*/filtered_contigs_repmask/*_contigs_unmasked.fa); do
+for Assembly in $(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/repeat_masked/V.dahliae/*/ncbi_filter_contigs/*_contigs_unmasked.fa); do
   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
   echo "$Organism - $Strain"
   OutDir="genome_submission/$Organism/$Strain"
+  FinalName="$Organism"_"$Strain"_Fan_2017
   cp $Assembly $OutDir/gag/edited/genome.fsa
   cp $SbtFile $OutDir/gag/edited/genome.sbt
   mkdir $OutDir/tbl2asn/final
