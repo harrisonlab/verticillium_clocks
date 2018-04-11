@@ -24,8 +24,9 @@ for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.3
         $Dir1/Wc153_LD_06h.txt \
         $Dir1/Wt53_Frq53_bl06h.txt \
         $Dir1/Wt53_Frq53_d06h.txt \
-        $Dir1/Wt53_LD_06h.txt \
+        $Dir1/Wt53_bl06h_vs_d06h.txt \
         $Dir1/Wt53_Wc153_bl06h.txt \
+        $Dir1/Wt53_Wc153_d06h.txt \
         $Dir2/Wt53_d06h_d12h.txt \
         $Dir2/Wt53_d06h_d18h.txt \
         $Dir2/Wt53_d06h_d24h.txt \
