@@ -82,7 +82,7 @@ genes = set(genes_list)
 
 #This creates a numpy array, the headings are arbitrary, this does not have to be a timecourse, but the original script was
 
-a = numpy.array(["Gene_Name", "24hr", "48hr", "96hr"])
+a = numpy.array(["Gene_Name", "12hr", "18hr", "24hr"])
 
 #These commands test if a gene is present in the DEG file or not, then if it has an absolute log2 fold change greater than the threshold of 1
 #It then adds the name of the gene and the result of the test (1 or 0) to a numpy array
@@ -97,7 +97,7 @@ for x in genes:
     else:
         for y in inp1_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
@@ -108,7 +108,7 @@ for x in genes:
     else:
         for y in inp2_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
@@ -119,7 +119,7 @@ for x in genes:
     else:
         for y in inp3_dict[x]:
             test = abs(y)
-            if test > 1:
+            if test > 0:
                 to_add.append('1')
             else:
                 to_add.append('0')
