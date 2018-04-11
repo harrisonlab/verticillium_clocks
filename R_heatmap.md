@@ -1,17 +1,7 @@
-Michelle script:
+Orhtologous genes
 
-library(gplots)
-virulence<-read.table("/Users/hulinm/Documents/effectors_reg_heatmap.txt", col.names=,1, row.names=1, check.names=FALSE)
-virulence_matrix<-data.matrix(virulence)
-scale <- colorRampPalette(c("white", "yellow", "forestgreen"), space = "rgb")(100)
-pdf(file = "/Users/hulinm/Documents/e-heatmap.pdf",width=7,height=7)
-virulence_heatmap <- heatmap.2(virulence_matrix, margins = c(10, 18), Rowv=NA, cexCol=0.3, cexRow=0.4 ,lmat=rbind( c(0, 3), c(2,1), c(0,4) ), lhei=c(0.25, 4, 0.25 ), trace="none", hline=NULL, vline=NULL, tracecol="Gray", col=scale)
-dev.off()
-
-
-Script used:
 ```R
-install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
+install.packages("ComplexHeatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 library("gplots")
 orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_genes.txt", col.names=,1, row.names=1, check.names=FALSE)
@@ -22,30 +12,67 @@ orthologs_heatmap <- heatmap.2(orthologs_matrix, margins = c(6, 12), dendogram="
 dev.off()
 ```
 
-Alternative script:
-/Users/lopeze/Desktop/Bioinformatics
+
+#Orthologous light genes
+```R
+install.packages("pheatmap", Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu" )
 
 library("gplots")
-orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_genes.txt", col.names=1, row.names=1, check.names=FALSE)
+library("Cairo")
+orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_light_genes.txt", col.names=,1, row.names=1, check.names=FALSE)
 orthologs_matrix<-data.matrix(orthologs)
-scale <- colorRampPalette(c("white", "forestgreen", "green"), space = "rgb")(100)
-pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs-heatmap.pdf",width=7,height=7)
-orthologs_heatmap <- heatmap.2(orthologs_matrix, geom_tile(aes(fill = scale)), margins = c(5, 12), Colv=FALSE, dendrogram="row", cexCol=0.8, cexRow=0.8, trace="none", tracecol="Gray", col=scale)
+scale <- colorRampPalette(c("white", "snow4", "gray36"), space = "rgb")(100)
+#pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs_light_heatmap2.pdf",width=6,height=7)
+#svg(file="Users/lopeze/Desktop/Bioinformatics/orthologs_light_heatmap2.svg", width=10, height=8)
+image = heatmap.2(orthologs_matrix, margins = c(5, 17), dendrogram="none", Colv=FALSE, Rowv=FALSE, cexCol=0.6, cexRow=0.6 , trace="none", col=scale, cellnote=orthologs_matrix, notecol="white", notecex=0.4,
+as.matrix(order_by27_T[rowsToDraw,]), colsep=c(5,8,9), rowsep=c(3, 14), sepwidth=c(0.1,0.1), sepcolor=c("white"))
+plot(image)
 dev.off()
+ggsave("/Users/lopeze/Desktop/Bioinformatics/orthologs_light_heatmap2.svg",image, width=6)
+```
+
+#Orthologous light genes using superheat
+```R
+library("superheat")
+library("gplots")
+orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_light_genes.txt", col.names=,1, row.names=1, check.names=FALSE)
+orthologs_matrix<-data.matrix(orthologs)
+scale <- colorRampPalette(c("white", "forestgreen", "darkgreen"), space = "rgb")(100)
+pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs_light_heatmap.pdf",width=7,height=7)
+superheat(X = orthologs_matrix, # heatmap matrix
+          # change the size of the labels
+          pretty.order.rows = FALSE,
+          pretty.order.cols = FALSE,
+          left.label.size = 0.4,
+          bottom.label.size = 0.1,
+          left.label.text.size = 3,
+          bottom.label.text.size = 2,
+          left.label.col = "white",
+          bottom.label.col = "white",
+          bottom.label.text.angle = 90,
+          left.label.text.alignment = "left",
+          grid.hline.size = 0.1,
+          grid.vline.size = 0.1,
+          scale = FALSE)
+dev.off()
+```
+
+Alternative script: /Users/lopeze/Desktop/Bioinformatics
+
+library("gplots") orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_genes.txt", col.names=1, row.names=1, check.names=FALSE) orthologs_matrix<-data.matrix(orthologs) scale <- colorRampPalette(c("white", "forestgreen", "green"), space = "rgb")(100) pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs-heatmap.pdf",width=7,height=7) orthologs_heatmap <- heatmap.2(orthologs_matrix, geom_tile(aes(fill = scale)), margins = c(5, 12), Colv=FALSE, dendrogram="row", cexCol=0.8, cexRow=0.8, trace="none", tracecol="Gray", col=scale) dev.off()
 
 Alternative script using Pheatmap:
 
 library("pheatmap")
 library("gplots")
-orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_genes.txt", col.names=,1, row.names=1, check.names=FALSE)
+orthologs<-read.table("/Users/lopeze/Desktop/Bioinformatics/Ortholog_light_genes.txt", col.names=,1, row.names=1, check.names=FALSE)
 orthologs_matrix<-data.matrix(orthologs)
 scale <- colorRampPalette(c("white", "forestgreen", "darkgreen"), space = "rgb")(100)
-pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs-heatmap.pdf",width=7,height=7)
-mylwid = c(1.5,4,0.5)
-mylhei = c(1.5,4,1)
-mylmat = rbind(c(0,3,0),c(2,1,0),c(0,4,0))
-orthologs_heatmap <- pheatmap(orthologs_matrix, lmat=mylmat, lwid=mylwid, lhei=mylhei, margins = c(6, 12), dendogram="column", Colv=FALSE, cexCol=0.8, cexRow=0.8 , trace="none", tracecol="Gray", col=scale)
-dev.off()
+pdf(file = "/Users/lopeze/Desktop/Bioinformatics/orthologs_light_heatmap2.pdf",width=7,height=7)
+#mylwid = c(1.5,4,0.5) mylhei = c(1.5,4,1) mylmat = rbind(c(0,3,0),c(2,1,0),c(0,4,0))
+orthologs_heatmap <- pheatmap(orthologs_matrix, lmat=mylmat, lwid=mylwid, lhei=mylhei, margins = c(6, 12), dendogram="column", Colv=FALSE, cexCol=0.8, cexRow=0.8 , trace="none", tracecol="Gray", col=scale) dev.off()
+
+
 
 
 ==========
@@ -54,7 +81,7 @@ Promoter motif heatmap
 
 library("pheatmap")
 library("gplots")
-promoter<-read.table("/Users/lopeze/Desktop/Bioinformatics/Promotermotif.txt", col.names=,1, row.names=1, check.names=FALSE)
+promoter<-read.table("/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/Promotermotif_dunlap.txt", col.names=,1, row.names=1, check.names=FALSE)
 promoter_matrix<-data.matrix(promoter)
 scale <- colorRampPalette(c("white", "lightgreen", "forestgreen", "darkgreen"), space = "rgb")(100)
 pdf(file = "/Users/lopeze/Desktop/Bioinformatics/promoter-heatmap2.pdf",width=7,height=7)
@@ -78,9 +105,9 @@ library("gplots")
 promoter<-read.table("/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/Promotermotif.txt", col.names=,1, row.names=1, check.names=FALSE)
 promoter_matrix<-data.matrix(promoter)
 scale <- colorRampPalette(c("white", "yellow", "orange", "red"), space = "rgb")(100)
-pdf(file = "/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/promoter-heatmap_DH.pdf",width=7,height=7)
+pdf(file = "/Users/lopeze/Desktop/Bioinformatics/Promoter_motif/promoter-heatmap_DH.pdf",width=6,height=7)
 promoter-heatmap <- heatmap.2(promoter_matrix,
-cellnote=as.matrix(promoter), #put the values in the cell
+cellnote=as.matrix(promoter_matrix), #put the values in the cell
 notecol="black", #color of the values in the cell
 margins = c(5, 12),
 dendogram="none",
@@ -124,33 +151,157 @@ groups<-cld(means, alpha= .05)
 #D8-D10 V.spp experiment
 
 ```R
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D8-D10_V.spp/D8-D10_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D8-D10-D14V.spp/D8-D10_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D8-D10-D14V.spp/all_data.csv")
 attach(data)
-boxplot(Diameter~Strain*Conditions)
-hist(Diameter)
-shapiro.test(data$Diameter) #p-value has to be over 0.5
+
+#RMEL for unbalanced designs
+library(lme4)
+library(lmertest)
+l1 <- lmer(Diameter ~ Experiment + Strain * Conditions + (1|Experiment:Strain:Conditions))
+summary(l1)
+anova(l1)
+
+
+library(lsmeans)
+means<-(lsmeans(l1, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+#ANOVA for balanced sesign
+anv.model<-aov(Diameter~Experiment+Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+#Test if data is Normally distributed
+res=resid(anv.model)
+hist(res)
+qqnorm(res)
+shapiro.test(res) #p-value has to be over 0.5
 
 #If the data is not normally distributed:
 data.log<-log(data$Diameter)
 shapiro.test(data.log$Diameter)
 hist(data.log)
 
-#ANOVA
-anv.model<-aov(Diameter~Strain*Conditions)
-summary(anv.model)
-print(posthoc <- TukeyHSD(anv.model ))
 
 library(agricolae)
 H<-HSD.test(anv.model, "Conditions", group=TRUE)
 H
 
 library(lsmeans)
-means<-(lsmeans(aov.model, pairwise~Conditions|Strain, adjust="tukey")
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
 groups<-cld(means, alpha= .05)
+groups
+
+#ggplot
+library("ggplot2")
+library(Cairo)
+svg("/Users/lopeze/Desktop/Statistics_R/Rings/D8-D10-D14V.spp/Vdspp_all.svg", width=10, height=8)
+image=ggplot(data, aes(x=Conditions, fill=Conditions, y=Diameter)) +
+stat_boxplot(geom="errorbar", size=0.5) +
+     geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+     labs(y=("Colony diameter(mm)")) +
+     facet_grid(~Strain, scale="free") +
+     scale_fill_manual(values=c(DD="#999999", LL="#3366CC", Lr="#99CCFF", RD="#660066"))+
+     #scale_x_discrete(limits=c("DD","LL","LD","RD"))+
+     ylim(30,60)+
+     ylab("Colony diameter (mm)")+
+     coord_fixed(ratio = 0.2)+
+     theme_bw() +
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_blank(),
+           panel.background = element_blank(),
+           text = element_text(size=10),
+           axis.text.x = element_text(colour="black", size=10 ,angle=45, hjust=1),
+           axis.text.y = element_text(colour="black", size=10),
+           axis.title.x = element_text(size=14),
+           axis.title.y = element_text(size=14),
+           strip.text = element_text(size=9),
+           strip.background = element_rect(colour = "white"))
+   plot(image)
+   dev.off()
+```
+
+#Light differences in WT strains
+
+```R
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Light/WT/all_data.csv")
+attach(data)
+
+#RMEL for unbalanced designs
+library(lme4)
+l1 <- lmer(Diameter ~ Experiment + Strain * Conditions + (1|Experiment:Strain:Conditions))
+summary(l1)
+anova(l1)
+
+
+library(lsmeans)
+means<-(lsmeans(l1, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+#ANOVA
+anv.model<-aov(Diameter~Experiment+Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+#Test if data is Normally distributed
+res=resid(anv.model)
+hist(res)
+qqnorm(res)
+shapiro.test(res) #p-value has to be over 0.5
+
+#If the data is not normally distributed:
+data.log<-log(data$Diameter)
+shapiro.test(data.log$Diameter)
+hist(data.log)
+
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+#ggplot
+library("ggplot2")
+library(Cairo)
+svg("/Users/lopeze/Desktop/Statistics_R/Rings/D8-D10-D14V.spp/Vdspp_all.svg", width=10, height=8)
+ggplot(data, aes(x=Conditions, fill=Conditions, y=Diameter)) +
+stat_boxplot(geom="errorbar", size=0.5) +
+     geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+     labs(y=("Colony diameter(mm)")) +
+     facet_grid(~Strain, scale="free") +
+     scale_fill_manual(values=c(DD="#999999", LL="#3366CC", LD="#99CCFF", RD="#660066"))+
+     #scale_x_discrete(limits=c("DD","LL","LD","RD"))+
+     ylim(30,60)+
+     ylab("Colony diameter (mm)")+
+     coord_fixed(ratio = 0.2)+
+     theme_bw() +
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_blank(),
+           panel.background = element_blank(),
+           text = element_text(size=10),
+           axis.text.x = element_text(colour="black", size=10 ,angle=45, hjust=1),
+           axis.text.y = element_text(colour="black", size=10),
+           axis.title.x = element_text(size=14),
+           axis.title.y = element_text(size=14),
+           strip.text = element_text(size=9),
+           strip.background = element_rect(colour = "white"))
+   plot(image)
+   dev.off()
 ```
 
 
-```
+
 #D3 Wc1
 
 ```R
@@ -177,28 +328,76 @@ H<-HSD.test(anv.model, "Conditions", group=TRUE)
 H
 ```
 
-#D15 medium
+#D15 D16 and D17 medium
 
 ```R   
-data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D15-D16_medium/D15_data/D15_med_data.csv")
+#data<-read.csv("/Users/lopeze/Desktop/Statistics_R/D15-D16_medium/D15_data/D15_med_data.csv")
+#data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D15-D16_medium/D16_data/D16_med_data.csv")
+data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D15-D16_medium/D16_D17.csv")
 attach(data)
 boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
 
 
-hist(Diameter)
-shapiro.test(data$Diameter) #p-value has to be over 0.5
+#ANOVA
+options(max.print=100000)
 
+anv.model<-aov(Diameter~Experiment+Strain*Conditions)
+summary(anv.model)
+print(posthoc <- TukeyHSD(anv.model ))
+
+library(agricolae)
+H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H
+
+library(lsmeans)
+means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
+groups<-cld(means, alpha= .05)
+groups
+
+#Test for normality
+res=resid(aov)
+hist(res)
+qqnorm(res)
+shapiro.test(res) #p-value has to be over 0.5
 #If the data is not normally distributed:
 data.log<-log(data$Diameter)
 shapiro.test(data.log$Diameter)
 hist(data.log)
 
-#ANOVA
-options(max.print=1000000)
+#Boxplot
 
-anv.model<-aov(Diameter~Strain*Conditions)
-summary(anv.model)
-print(posthoc <- TukeyHSD(anv.model ))
+library("ggplot2")
+library(Cairo)
+svg("/Users/lopeze/Desktop/Statistics_R/Rings/D15-D16_medium/D16D17_medium.svg", width=10, height=8)
+data$Strain_new= factor(data$Strain, levels=c("WT_12008", "WT_12253","Frq_12008", "Frq_12253", "Wc1_12253","Wc2_1", "Wc2_10"))
+image=ggplot(data, aes(x=Conditions, fill=Conditions, y=Diameter)) +
+stat_boxplot(geom="errorbar", size=0.5) +
+     geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+     #labs(y=("Colony diameter(mm)")) +
+     #facet_grid(~Conditions, scale="free") +
+     facet_wrap(~Strain_new, scale="free") +
+     #scale_fill_manual(values=c(WT_12008="#CC0099", WT_12253="#009900",Wc1_12253="#006600", Frq_12008="#0099CC", Frq_12253="#CC0000", Wc2_1="#FF9900", Wc2_10="#FFCC66"))+
+     scale_fill_manual(values=c(PLYA="#CC3333", DOX="#009900",BMM="#FFCC33", MM="#CC0099"))+
+     #scale_x_discrete(limits=c("WT_12008", "WT_12253","Frq_12008", "Frq_12253", "Wc1_12253","Wc2_1", "Wc2_10"))+
+     scale_x_discrete(limits=c("PLYA","DOX","BMM", "MM"))+
+     ylim(25,70)+
+     ylim(25,70)+
+     ylab("Colony diameter (mm)")+
+     theme_bw() +
+     theme(axis.line = element_line(colour = "black"),
+           panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(),
+           panel.border = element_blank(),
+           panel.background = element_blank(),
+           text = element_text(size=12),
+           axis.text.x = element_text(colour="black", size=10 ,angle=45, hjust=1),
+           axis.text.y = element_text(colour="black", size=10),
+           axis.title.x = element_text(size=14),
+           axis.title.y = element_text(size=14),
+           strip.text = element_text(size=12),
+           strip.background = element_rect(colour = "white"))
+   plot(image)
+   dev.off()
 
 ```
 #Pathogenicity test E1, E2
@@ -429,7 +628,7 @@ stat_boxplot(geom="errorbar", size=0.5) +
 
            library("ggplot2")
            ggplot(data, aes(x=Strain, fill=Strain, y=Diameter)) +
-           stat_boxplot(geom="errorbar", size=0.5) +
+           stat_boxplot(geom="bar", size=0.5) +
                 geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
                 #labs(y=("Colony diameter(mm)")) +
                 facet_grid(~Conditions, scale="free") +
@@ -540,7 +739,7 @@ mn
 ggplot(mn, aes(x=Conditions, fill=Conditions, y=Expression)) +
      geom_bar(stat="identity", width=0.5) +
      facet_grid(~Strain) +
-     geom_errorbar(aes(ymin=Expression-se, ymax=Expression+se), width=.1) +
+     geom_bar(aes(ymin=Expression-se, ymax=Expression+se), width=.1) +
      theme_bw() +
      #scale_fill_brewer(palette="YIOrRd") +
      scale_fill_brewer(palette="Paired") +
@@ -670,18 +869,13 @@ data<-read.csv("/Users/lopeze/Desktop/Statistics_R/Rings/D5-D9_Men/D9_53_data.cs
 attach(data)
 boxplot(Diameter~Strain*Conditions, las = 2, cex.axis=0.6)
 
-
-hist(Diameter)
-shapiro.test(data$Diameter) #p-value has to be over 0.5
-
-
 #ANOVA
 anv.model<-aov(Diameter~Strain*Conditions)
 summary(anv.model)
 print(posthoc <- TukeyHSD(anv.model ))
 
 library(agricolae)
-H<-HSD.test(anv.model, "Conditions", group=TRUE)
+H<-HSD.test(anv.model, "Strain", group=TRUE)
 H
 
 library(lsmeans)
@@ -689,27 +883,56 @@ means<-(lsmeans(anv.model, pairwise~Conditions|Strain, adjust="tukey"))
 groups<-cld(means, alpha= .05)
 groups
 
+#Test for normality
+res=resid(aov)
+hist(res)
+qqnorm(res)
+shapiro.test(res) #p-value has to be over 0.5
+#If the data is not normally distributed:
+data.log<-log(data$Diameter)
+shapiro.test(data.log$Diameter)
+hist(data.log)
+
+#Standard Error
+data_summary <- function(data, Diameter, Strain){
+     require(plyr)
+     summary_func <- function(x, col){
+         c(mean = mean(x[[col]], na.rm=TRUE),
+          se = sd(x[[col]]/sqrt(6), na.rm=TRUE))
+     }
+     data_sum<-ddply(data, Strain, .fun=summary_func, Diameter)
+     data_sum <- rename(data_sum, c("mean" = Diameter))
+     return(data_sum)
+ }
+
+df <- data_summary(data, Diameter="Diameter",
+                  Strain=c("Strain", "Conditions"))
+
+df$Strain=as.factor(df$Strain)
+head(df)
+
 
 #Plot results Bar Plot
 library("ggplot2")
 library("Rmisc")
+library(Cairo)
+
 #calculate means
-mn <- summarySE(data, measurevar="Diameter", groupvars=c("Strain","Conditions"))
-mn
-
-#mn$Conditions= factor(mn$Conditions, levels=c("28°C","20°C"), labels=c("28°C","20°C"))
-#mn$Gene_f = factor(mn$Gene, levels=c('frq','wc-1','wc-2','ccg-16'))
-
-ggplot(mn, aes(x=Strain, fill=Strain, y=Diameter)) +
+#mn <- summarySE(data, measurevar="Diameter", groupvars=c("Strain","Conditions"))
+#mn
+svg("/Users/lopeze/Desktop/Statistics_R/Rings/D5-D9_Men/D5_D9_53_boarplot_ME.svg", width=10, height=8)
+image=ggplot(df, aes(x=Strain, fill=Strain, y=Diameter)) +
      geom_bar(stat="identity", width=0.5) +
      facet_grid(~Conditions) +
+     scale_x_discrete(limits=c("WT_12008","Frq_12008"))+
+     #scale_x_discrete(limits=c("WT_12253","Wc1_12253"))+
      geom_errorbar(aes(ymin=Diameter-se, ymax=Diameter+se), width=.1) +
+     scale_fill_manual(values=c(WT_12008="#CC0099", Frq_12008="#0099CC"))+
+     #scale_fill_manual(values=c(WT_12253="#009900",Wc1_12253="#336666"))+
      theme_bw() +
-     #scale_fill_manual(breaks=c("28°C","20°C"), values=c("maroon4","lightskyblue1")) +
-     #scale_fill_manual(breaks=c("20°C","28°C"), values=c("lightskyblue1","maroon4")) +
-     ylim(0,60)+
+     ylim(0,50)+
      ylab("Colony diameter (mm)")+
-     #coord_fixed(ratio = 1)+
+     coord_fixed(ratio = 0.2)+
      theme(axis.line = element_line(colour = "black"),
            panel.grid.major = element_blank(),
            panel.grid.minor = element_blank(),
@@ -720,3 +943,37 @@ ggplot(mn, aes(x=Strain, fill=Strain, y=Diameter)) +
            strip.background = element_rect(colour = "white"),
            axis.text.x = element_text(size=10, angle=45, hjust=1),
            axis.text.y = element_text(size=10))
+         plot(image)
+         dev.off()
+
+   #Boxplot
+
+   library("ggplot2")
+   library(Cairo)
+   svg("/Users/lopeze/Desktop/Statistics_R/Rings/D5-D9_Men/D9_53_boxplot_ME.svg", width=10, height=8)
+   image=ggplot(data, aes(x=Strain, fill=Strain, y=Diameter)) +
+   stat_boxplot(geom="errorbar", size=0.5) +
+        geom_boxplot(outlier.shape=16, outlier.size=1, fatten=1) +
+        facet_grid(~Conditions) +
+        #scale_fill_manual(values=c(WT_12008="#CC0099", Frq_12008="#0099CC"))+
+        scale_fill_manual(values=c(WT_12253="#009900",Wc1_12253="#336666"))+
+        #scale_x_discrete(limits=c("WT_12008","Frq_12008"))+
+        scale_x_discrete(limits=c("WT_12253","Wc1_12253"))+
+        ylim(15,60)+
+        ylab("Colony diameter (mm)")+
+        coord_fixed(ratio = 0.2)+
+        theme_bw() +
+        theme(axis.line = element_line(colour = "black"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank(),
+              text = element_text(size=12),
+              axis.text.x = element_text(colour="black", size=10 ,angle=45, hjust=1),
+              axis.text.y = element_text(colour="black", size=10),
+              axis.title.x = element_text(size=14),
+              axis.title.y = element_text(size=14),
+              strip.text = element_text(size=11),
+              strip.background = element_rect(colour = "white"))
+      plot(image)
+      dev.off()
