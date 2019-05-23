@@ -178,8 +178,13 @@ gene_TPM <- read.delim("/Volumes/GGB/Harrison/Projects/BBSRC IPA Clocks/Science/
 summaryfunc <- function(prefix,x) {
   o1 <- paste(prefix, "summary.txt", sep="_")
   sink(o1)
+  print("Summary of all genes")
   y <- summary(x)
   print(y)
+  expressed_x <- x[x > 0]
+  print("Summary of genes with TPM > 0")
+  z <- summary(expressed_x)
+  print(z)
   sink()
 }
 histfunc <- function(x){
@@ -187,25 +192,29 @@ histfunc <- function(x){
   # remove counts < 1
   sub_x <- subset(gene_TPM, x > 0)
   # calculate upper quantiles of subset genes:
-  quantiles <- quantile(gene_TPM[,x], c(.75, .90, .95))
-  quartile <- round(as.numeric(quantiles[1]))
-  decile <- round(as.numeric(quantiles[2]))
-  p <- ggplot(data=sub_x, aes(sub_x[,x])) +
-    geom_histogram(bins=100)
-  # p <- p + scale_x_log10()
-  p <- p + xlim(1, 500)
-  p <- p + geom_vline(xintercept=quartile, linetype="dashed", color = "black")
-  p <- p + geom_text(aes(x=quartile, label=paste(quartile, "top 25%", sep="\n"), y=0), colour="black", angle=0, text=element_text(size=6))
-  p <- p + geom_vline(xintercept=decile, linetype="dashed", color = "black")
-  p <- p + geom_text(aes(x=decile, label=paste(decile, "top 10%", sep="\n"), y=0), colour="black", angle=0, text=element_text(size=6))
-  o2 <- paste(x, "hist.png", sep="_")
-  ggsave(o2, plot = p)
+  quantiles <- quantile(gene_TPM[,x], c(.25, .75, .90, .95))
+  low <- round(as.numeric(quantiles[1]))
+  quartile <- round(as.numeric(quantiles[2]))
+  decile <- round(as.numeric(quantiles[3]))
+  # p <- ggplot(data=sub_x, aes(sub_x[,x])) +
+  #   geom_histogram(bins=100)
+  # # p <- p + scale_x_log10()
+  # p <- p + xlim(1, 500)
+  # p <- p + geom_vline(xintercept=quartile, linetype="dashed", color = "black")
+  # p <- p + geom_text(aes(x=quartile, label=paste(quartile, "top 25%", sep="\n"), y=0), colour="black", angle=0, text=element_text(size=6))
+  # p <- p + geom_vline(xintercept=decile, linetype="dashed", color = "black")
+  # p <- p + geom_text(aes(x=decile, label=paste(decile, "top 10%", sep="\n"), y=0), colour="black", angle=0, text=element_text(size=6))
+  # o2 <- paste(x, "hist.png", sep="_")
+  # ggsave(o2, plot = p)
   q_ids <- gene_TPM$Name[gene_TPM[,x] >= quartile]
   o3 <- paste(x, "quartile_ids.txt", sep="_")
   write(as.character(q_ids), file=o3)
   d_ids <- gene_TPM$Name[gene_TPM[,x] >= decile]
   o4 <- paste(x, "decile_ids.txt", sep="_")
   write(as.character(d_ids), file=o4)
+  low_ids <- gene_TPM$Name[gene_TPM[,x] <= low]
+  o4 <- paste(x, "low_ids.txt", sep="_")
+  write(as.character(low_ids), file=o4)
 }
 
 
@@ -229,13 +238,18 @@ cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ tem
 
 cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/R-studio/*decile_ids.txt | sort | uniq > /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/decile_genes_combined.txt
 
+cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/R-studio/*low_ids.txt | sort | uniq > /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/low_genes_combined.txt
+
 cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/R-studio/*quartile_ids.txt | sort | uniq -c | sort -nr | grep "57.*VDAG" | sed "s/*.VDAG/VDAG/g" > /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/quartile_genes_filtered.txt
 
 cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/R-studio/*decile_ids.txt | sort | uniq -c | sort -nr | grep "57.*VDAG" | sed "s/*.VDAG/VDAG/g" > /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/decile_genes_filtered.txt
+
+
+cat /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/R-studio/*low_ids.txt | sort | uniq -c | sort -nr | grep "57.*VDAG" | sed "s/*.VDAG/VDAG/g" > /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/low_genes_filtered.txt
 ```
 
 ```bash
-scp /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/*.txt cluster:/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/alignment/salmon/TPM/.
+scp /Volumes/GGB/Harrison/Projects/BBSRC\ IPA\ Clocks/Science/WP2.\ Light\,\ temperature\,\ clock\ role\ in\ pathogenicity/Obj4.\ HIGS/codon_optimisation/*.txt cluster:/home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/analysis/codon_usage/by_expression/.
 ```
 
 ### Extract highly expressed genes
@@ -310,4 +324,176 @@ Vd codon optimisation table based on highly expressed genes:
 
 ```
   UUU: 0.55; UCU: 0.85; UAU: 0.40; UGU: 0.44; UUC: 1.45; UCC: 1.41; UAC: 1.60; UGC: 1.56; UUA: 0.07; UCA: 0.51; UAA: 1.04; UGA: 1.06; UUG: 0.55; UCG: 1.36; UAG: 0.90; UGG: 1.00; CUU: 0.84; CCU: 0.93; CAU: 0.50; CGU: 0.97; CUC: 2.49; CCC: 1.66; CAC: 1.50; CGC: 2.45; CUA: 0.23; CCA: 0.53; CAA: 0.50; CGA: 0.75; CUG: 1.81; CCG: 0.89; CAG: 1.50; CGG: 0.71; AUU: 0.95; ACU: 0.58; AAU: 0.37; AGU: 0.39; AUC: 1.91; ACC: 1.62; AAC: 1.63; AGC: 1.49; AUA: 0.14; ACA: 0.58; AAA: 0.26; AGA: 0.36; AUG: 1.00; ACG: 1.22; AAG: 1.74; AGG: 0.76; GUU: 0.73; GCU: 0.80; GAU: 0.61; GGU: 0.91; GUC: 2.20; GCC: 1.98; GAC: 1.39; GGC: 2.32; GUA: 0.18; GCA: 0.44; GAA: 0.48; GGA: 0.46; GUG: 0.88; GCG: 0.77; GAG: 1.52; GGG: 0.31
+```
+
+
+## Calculate delta RSCU between codon sets:
+
+High extracted genes were already extracted. Low extracted genes needed to be extracted:
+
+### Extract low expressed genes
+
+
+```bash
+CDS=$(ls ../clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa)
+cat $CDS >
+GeneList=$(ls analysis/codon_usage/by_expression/low_genes_filtered.txt)
+OutFasta=${GeneList%.txt}.fa
+# A single transcript should be used from each gene. Check this assumption:
+cat $GeneList | grep -v ".t1$" | wc -l
+# cat $CDS | grep -w -f $OutDir/quorn_fpkm_148_IDs.txt > $OutDir/quorn_fpkm_148_IDs.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $CDS --headers $GeneList > $OutFasta
+```
+
+Remove genes with transposon annotations:
+IPR000477 - reverse transriptase
+IPR004875 - DDE superfamily endonuclease
+IPR025476 - Helitron helicase-like domain
+IPR012337 - Ribonuclease H-like superfamily
+
+Remove genes with no annotations.
+  (these may represent transposons)
+
+```bash
+OutDir=analysis/codon_usage/by_expression
+GeneList=$(ls analysis/codon_usage/by_expression/low_genes_filtered.txt)
+AnnotTab=$(ls ../clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_exp.tsv)
+CDS=$(ls ../clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa)
+FilteredList=${GeneList%.txt}_no_transposons.txt
+OutFasta=${GeneList%.txt}_no_transposons.fa
+
+# make a list of genes with transposon annotations
+cat $AnnotTab | grep -e 'IPR000477' -e 'IPR004875' -e 'IPR025476' -e 'IPR012337' -e 'transpos' > $OutDir/putative_transposon_IDs.txt
+# make a list of genes with no interproscan annotations
+cat $AnnotTab | cut -f1,29 | grep -P -v "\t\w" | cut -f1 > $OutDir/no_annotation_IDs.txt
+
+cat $GeneList | sed "s/.*VDAG/VDAG/g" | grep -v -f $OutDir/putative_transposon_IDs.txt | grep -v -f $OutDir/no_annotation_IDs.txt > $FilteredList
+ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $CDS --headers $FilteredList > $OutFasta
+
+cat $OutFasta | grep '>' | wc -l
+```
+
+```
+1114
+```
+
+### Calculate delta RSCU
+
+```bash
+OutDir=analysis/codon_usage/by_expression/delta_rscu
+mkdir -p $OutDir
+CDS=$(ls ../clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa)
+cat $CDS | cut -f1 -d ' ' > $OutDir/Vd_CDS_parsed.fa
+
+Low=analysis/codon_usage/by_expression/low_genes_filtered_no_transposons.txt
+High=analysis/codon_usage/by_expression/quartile_genes_filtered_no_transposons.txt
+ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium_venenatum/codon_usage
+$ProgDir/d_rscu.R --low $Low --high $High --cds $OutDir/Vd_CDS_parsed.fa | less
+```
+
+
+## Optimise codons for given proteins
+
+### GFP
+
+```bash
+OutDir=analysis/codon_usage/by_expression/optimised
+mkdir -p $OutDir
+printf ">GFP\nMVSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTLTYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSKLSKDPNEKRDHMVLLEFVTAAGITLGMDELYK\n" > $OutDir/GFP_unoptimised.aa
+
+printf ">human_optimised_GFP\nATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACCGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCCTGACCTACGGCGTGCAGTGCTTCAGCCGCTACCCCGACCACATGAAGCAGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCCATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTGAGCACCCAGTCCAAGCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAG\n" > $OutDir/GFP_unoptimised.cds
+printf ">Vd_HC_optimizer_GFP\nATGGTGAGCAAGGGGGAGGAGCTTTTCACGGGAGTCGTGCCAATTCTCGTGGAGCTTGACGGCGACGTGAACGGCCACAAATTCAGCGTGTCTGGAGAGGGAGAGGGCGACGCGACGTACGGAAAGCTGACGCTCAAGTTCATTTGCACCACCGGCAAGCTTCCTGTCCCGTGGCCGACACTGGTTACAACGCTGACGTACGGCGTCCAGTGCTTCTCCCGATACCCCGACCACATGAAGCAACATGATTTTTTTAAGTCGGCTATGCCCGAGGGCTACGTCCAAGAGCGTACCATTTTCTTCAAGGATGATGGAAACTACAAGACCCGAGCGGAAGTCAAATTCGAGGGCGACACGCTCGTCAACAGGATTGAGTTGAAGGGGATCGATTTCAAGGAAGATGGCAATATCCTCGGCCACAAGCTCGAATACAACTACAACAGCCACAACGTCTACATTATGGCGGACAAGCAGAAGAATGGAATCAAGGTTAACTTTAAAATCCGCCACAACATTGAAGATGGAAGTGTCCAGCTCGCGGACCATTACCAGCAGAACACGCCTATCGGCGATGGCCCCGTGCTCCTCCCGGACAACCACTATCTTTCGACCCAGTCAAAGTTGAGTAAGGACCCCAACGAGAAGCGCGACCATATGGTATTGCTGGAATTCGTGACCGCGGCAGGCATCACTCTGGGGATGGACGAGTTGTACAAG\n" >> $OutDir/GFP_unoptimised.cds
+
+printf 'UUU: 0.55; UCU: 0.85; UAU: 0.40; UGU: 0.44; UUC: 1.45; UCC: 1.41; UAC: 1.60; UGC: 1.56; UUA: 0.07; UCA: 0.51; UAA: 1.04; UGA: 1.06; UUG: 0.55; UCG: 1.36; UAG: 0.90; UGG: 1.00; CUU: 0.84; CCU: 0.93; CAU: 0.50; CGU: 0.97; CUC: 2.49; CCC: 1.66; CAC: 1.50; CGC: 2.45; CUA: 0.23; CCA: 0.53; CAA: 0.50; CGA: 0.75; CUG: 1.81; CCG: 0.89; CAG: 1.50; CGG: 0.71; AUU: 0.95; ACU: 0.58; AAU: 0.37; AGU: 0.39; AUC: 1.91; ACC: 1.62; AAC: 1.63; AGC: 1.49; AUA: 0.14; ACA: 0.58; AAA: 0.26; AGA: 0.36; AUG: 1.00; ACG: 1.22; AAG: 1.74; AGG: 0.76; GUU: 0.73; GCU: 0.80; GAU: 0.61; GGU: 0.91; GUC: 2.20; GCC: 1.98; GAC: 1.39; GGC: 2.32; GUA: 0.18; GCA: 0.44; GAA: 0.48; GGA: 0.46; GUG: 0.88; GCG: 0.77; GAG: 1.52; GGG: 0.31' > $OutDir/Vd_codon_weights.cds
+
+# CDS=$(ls ../clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa)
+# cat $CDS | cut -f1 -d ' ' > $OutDir/Vd_CDS_parsed.fa
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/verticillium_clocks/codon_optimisation
+$ProgDir/score_codons.py --fasta_aa $OutDir/GFP_unoptimised.aa  --fasta_cds $OutDir/GFP_unoptimised.cds --codon_table $OutDir/Vd_codon_weights.cds --prefix $OutDir/GFP
+```
+
+```
+randomised codons:
+AUGGUGUCAAAGGGCGAGGAGCUAUUCACGGGGGUGGUACCAAUCCUAGUGGAACUAGACGGGGACGUGAACGGACACAAGUUCAGCGUGAGCGGGGAGGGGGAGGGAGAUGCGACGUAUGGCAAGCUUACAUUGAAGUUCAUCUGUACCACGGGGAAGCUACCGGUGCCGUGGCCUACUCUAGUGACAACGCUCACAUACGGAGUGCAGUGCUUCAGCCGGUAUCCGGACCACAUGAAGCAGCACGACUUCUUCAAGUCGGCCAUGCCGGAGGGGUACGUGCAAGAGCGAACCAUCUUUUUUAAGGACGACGGGAACUACAAGACGAGGGCCGAGGUGAAGUUCGAGGGGGACACGCUGGUAAACCGCAUCGAGCUUAAGGGAAUCGACUUCAAGGAAGAUGGAAAUAUACUUGGGCACAAGCUGGAGUACAACUACAACUCGCAUAACGUGUACAUAAUGGCCGACAAGCAGAAGAACGGAAUAAAGGUGAACUUCAAGAUAAGGCACAACAUAGAGGACGGGUCCGUGCAGCUAGCGGACCACUACCAGCAGAACACACCGAUAGGCGACGGACCCGUCCUGCUGCCCGACAACCACUACCUAAGUACGCAGUCAAAGCUUAGCAAGGAUCCGAACGAAAAGCGCGACCACAUGGUACUUCUUGAGUUCGUUACAGCGGCGGGAAUCACACUAGGUAUGGAUGAGCUCUACAAG
+0.74 of 1.0
+optimum sequence:
+AUGGUCAGCAAGGGCGAGGAGCUCUUCACCGGCGUCGUCCCCAUCCUCGUCGAGCUCGACGGCGACGUCAACGGCCACAAGUUCAGCGUCAGCGGCGAGGGCGAGGGCGACGCCACCUACGGCAAGCUCACCCUCAAGUUCAUCUGCACCACCGGCAAGCUCCCCGUCCCCUGGCCCACCCUCGUCACCACCCUCACCUACGGCGUCCAGUGCUUCAGCCGCUACCCCGACCACAUGAAGCAGCACGACUUCUUCAAGAGCGCCAUGCCCGAGGGCUACGUCCAGGAGCGCACCAUCUUCUUCAAGGACGACGGCAACUACAAGACCCGCGCCGAGGUCAAGUUCGAGGGCGACACCCUCGUCAACCGCAUCGAGCUCAAGGGCAUCGACUUCAAGGAGGACGGCAACAUCCUCGGCCACAAGCUCGAGUACAACUACAACAGCCACAACGUCUACAUCAUGGCCGACAAGCAGAAGAACGGCAUCAAGGUCAACUUCAAGAUCCGCCACAACAUCGAGGACGGCAGCGUCCAGCUCGCCGACCACUACCAGCAGAACACCCCCAUCGGCGACGGCCCCGUCCUCCUCCCCGACAACCACUACCUCAGCACCCAGAGCAAGCUCAGCAAGGACCCCAACGAGAAGCGCGACCACAUGGUCCUCCUCGAGUUCGUCACCGCCGCCGGCAUCACCCUCGGCAUGGACGAGCUCUACAAG
+1.0 of 1.0
+worst sequence:
+AUGGUAAGUAAAGGGGAAGAAUUAUUUACAGGGGUAGUACCAAUAUUAGUAGAAUUAGAUGGGGAUGUAAAUGGGCAUAAAUUUAGUGUAAGUGGGGAAGGGGAAGGGGAUGCAACAUAUGGGAAAUUAACAUUAAAAUUUAUAUGUACAACAGGGAAAUUACCAGUACCAUGGCCAACAUUAGUAACAACAUUAACAUAUGGGGUACAAUGUUUUAGUAGAUAUCCAGAUCAUAUGAAACAACAUGAUUUUUUUAAAAGUGCAAUGCCAGAAGGGUAUGUACAAGAAAGAACAAUAUUUUUUAAAGAUGAUGGGAAUUAUAAAACAAGAGCAGAAGUAAAAUUUGAAGGGGAUACAUUAGUAAAUAGAAUAGAAUUAAAAGGGAUAGAUUUUAAAGAAGAUGGGAAUAUAUUAGGGCAUAAAUUAGAAUAUAAUUAUAAUAGUCAUAAUGUAUAUAUAAUGGCAGAUAAACAAAAAAAUGGGAUAAAAGUAAAUUUUAAAAUAAGACAUAAUAUAGAAGAUGGGAGUGUACAAUUAGCAGAUCAUUAUCAACAAAAUACACCAAUAGGGGAUGGGCCAGUAUUAUUACCAGAUAAUCAUUAUUUAAGUACACAAAGUAAAUUAAGUAAAGAUCCAAAUGAAAAAAGAGAUCAUAUGGUAUUAUUAGAAUUUGUAACAGCAGCAGGGAUAACAUUAGGGAUGGAUGAAUUAUAUAAA
+0.27 of 1.0
+midpoint sequence:
+0.67
+AUGGUAUCGAAGGGGGAGGAGUUGUUUACAGGGGUCGUGCCGAUACUAGUAGAACUUGAUGGAGAUGUCAACGGGCAUAAGUUUAGUGUAAGUGGGGAAGGGGAAGGCGACGCCACAUAUGGAAAGCUUACGCUGAAGUUUAUAUGUACGACAGGGAAGCUGCCGGUCCCGUGGCCGACACUGGUCACGACGCUGACAUAUGGCGUGCAGUGCUUUAGCCGCUAUCCGGAUCACAUGAAGCAACACGACUUUUUUAAGAGCGCGAUGCCUGAGGGGUACGUACAGGAGAGGACUAUAUUCUUCAAGGACGACGGGAACUACAAGACGAGGGCUGAGGUAAAGUUCGAGGGAGACACAUUGGUCAACAGAAUAGAGCUGAAAGGGAUAGACUUCAAGGAGGAUGGGAACAUACUGGGUCAUAAGCUCGAGUACAACUAUAACUCGCAUAACGUAUACAUAAUGGCGGACAAGCAAAAGAACGGGAUAAAGGUGAAUUUCAAGAUCAGGCACAACAUAGAGGAUGGAAGUGUGCAGCUAGCGGAUCACUACCAGCAGAACACCCCAAUAGGCGACGGGCCCGUGUUGCUGCCUGACAACCAUUACCUAUCGACGCAGAGCAAGCUGAGUAAGGACCCGAACGAGAAGCGAGACCAUAUGGUAUUGCUCGAAUUCGUAACAGCGGCCGGUAUCACUCUAGGGAUGGACGAAUUGUACAAG
+Score of the pre-optimised sequence:
+human_optimised_GFP
+0.92 of 1.0
+Vd_HC_optimizer_GFP
+0.78 of 1.0
+```
+
+open an R session:
+
+```bash
+R
+```
+
+```R
+GFP_1000_scores <- read.table("~/cluster_mount/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/analysis/codon_usage/by_expression/optimised/GFP_1000_scores.tsv", quote="\"", comment.char="")
+library("ggplot2")
+p <- ggplot(data=GFP_1000_scores, aes(GFP_1000_scores[,1])) + geom_histogram(bins = '50')
+p <- p + xlim(0.3, 1.0)
+p <- p + xlab("Total codon score") + ylab("Count")
+p <- p + xlab("Total codon score") + ylab("Count")
+
+p <- p + geom_vline(xintercept = 0.92, na.rm = FALSE, show.legend = NA)
+p
+```
+
+### mCherry
+
+```bash
+OutDir=analysis/codon_usage/by_expression/optimised
+mkdir -p $OutDir
+printf ">GFP\nMVSKGEEDNMAIIKEFMRFKVHMEGSVNGHEFEIEGEGEGRPYEGTQTAKLKVTKGGPLPFAWDILSPQFMYGSKAYVKHPADIPDYLKLSFPEGFKWERVMNFEDGGVVTVTQDSSLQDGEFIYKVKLRGTNFPSDGPVMQKKTMGWEASSERMYPEDGALKGEIKQRLKLKDGGHYDAEVKTTYKAKKPVQLPGAYNVNIKLDITSHNEDYTIVEQYERAEGRHSTGGMDELYK\n" > $OutDir/mCherry_unoptimised.aa
+
+printf ">Vd_optimised_mCherry\nATGGTCTCCAAGGGCGAGGAGGACAACATGGCCATCATCAAGGAGTTCATGCGCTTCAAGGTCCACATGGAGGGCAGCGTCAACGGCCACGAGTTCGAGATCGAGGGCGAGGGCGAGGGCCGCCCTTACGAGGGCACCCAGACCGCCAAGCTCAAGGTCACGAAGGGCGGCCCTCTCCCGTTCGCCTGGGACATCCTCTCCCCCCAGTTCATGTACGGCTCCAAGGCCTACGTTAAGCACCCCGCCGACATTCCCGACTACCTCAAGCTCTCCTTCCCCGAGGGCTTCAAGTGGGAGCGCGTCATGAACTTCGAGGACGGCGGCGTTGTCACCGTCACCCAGGACTCCTCCCTCCAGGACGGCGAGTTCATCTACAAGGTCAAGCTCCGCGGCACCAACTTCCCCTCCGACGGCCCTGTTATGCAGAAGAAGACCATGGGCTGGGAGGCCTCTAGCGAGCGCATGTACCCCGAGGACGGCGCCCTCAAGGGCGAGATCAAGCAGCGCCTCAAGCTCAAGGACGGCGGCCACTACGACGCCGAGGTCAAGACCACCTACAAGGCCAAGAAGCCCGTCCAGCTCCCCGGCGCCTACAACGTTAACATCAAGCTGGACATCACCTCCCACAACGAGGACTACACGATTGTCGAGCAGTACGAGCGCGCCGAGGGCCGCCACTCTACCGGCGGCATGGACGAGCTCTACAAGTAG\n" > $OutDir/mCherry_unoptimised.cds
+
+printf 'UUU: 0.55; UCU: 0.85; UAU: 0.40; UGU: 0.44; UUC: 1.45; UCC: 1.41; UAC: 1.60; UGC: 1.56; UUA: 0.07; UCA: 0.51; UAA: 1.04; UGA: 1.06; UUG: 0.55; UCG: 1.36; UAG: 0.90; UGG: 1.00; CUU: 0.84; CCU: 0.93; CAU: 0.50; CGU: 0.97; CUC: 2.49; CCC: 1.66; CAC: 1.50; CGC: 2.45; CUA: 0.23; CCA: 0.53; CAA: 0.50; CGA: 0.75; CUG: 1.81; CCG: 0.89; CAG: 1.50; CGG: 0.71; AUU: 0.95; ACU: 0.58; AAU: 0.37; AGU: 0.39; AUC: 1.91; ACC: 1.62; AAC: 1.63; AGC: 1.49; AUA: 0.14; ACA: 0.58; AAA: 0.26; AGA: 0.36; AUG: 1.00; ACG: 1.22; AAG: 1.74; AGG: 0.76; GUU: 0.73; GCU: 0.80; GAU: 0.61; GGU: 0.91; GUC: 2.20; GCC: 1.98; GAC: 1.39; GGC: 2.32; GUA: 0.18; GCA: 0.44; GAA: 0.48; GGA: 0.46; GUG: 0.88; GCG: 0.77; GAG: 1.52; GGG: 0.31' > $OutDir/Vd_codon_weights.cds
+
+ProgDir=/home/armita/git_repos/emr_repos/scripts/verticillium_clocks/codon_optimisation
+$ProgDir/score_codons.py --fasta_aa $OutDir/mCherry_unoptimised.aa  --fasta_cds $OutDir/mCherry_unoptimised.cds --codon_table $OutDir/Vd_codon_weights.cds --prefix $OutDir/mCherry
+```
+
+```
+randomised codons:
+AUGGUGUCAAAGGGGGAGGAGGACAAUAUGGCAAUCAUCAAGGAAUUCAUGCGAUUCAAGGUGCACAUGGAGGGGUCUGUAAACGGGCACGAGUUCGAAAUUGAGGGCGAGGGGGAGGGGCGUCCAUACGAGGGAACCCAGACGGCCAAGCUAAAGGUGACGAAAGGGGGACCACUCCCGUUCGCCUGGGACAUAUUGUCACCACAGUUCAUGUAUGGGUCGAAGGCGUACGUCAAGCACCCGGCGGACAUUCCCGAUUAUCUAAAGCUGAGUUUCCCGGAGGGUUUCAAGUGGGAGCGGGUAAUGAACUUCGAGGACGGGGGGGUAGUGACGGUAACGCAGGACAGUUCACUACAGGACGGGGAAUUCAUAUACAAGGUGAAGCUGAGGGGAACGAACUUCCCGUCUGACGGGCCAGUGAUGCAAAAGAAGACGAUGGGAUGGGAGGCGAGUUCAGAGAGGAUGUACCCAGAGGACGGAGCGCUGAAAGGGGAGAUAAAGCAGCGGCUAAAGCUAAAGGAUGGUGGGCAUUACGACGCUGAGGUGAAGACUACGUAUAAGGCGAAGAAACCGGUACAGCUGCCGGGGGCGUACAACGUGAACAUCAAGCUGGACAUAACAAGUCACAACGAGGACUACACCAUCGUCGAGCAGUACGAGAGGGCGGAGGGGCGUCACUCUACAGGCGGCAUGGACGAGCUGUACAAG
+0.73 of 1.0
+optimum sequence:
+AUGGUCAGCAAGGGCGAGGAGGACAACAUGGCCAUCAUCAAGGAGUUCAUGCGCUUCAAGGUCCACAUGGAGGGCAGCGUCAACGGCCACGAGUUCGAGAUCGAGGGCGAGGGCGAGGGCCGCCCCUACGAGGGCACCCAGACCGCCAAGCUCAAGGUCACCAAGGGCGGCCCCCUCCCCUUCGCCUGGGACAUCCUCAGCCCCCAGUUCAUGUACGGCAGCAAGGCCUACGUCAAGCACCCCGCCGACAUCCCCGACUACCUCAAGCUCAGCUUCCCCGAGGGCUUCAAGUGGGAGCGCGUCAUGAACUUCGAGGACGGCGGCGUCGUCACCGUCACCCAGGACAGCAGCCUCCAGGACGGCGAGUUCAUCUACAAGGUCAAGCUCCGCGGCACCAACUUCCCCAGCGACGGCCCCGUCAUGCAGAAGAAGACCAUGGGCUGGGAGGCCAGCAGCGAGCGCAUGUACCCCGAGGACGGCGCCCUCAAGGGCGAGAUCAAGCAGCGCCUCAAGCUCAAGGACGGCGGCCACUACGACGCCGAGGUCAAGACCACCUACAAGGCCAAGAAGCCCGUCCAGCUCCCCGGCGCCUACAACGUCAACAUCAAGCUCGACAUCACCAGCCACAACGAGGACUACACCAUCGUCGAGCAGUACGAGCGCGCCGAGGGCCGCCACAGCACCGGCGGCAUGGACGAGCUCUACAAG
+1.0 of 1.0
+worst sequence:
+AUGGUAAGUAAAGGGGAAGAAGAUAAUAUGGCAAUAAUAAAAGAAUUUAUGAGAUUUAAAGUACAUAUGGAAGGGAGUGUAAAUGGGCAUGAAUUUGAAAUAGAAGGGGAAGGGGAAGGGAGACCAUAUGAAGGGACACAAACAGCAAAAUUAAAAGUAACAAAAGGGGGGCCAUUACCAUUUGCAUGGGAUAUAUUAAGUCCACAAUUUAUGUAUGGGAGUAAAGCAUAUGUAAAACAUCCAGCAGAUAUACCAGAUUAUUUAAAAUUAAGUUUUCCAGAAGGGUUUAAAUGGGAAAGAGUAAUGAAUUUUGAAGAUGGGGGGGUAGUAACAGUAACACAAGAUAGUAGUUUACAAGAUGGGGAAUUUAUAUAUAAAGUAAAAUUAAGAGGGACAAAUUUUCCAAGUGAUGGGCCAGUAAUGCAAAAAAAAACAAUGGGGUGGGAAGCAAGUAGUGAAAGAAUGUAUCCAGAAGAUGGGGCAUUAAAAGGGGAAAUAAAACAAAGAUUAAAAUUAAAAGAUGGGGGGCAUUAUGAUGCAGAAGUAAAAACAACAUAUAAAGCAAAAAAACCAGUACAAUUACCAGGGGCAUAUAAUGUAAAUAUAAAAUUAGAUAUAACAAGUCAUAAUGAAGAUUAUACAAUAGUAGAACAAUAUGAAAGAGCAGAAGGGAGACAUAGUACAGGGGGGAUGGAUGAAUUAUAUAAA
+0.3 of 1.0
+midpoint sequence:
+0.68
+AUGGUAUCUAAGGGGGAGGAAGAUAACAUGGCGAUAAUAAAAGAGUUCAUGCGAUUCAAGGUACACAUGGAGGGAUCAGUGAACGGCCAUGAGUUCGAGAUCGAGGGGGAGGGGGAGGGGAGACCAUAUGAGGGGACGCAGACGGCGAAGCUGAAGGUAACUAAGGGGGGGCCACUCCCAUUCGCAUGGGAUAUACUCUCGCCACAGUUUAUGUACGGGUCGAAGGCCUACGUGAAGCACCCAGCUGACAUACCAGAUUACCUCAAGCUGUCAUUCCCUGAGGGUUUUAAGUGGGAACGGGUAAUGAACUUCGAGGACGGGGGGGUAGUGACGGUAACGCAGGAUUCGUCACUACAGGACGGCGAAUUCAUAUAUAAGGUUAAGCUCCGCGGGACAAACUUUCCGAGCGACGGGCCGGUGAUGCAGAAGAAGACGAUGGGUUGGGAAGCAUCUAGUGAGAGAAUGUACCCGGAGGAUGGGGCGCUGAAGGGCGAGAUAAAACAGAGGCUGAAGCUGAAAGACGGGGGGCACUACGAUGCAGAAGUGAAGACAACUUACAAGGCUAAAAAGCCAGUGCAACUACCAGGGGCCUACAACGUGAACAUAAAACUCGACAUCACGUCGCAUAACGAGGACUAUACAAUCGUGGAGCAAUAUGAGAGGGCGGAAGGGAGGCACAGUACUGGUGGAAUGGACGAGCUCUACAAG
+Score of the pre-optimised sequence:
+Vd_optimised_mCherry
+0.98 of 1.0
+```
+
+```R
+GFP_1000_scores <- read.table("~/cluster_mount/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/analysis/codon_usage/by_expression/optimised/mCherry_1000_scores.tsv", quote="\"", comment.char="")
+library("ggplot2")
+p <- ggplot(data=GFP_1000_scores, aes(GFP_1000_scores[,1])) + geom_histogram(bins = '50')
+p <- p + xlim(0.3, 1.0)
+p <- p + xlab("Total codon score") + ylab("Count")
+p <- p + xlab("Total codon score") + ylab("Count")
+
+p <- p + geom_vline(xintercept = 0.98, na.rm = FALSE, show.legend = NA)
+p
 ```
