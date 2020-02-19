@@ -63,6 +63,8 @@ ap.add_argument('--gene_fasta',required=True,type=str,help='amino acid sequence 
 ap.add_argument('--DEG_files',required=True,nargs='+',type=str,help='space spererated list of files containing DEG information')
 ap.add_argument('--raw_counts',required=True,type=str,help='raw count data as output from DESeq')
 ap.add_argument('--fpkm',required=True,type=str,help='normalised fpkm count data as output from DESeq')
+ap.add_argument('--TFs',required=True,type=str,help='Tab seperated of putative transcription factors and their domains as identified by interpro2TFs.py')
+ap.add_argument('--Antismash',required=True,type=str,help='Output of Antismash parsed into a tsv file of gene names, contig, secmet function and cluster ID')
 ap.add_argument('--InterPro',required=True,type=str,help='The Interproscan functional annotation .tsv file')
 ap.add_argument('--Swissprot',required=True,type=str,help='A parsed table of BLAST results against the Swissprot database. Note - must have been parsed with swissprot_parser.py')
 conf = ap.parse_args()
@@ -99,8 +101,14 @@ with open(conf.raw_counts) as f:
 with open(conf.fpkm) as f:
     fpkm_lines = f.readlines()
 
+with open(conf.TFs) as f:
+    TF_lines = f.readlines()
+
 with open(conf.InterPro) as f:
     InterPro_lines = f.readlines()
+
+with open(conf.Antismash) as f:
+    antismash_lines = f.readlines()
 
 with open(conf.Swissprot) as f:
     swissprot_lines = f.readlines()
@@ -169,6 +177,20 @@ for line in fpkm_lines:
 
 #-----------------------------------------------------
 #
+# Build a dictionary of TF gene homologs
+#-----------------------------------------------------
+
+TF_dict = defaultdict(list)
+for line in TF_lines:
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    gene_id = split_line[0]
+    gene_id = gene_id.replace('.p', '.t')
+    TF_function = split_line[2]
+    TF_dict[gene_id].append(TF_function)
+
+#-----------------------------------------------------
+#
 # Build a dictionary of interproscan annotations
 # Annotations first need to be filtered to remove
 # redundancy. This is done by first loading anntoations
@@ -193,6 +215,25 @@ for line in InterPro_lines:
         interpro_feat = ";".join(interpro_columns[1:])
         interpro_dict[gene_id].append(interpro_feat)
     interpro_set.add(set_line)
+
+#-----------------------------------------------------
+# Step 5
+# Build a dictionary of Secondary Metabolite annotations
+#-----------------------------------------------------
+#
+i = 0
+antismash_dict = defaultdict(list)
+for line in antismash_lines:
+    i += 1
+    cluster = "cluster_" + str(i)
+    line = line.rstrip("\n")
+    split_line = line.split("\t")
+    secmet_func = split_line[2]
+    cluster_genes = split_line[4].split(";")
+    for gene in cluster_genes:
+        gene = re.sub("_\d$", "", gene)
+        antismash_dict[gene].extend([secmet_func, cluster])
+        # print "\t".join([gene, secmet_func, cluster])
 
 
 #-----------------------------------------------------
@@ -234,8 +275,10 @@ for DEG_file in DEG_files:
     header_line.append("LFC_" + file_name)
     header_line.append("P-val_" + file_name)
 header_line.append('CDS_seq')
-header_line.append('Swissprot')
+header_line.append('TFs')
 header_line.append('Interpro')
+header_line.append('Antismash')
+header_line.append('Swissprot')
 print ("\t".join(header_line))
 
 transcript_lines = []
@@ -254,6 +297,7 @@ for line in transcript_lines:
     prot_seq = ''
     swissprot_cols = []
     interpro_col = []
+
     # Identify gene id
     if 'ID' in split_line[8]:
         split_col9 = split_line[8].split(';')
@@ -273,6 +317,7 @@ for line in transcript_lines:
             DEG_out.append('.')
             DEG_out.append('.')
             DEG_out.append('.')
+
 
     # # Add in read count data:
     mean_count_cols = []
@@ -295,16 +340,35 @@ for line in transcript_lines:
         mean_fpkm = np.round_(mean_fpkm, decimals=0)
         mean_fpkm_cols.append(mean_fpkm.astype(str))
 
-    # # Add in Swissprot info
-    if swissprot_dict[transcript_id]:
-        swissprot_cols = swissprot_dict[transcript_id]
+    # Add TFs info
+    TFs_cols = []
+    if TF_dict[transcript_id]:
+        TF_functions = TF_dict[transcript_id]
+        TFs_cols.append(";".join(TF_functions))
     else:
-        swissprot_cols = ['.','.','.']
+        TFs_cols.append("")
+
+    #Add Antismash info
+    if antismash_dict[transcript_id]:
+        antismash_cols = antismash_dict[transcript_id]
+        secmet_func = antismash_cols[0]
+        cluster = antismash_cols[1]
+        antismash_cols = [cluster, secmet_func]
+    else:
+        antismash_cols = ["",""]
+
     # Add in interproscan info
     if interpro_dict[transcript_id]:
         interpro_col = "|".join(interpro_dict[transcript_id])
     else:
         interpro_col = '.'
+
+    # Add in Swissprot info
+    if swissprot_dict[transcript_id]:
+        swissprot_cols = swissprot_dict[transcript_id]
+    else:
+        swissprot_cols = ['.','.','.']
+
 
     prot_seq = "".join(prot_dict[transcript_id])
     outline = [transcript_id]
@@ -313,8 +377,10 @@ for line in transcript_lines:
     outline.extend(mean_fpkm_cols)
     outline.extend(DEG_out)
     outline.append(prot_seq)
-    outline.extend(swissprot_cols)
+    outline.extend(TFs_cols)
     outline.append(interpro_col)
+    outline.extend(antismash_cols)
+    outline.extend(swissprot_cols)
 
 
     print "\t".join(outline)

@@ -599,7 +599,7 @@ done
     qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
     done
     ```
-
+<!--
 #Identification of duplicated genes in additional CodingQuary gene models
 
 ```bash
@@ -693,84 +693,111 @@ fi [ $Strain == 61 ]; then
 echo ""
 cat $CodingGff | grep -v 'CUFF.3883.1.2' > $CodingGffEd
 done
-    ```
+    ``` -->
 
 #Then additional transcripts were added to Braker gene models, when CodingQuary
 
 genes were predicted in regions of the genome, not containing Braker gene models:
 
 ```bash
-for EditDir in $(ls -d gene_pred/final_genes/*/*/edited); do
-Strain=$(echo $EditDir | rev | cut -d '/' -f2 | rev)
-Organism=$(echo $EditDir | rev | cut -d '/' -f3 | rev)
-echo "$Organism - $Strain"
-Assembly=$(ls repeat_masked/$Organism/$Strain/ncbi*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
-BrakerGff=$EditDir/final_genes_Braker_ed.gff3
-CodingQuaryGff=$EditDir/PredictedPass_ed.gff3
-PGNGff=$EditDir/PGN_predictedPass_ed.gff3
-# ManGff=$EditDir/manual_annotations.gff3
-AddDir=$EditDir/additional
-FinalDir=gene_pred/final_genes/$Organism/$Strain/final
-AddGenesList=$AddDir/additional_genes.txt
-AddGenesGff=$AddDir/additional_genes.gff
-# FinalGff=$AddDir/combined_genes.gff
-mkdir -p $AddDir
-mkdir -p $FinalDir
+for BrakerGff in $(ls gene_pred/braker/*/*/*/augustus.gff3 | grep -v 'sixth'); do
+    Strain=$(echo $BrakerGff| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    Assembly=$(ls repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+    CodingQuaryGff=gene_pred/codingquary1/$Organism/$Strain/out/PredictedPass.gff3
+    PGNGff=gene_pred/codingquary1/$Organism/$Strain/out/PGN_predictedPass.gff3
+    AddDir=gene_pred/codingquary1/$Organism/$Strain/additional
+    FinalDir=gene_pred/final/$Organism/$Strain/final
+    AddGenesList=$AddDir/additional_genes.txt
+    AddGenesGff=$AddDir/additional_genes.gff
+    FinalGff=$AddDir/combined_genes.gff
+    mkdir -p $AddDir
+    mkdir -p $FinalDir
 
-bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
-bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
-$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+    bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+    bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+    $ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+    $ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+    # -
+    # This section is edited
+    $ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $AddDir/add_genes_CodingQuary_unspliced.gff3
+    $ProgDir/correct_CodingQuary_splicing.py --inp_gff $AddDir/add_genes_CodingQuary_unspliced.gff3 > $FinalDir/final_genes_CodingQuary.gff3
+    # -
+    $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+    cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+    $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+    cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+    cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+    cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+    cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
-$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
-cp $BrakerGff $FinalDir/final_genes_Braker.gff3
-$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
-# cp $ManGff $FinalDir/final_genes_manual.gff3
-# $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_manual.gff3 $FinalDir/final_genes_manual
-cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
-cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
-cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
-cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-GffBraker=$FinalDir/final_genes_CodingQuary.gff3
-GffQuary=$FinalDir/final_genes_Braker.gff3
-# GffManual=$FinalDir/final_genes_manual.gff3
-GffAppended=$FinalDir/final_genes_appended.gff3
-cat $GffBraker $GffQuary > $GffAppended
-# cat $GffBraker $GffQuary $GffManual > $GffAppended
-done
+    GffBraker=$FinalDir/final_genes_Braker.gff3
+    GffQuary=$FinalDir/final_genes_CodingQuary.gff3
+    GffAppended=$FinalDir/final_genes_appended.gff3
+    cat $GffBraker $GffQuary > $GffAppended
+  done
   ```
+
+
+In preperation for submission to ncbi, gene models were renamed and duplicate gene features were identified and removed.
+ * no duplicate genes were identified
+
+
+```bash
+  for GffAppended in $(ls gene_pred/final/*/*/final/final_genes_appended.gff3); do
+    Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    FinalDir=gene_pred/final/$Organism/$Strain/final
+    GffFiltered=$FinalDir/filtered_duplicates.gff
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+    $ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
+    GffRenamed=$FinalDir/final_genes_appended_renamed.gff3
+    LogFile=$FinalDir/final_genes_appended_renamed.log
+    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/codingquary
+    $ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+    rm $GffFiltered
+    Assembly=$(ls repeat_masked/$Organism/$Strain/ncbi_filtered_contigs_repmask/*_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+    $ProgDir/gff2fasta.pl $Assembly $GffRenamed gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed
+    # The proteins fasta file contains * instead of Xs for stop codons, these should
+    # be changed
+    sed -i 's/\*/X/g' gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.pep.fasta
+  done
+```
 
 The final number of genes per isolate was observed using:
 
 ```bash
-for DirPath in $(ls -d  gene_pred/final_genes/V.dahliae/*/final); do
+for DirPath in $(ls -d  gene_pred/final/V.dahliae/*/final); do
   echo $DirPath;
   cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
   cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-  cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+  cat $DirPath/final_genes_appended_renamed.pep.fasta | grep '>' | wc -l;
   echo "";
-  done
-  ```
-gene_pred/final_genes/V.dahliae/51/final
-9655
-732
-10387
+done
+```
+```
+  gene_pred/final/V.dahliae/51/final
+  9655
+  732
+  10387
 
-gene_pred/final_genes/V.dahliae/53/final
-9718
-716
-10434
+  gene_pred/final/V.dahliae/53/final
+  9718
+  716
+  10434
 
-gene_pred/final_genes/V.dahliae/58/final
-9458
-0
-9458
+  gene_pred/final/V.dahliae/58/final
+  9458
+  545
+  10003
 
-gene_pred/final_genes/V.dahliae/61/final
-9457
-550
-10007
+  gene_pred/final/V.dahliae/61/final
+  9457
+  550
+  10007
+```

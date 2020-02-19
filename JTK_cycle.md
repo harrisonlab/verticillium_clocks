@@ -375,3 +375,79 @@ lty = c(1, 2, 2, 1),
 lwd = c(1, 1, 1, 3),
 col.line = c(rep("black",3), "red"))
 dev.off()
+
+
+#TimecourseLD
+
+source("/Users/lopeze/Desktop/Bioinformatics/RNA_seq/JTK_Cycle/JTK_CYCLEv3.1.R")
+
+project <- "Timecourse_LD"
+
+options(stringsAsFactors=FALSE)
+annot <- read.delim("/Users/lopeze/Desktop/Statistics_R/Timecourse_LD/Timecourse_LD_annot.txt")
+data <- read.delim("/Users/lopeze/Desktop/Statistics_R/Timecourse_LD/Timecourse_LD_data.txt")
+
+rownames(data) <- data[,1]
+data <- data[,-1]
+jtkdist(6, 3)       # 13 total time points, 2 replicates per time point
+
+periods <- 5:6       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("/Users/lopeze/Desktop/Statistics_R/Timecourse_LD/JTK_TimecourseLD",project,"rda",sep="."))
+write.table(results,file=paste("/Users/lopeze/Desktop/Statistics_R/Timecourse_LD/JTK_TimecourseLD.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+
+
+#Timecourse_T
+
+source("/Users/lopeze/Desktop/Bioinformatics/RNA_seq/JTK_Cycle/JTK_CYCLEv3.1.R")
+
+project <- "Timecourse_LD"
+
+options(stringsAsFactors=FALSE)
+annot <- read.delim("/Users/lopeze/Desktop/Statistics_R/Timecourse_T/Timecourse_T_annot.txt")
+data <- read.delim("/Users/lopeze/Desktop/Statistics_R/Timecourse_T/Timecourse_T_data.txt")
+
+rownames(data) <- data[,1]
+data <- data[,-1]
+jtkdist(6, 2)       # 13 total time points, 2 replicates per time point
+
+periods <- 5:6       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("/Users/lopeze/Desktop/Statistics_R/Timecourse_LD/JTK_TimecourseLD",project,"rda",sep="."))
+write.table(results,file=paste("/Users/lopeze/Desktop/Statistics_R/Timecourse_T/JTK_TimecourseT.txt"),row.names=F,col.names=T,quote=F,sep="\t")

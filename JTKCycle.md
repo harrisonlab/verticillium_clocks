@@ -91,11 +91,11 @@ cut -f1 countData_WT > counData_annot
 Run programme
 =============
 ```R
-source("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_CYCLEv3.1.R")
+source("/Users/lopeze/Desktop/Bioinformatics/RNA_seq/JTK_Cycle/JTK_CYCLEv3.1.R")
 project <- "WT53"
 options(stringsAsFactors=FALSE)
-annot <- read.delim("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/countData_annot")
-data <- read.delim("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/countData_WT")
+annot <- read.delim("/Users/lopeze/Desktop/Bioinformatics/RNA_seq/JTK_Cycle/countData_annot")
+data <- read.delim("/Users/lopeze/Desktop/Bioinformatics/RNA_seq/JTK_Cycle/countData_WT")
 
 #rownames(data) <- data[,1]
 #data <- data[,-1]
@@ -191,7 +191,7 @@ countData <- subset(countData, select=-Frq08_LL6_rep3)
 
 write.table(countData,"countData_FrqKO",sep="\t",na="",quote=F)
 ```
-```
+```R
 ===============
 require(DESeq2)
 colData <- read.table("colData",header=T,sep="\t")
@@ -213,7 +213,7 @@ cut -f1 countData_WT > counData_annot
 =============
 Run programme
 =============
-```
+```R
 source("/Users/lopeze/Desktop/Bioinformatics/JTK_Cycle/JTK_CYCLEv3.1.R")
 project <- "Frq08KO"
 options(stringsAsFactors=FALSE)

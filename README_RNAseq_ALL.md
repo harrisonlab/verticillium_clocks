@@ -1131,3 +1131,170 @@ heatmap.2( TFs, scale="row",
 trace="none", dendrogram="row", margins = c(8, 20), col = my_palette, cexCol=0.8,cexRow=0.4)
 dev.off()
 ```
+
+
+-----------------------------------------
+
+EXPERIMENT LD for WT, Frq and Wc-1 mutants
+
+=======================================
+Remove unnecessary samples from colData_all and countData_all
+=======================================
+
+require(DESeq2)
+
+colData <- read.table("colData_all",header=T,sep="\t")
+countData <- read.table("countData_all",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD24_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD24_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD18_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD18_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD12_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD12_rep3)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq08_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq08_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq08_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep1"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep2"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_DD6_rep3"),]      
+countData <- subset(countData, select=-Frq53_DD6_rep3)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep1"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep1)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep2"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep2)
+colData <- colData[!(colData$Sample=="Frq53_LL6_rep3"),]      
+countData <- subset(countData, select=-Frq53_LL6_rep3)
+
+colData <- colData[!(colData$Sample=="WT53_DD24_rep1"),]      
+countData <- subset(countData, select=-WT53_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep2"),]      
+countData <- subset(countData, select=-WT53_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD24_rep3"),]      
+countData <- subset(countData, select=-WT53_DD24_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep1"),]      
+countData <- subset(countData, select=-WT53_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep2"),]      
+countData <- subset(countData, select=-WT53_DD18_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD18_rep3"),]      
+countData <- subset(countData, select=-WT53_DD18_rep3)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep1"),]      
+countData <- subset(countData, select=-WT53_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep2"),]      
+countData <- subset(countData, select=-WT53_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT53_DD12_rep3"),]      
+countData <- subset(countData, select=-WT53_DD12_rep3)
+
+colData <- colData[!(colData$Sample=="WT08_DD24_rep1"),]      
+countData <- subset(countData, select=-WT08_DD24_rep1)
+colData <- colData[!(colData$Sample=="WT08_DD24_rep2"),]      
+countData <- subset(countData, select=-WT08_DD24_rep2)
+colData <- colData[!(colData$Sample=="WT08_DD24_rep3"),]      
+countData <- subset(countData, select=-WT08_DD24_rep3)
+colData <- colData[!(colData$Sample=="WT08_DD18_rep1"),]      
+countData <- subset(countData, select=-WT08_DD18_rep1)
+colData <- colData[!(colData$Sample=="WT08_DD18_rep2"),]      
+countData <- subset(countData, select=-WT08_DD18_rep2)
+colData <- colData[!(colData$Sample=="WT08_DD18_rep3"),]      
+countData <- subset(countData, select=-WT08_DD18_rep3)
+colData <- colData[!(colData$Sample=="WT08_DD12_rep1"),]      
+countData <- subset(countData, select=-WT08_DD12_rep1)
+colData <- colData[!(colData$Sample=="WT08_DD12_rep2"),]      
+countData <- subset(countData, select=-WT08_DD12_rep2)
+colData <- colData[!(colData$Sample=="WT08_DD12_rep3"),]      
+countData <- subset(countData, select=-WT08_DD12_rep3)
+colData <- colData[!(colData$Sample=="WT08_DD6_rep1"),]      
+countData <- subset(countData, select=-WT08_DD6_rep1)
+colData <- colData[!(colData$Sample=="WT08_DD6_rep2"),]      
+countData <- subset(countData, select=-WT08_DD6_rep2)
+colData <- colData[!(colData$Sample=="WT08_DD6_rep3"),]      
+countData <- subset(countData, select=-WT08_DD6_rep3)
+colData <- colData[!(colData$Sample=="WT08_LL6_rep1"),]      
+countData <- subset(countData, select=-WT08_LL6_rep1)
+colData <- colData[!(colData$Sample=="WT08_LL6_rep2"),]      
+countData <- subset(countData, select=-WT08_LL6_rep2)
+colData <- colData[!(colData$Sample=="WT08_LL6_rep3"),]      
+countData <- subset(countData, select=-WT08_LL6_rep3)
+
+write.table(countData,"countData_all_LD",sep="\t",na="",quote=F)
+write.table(colData,"colData_all_LD",sep="\t",na="",quote=F)
+
+
+#Re-run with new colData and countData files
+
+colData <- read.table("colData_all_LD",header=T,sep="\t")
+countData <- read.table("countData_all_LD",header=T,sep="\t")
+colData$Group <- factor(paste0(colData$Strain,colData$Light))
+
+design <- ~Group
+dds <- 	DESeqDataSetFromMatrix(countData,colData,design)
+sizeFactors(dds) <- sizeFactors(estimateSizeFactors(dds))
+dds <- DESeq(dds)
+rld <- rlog( dds, blind=FALSE )
+resultsNames(dds)
+
+design(dds) <- ~ Strain + Light + Strain:Light
+dds <- DESeq(dds)
+#rld <- rlog( dds )
+resultsNames(dds)
+
+#[1] "Intercept"            "Strain_Wc153_vs_53WT" "Light_l_vs_d"        
+#[4] "StrainWc153.Lightl"  
+
+# the condition effect for Wc153. This is the main effect *plus* the interaction term
+# (the extra condition effect in  Wc153 compared to WT).
+
+alpha <- 0.05
+res=results(dds, alpha=alpha, contrast=list( c("Strain_Wc153_vs_53WT") ))
+
+# the interaction term for condition effect in StrainWc153 vs WT.
+# this tests if the condition effect is different in Wc1 compared to WT
+#the interaction term for light effect in WC53 vs WT53.
+res=results(dds, alpha=alpha, contrast=list( c("StrainWc153.Lightl") ))
+
+alpha <- 0.05
+sig.res <- subset(res,padj<=alpha)
+summary(sig.res)
+
+# Plot counts
+dds <- estimateSizeFactors(dds)
+count<-counts(dds, normalized=TRUE)
+subset_interaction=which(rownames(count)%in%rownames(sig.res)=="TRUE")
+different<-count[subset_interaction,]
+
+pdf(“alignment/salmon/N.ditissima/Hg199/DeSeq2/plotcounts_dds.pdf”)
+plotCounts(dds, gene=which.min(res$padj), intgroup=“Cultivar”)
+dev.off()
+
+pdf(“alignment/salmon/N.ditissima/Hg199/DeSeq2/plotcounts2_dds.pdf”)
+plotCounts(dds, gene=which.min(res$padj), intgroup=c(“Cultivar”,“Timepoint”))
+dev.off()
+
