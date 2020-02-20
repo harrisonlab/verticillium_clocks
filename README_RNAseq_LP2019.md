@@ -15,6 +15,7 @@ tar -xvf X201SC19112783-Z01-F002_20200206_y35fds.tar
 ```
 
 #Copy the directory structure from the RawDatDir to the ProjectDir (only directories)
+
 ```bash
 cd destination/directory
 find /projects/vertclock/RNAseq_data/LP_experiment2019/X201SC19112783-Z01-F001_1_20200114/Rawdata  -type d -printf "%P\n" | xargs mkdir -p
@@ -45,6 +46,7 @@ done
 ```bash
 RawDatDir=/projects/vertclock/RNAseq_data/LP_experiment2019/X201SC19112783-Z01-F001_1_20200114/Rawdata
 ProjectDir=/projects/vertclock/raw_rna/V.dahliae/LP_experiment2019
+
 mv $RawDatDir/W53_15_1/W53_15_1_1.fq.gz $ProjectDir/W53_15_1/F/.
 mv $RawDatDir/W53_15_1/W53_15_1_2.fq.gz $ProjectDir/W53_15_1/R/.
 mv $RawDatDir/W53_15_2/W53_15_2_1.fq.gz $ProjectDir/W53_15_2/F/.
@@ -141,6 +143,7 @@ for RawData in $(ls qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/R/*.fq.gz); do
 ```
 
 ## bbduk
+
 Filter out rRNA Data using BBTools BBduk: https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/
 
 ```bash
@@ -153,6 +156,50 @@ for StrainPath in in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
 		echo $StrainPath;
     sbatch -p long --mem 60000 -c 10 ./git_repos/tools/seq_tools/bbtools/duck_wrapper2.sh $ref $StrainPath $in1 $in2 $ProgDir $Strain
 done
+```
+
+## Set up Bioconda environment
+
+To install the new version of Salmon we must set up a Bioconda environment
+Follow http://149.155.34.104/bioconda.html
+
+#Download and install Anaconda2
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+```
+PATH=/home/lopeze/miniconda3/bin:$PATH
+
+```bash
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+#Creating a Conda environment called SALMON
+
+```bash
+conda create --name salmon
+conda activate salmon
+```
+
+#Install salmon https://bioconda.github.io/recipes/salmon/README.html
+
+```bash
+conda install salmon
+```
+
+#have bwa print its help message to check it runs
+
+```bash
+salmon
+```
+
+#deactivate the environment once you are done with it
+
+```bash
+conda deactivate
 ```
 
 ## SALMON
@@ -173,7 +220,7 @@ cat Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa | sed 's/cds.*//g' > Vertic
 for Transcriptome in $(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa); do
 Strain=$(echo $Transcriptome| rev | cut -d '/' -f2 | rev)
 echo "$Strain"
-for RNADir in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
+for RNADir in $(ls -d qc_rna/V.dahliae/LP_experiment2019/W53_15_1); do
 FileNum=$(ls $RNADir/F/*cleaned.fq.gz | wc -l)
 #Jobs=$(sbatch | grep 'sub_sta' | grep 'qw'| wc -l)
 for num in $(seq 1 $FileNum); do
@@ -195,6 +242,7 @@ done
 ```
 
 #Convert Salmon quasi-quanitifcations to gene counts using an awk script:
+
 https://bioconductor.org/packages/3.7/bioc/vignettes/tximport/inst/doc/tximport.html
 
 ```bash
@@ -221,10 +269,12 @@ done
 # GENE EXPRESSION IN DESEQ2
 
 #This analysis was done repeating the salmon alignment with the option --keepduplicates.
+
 ```bash
 setwd("/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2")
 ```
 #Launch R
+
 ```bash
 /projects/software/R-3.6.1/bin/R
 ```
