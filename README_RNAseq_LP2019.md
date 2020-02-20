@@ -1,6 +1,7 @@
-##V. dahliae LP RNAseq experiment Dec2019
 
-#To download the RNSseq data from a link using the command ling, use wget in the preferred directory:
+## V. dahliae LP RNAseq experiment Dec2019
+
+# To download the RNSseq data from a link using the command ling, use wget in the preferred directory:
 wget link
 
 # In order to open and extract the files from the .tar document:
@@ -8,11 +9,11 @@ tar -xvf X201SC19112783-Z01-F001_1_20200114_91chX0.tar
 tar -xvf X201SC19112783-Z01-F001_2_20200114_CtM3Ta.tar
 tar -xvf X201SC19112783-Z01-F002_20200206_y35fds.tar
 
-#Copy the directory structure from the RawDatDir to the ProjectDir (only directories)
+# Copy the directory structure from the RawDatDir to the ProjectDir (only directories)
 cd destination/directory
 find /projects/vertclock/RNAseq_data/LP_experiment2019/X201SC19112783-Z01-F001_1_20200114/Rawdata  -type d -printf "%P\n" | xargs mkdir -p
 
-#To create folders F and R inside each strain folder:
+# To create folders F and R inside each strain folder:
 ```
 ls > t
 for folder in $(cat t); do
@@ -22,13 +23,13 @@ for folder in $(cat t); do
 done
 rm t
 ```
-#To create folders F and R inside each strain folder (simpler version):
+#T o create folders F and R inside each strain folder (simpler version):
 for folder /Wc1_15_2/; do
 	mkdir -p ./"$folder"/F
 	mkdir -p ./"$folder"/R
 done
 
-#Move sequence data to the correct directory
+# Move sequence data to the correct directory
 RawDatDir=/projects/vertclock/RNAseq_data/LP_experiment2019/X201SC19112783-Z01-F001_1_20200114/Rawdata
 ProjectDir=/projects/vertclock/raw_rna/V.dahliae/LP_experiment2019
 mv $RawDatDir/W53_15_1/W53_15_1_1.fq.gz $ProjectDir/W53_15_1/F/.
@@ -71,7 +72,10 @@ mv $RawDatDir/Wc1_D_1_2.fq.gz $ProjectDir/Wc1_D_1/R/.
 mv $RawDatDir/Wc1_D_2_1.fq.gz $ProjectDir/Wc1_D_2/F/.
 mv $RawDatDir/Wc1_D_2_2.fq.gz $ProjectDir/Wc1_D_2/R/.
 
-#Data QC Perform qc of RNAseq timecourse data
+
+#+++++++++++++++++++++++++++++++++++++++
+# Data QC Perform qc of RNAseq timecourse data
+#+++++++++++++++++++++++++++++++++++++++
 
 screen -a
 for FilePath in $(ls -d raw_rna/V.dahliae/LP_experiment2019/*); do
@@ -85,14 +89,17 @@ sbatch $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
 #sleep 10m
 done
 
-#Data quality was visualised using fastqc:
+# Data quality was visualised using fastqc:
 for RawData in $(ls qc_rna/V.dahliae/LP_experiment2019/*/*/*.fq.gz); do
 				ProgDir=/projects/vertclock/git_repos/tools/seq_tools/dna_qc
 				echo $RawData;
 				sbatch $ProgDir/run_fastqc.sh $RawData
 		done
 
-#Trim data
+#+++++++++++++++++++++++++++++++++++++++
+# Trim data
+#+++++++++++++++++++++++++++++++++++++++
+
 #Trimming was performed on data to trim adapters from sequences and remove poor quality data. This was done with fastq-mcf
 #Trimming was first performed on the strain that had a single run of data:
 
@@ -115,6 +122,10 @@ for RawData in $(ls qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/R/*.fq.gz); do
 				sbatch $ProgDir/run_fastqc.sh $RawData
 		done
 
+#+++++++++++++++++++++++++++++++++++++++
+#bbduk
+#+++++++++++++++++++++++++++++++++++++++
+
 #Filter out rRNA Data using BBTools BBduk: https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/
 
 for StrainPath in in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
@@ -127,7 +138,11 @@ for StrainPath in in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
     sbatch -p long --mem 60000 -c 10 ./git_repos/tools/seq_tools/bbtools/duck_wrapper2.sh $ref $StrainPath $in1 $in2 $ProgDir $Strain
 done
 
-##Salmon tool for transcript quantification from RNA-seq data.
+#+++++++++++++++++++++++++++++++++++++++
+# SALMON
+#+++++++++++++++++++++++++++++++++++++++
+
+# Salmon tool for transcript quantification from RNA-seq data.
 # http://salmon.readthedocs.io/en/latest/salmon.html
 # Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature Methods.
 # Note that it is designed to align to predicted transcripts and not to the whole genomeDir
@@ -159,3 +174,86 @@ sbatch $ProgDir/sub_salmon.sh $Transcriptome $FileF $FileR $OutDir
 done
 done
 done
+
+
+#Convert Salmon quasi-quanitifcations to gene counts using an awk script:
+#https://bioconductor.org/packages/3.7/bioc/vignettes/tximport/inst/doc/tximport.html
+
+mkdir -p projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2
+
+#This command creates a two column file with transcript_id and gene_id.
+for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/quant.sf | head -n1); do
+  cat $File | awk -F"\t" '{c=$1;sub(".t.*","",$1);print c,$1}' OFS="\t" > RNA_alignment/salmon/LP_experiment2019/DeSeq2/trans2gene.txt
+done
+
+# Put files in a convenient location for DeSeq.
+for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/quant.sf); do
+  Prefix=$(echo $File | cut -f5 -d '/' --output-delimiter '_')
+  mkdir -p RNA_alignment/salmon/LP_experiment2019/DeSeq2/$Prefix
+  cp $PWD/$File RNA_alignment/salmon/LP_experiment2019/DeSeq2/$Prefix/quant.sf
+done
+
+
+#+++++++++++++++++++++++++++++++++++++++
+# GENE EXPRESSION IN DESEQ2
+#+++++++++++++++++++++++++++++++++++++++
+
+#This analysis was done repeating the salmon alignment with the option --keepduplicates.
+setwd("/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2")
+
+# Launch R
+/projects/software/R-3.6.1/bin/R
+
+#===============================================================================
+#       Load libraries (R 3.4 required)
+#===============================================================================
+
+#Install packages
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("tximport")
+
+# Libraries
+library("DESeq2")
+library("BiocParallel")
+register(MulticoreParam(12))
+library(ggplot2)
+library(Biostrings)
+library(devtools)
+library(data.table)
+library(dplyr)
+library(naturalsort)
+library(tibble)
+library(tximport)
+library(rjson)
+library(readr)
+require("pheatmap")
+require(data.table)
+library("RColorBrewer")
+library("gplots", Sys.getenv("R_LIBS_USER"))
+library("ggrepel")
+
+
+#===============================================================================
+#       Load data from SALMON quasi mapping
+#===============================================================================
+
+# Create a file for all the samples
+# import transcript to gene mapping info
+tx2gene <- read.table("trans2gene.txt",header=T,sep="\t")
+head(tx2gene)
+
+# import quantification files
+txi.reps <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""),type="salmon",tx2gene=tx2gene,txOut=T)
+
+# get the sample names from the folders
+mysamples <- list.dirs("./",full.names=F,recursive=F)
+
+# summarise to gene level (this can be done in the tximport step, but is easier to understand in two steps)
+txi.genes <- summarizeToGene(txi.reps,tx2gene)
+
+# set the sample names for txi.genes
+invisible(sapply(seq(1,3), function(i) {colnames(txi.genes[[i]])<<-mysamples}))
+
+write.table(txi.genes,"countData",sep="\t",na="",quote=F)
