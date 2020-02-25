@@ -160,8 +160,8 @@ done
 
 ## Set up Bioconda environment
 
-To install the new version of Salmon we must set up a Bioconda environment
-Follow http://149.155.34.104/bioconda.html
+To install the new version of Salmon we must set up a Bioconda environment.
+Follow: http://149.155.34.104/bioconda.html
 
 #Download and install Anaconda2
 
@@ -190,7 +190,7 @@ conda activate salmon
 conda install salmon
 ```
 
-#have bwa print its help message to check it runs
+#have salmon print its help message to check it runs
 
 ```bash
 salmon
@@ -207,13 +207,19 @@ conda deactivate
 Salmon tool for transcript quantification from RNA-seq data.
 http://salmon.readthedocs.io/en/latest/salmon.html
 Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature Methods.
-Note that it is designed to align to predicted transcripts and not to the whole genomeDir
+Note that it is designed to align to predicted transcripts and not to the whole genomeDir.
+Quantifying in mapping-based mode
 
 #V. dahliae transcripts
 
 ```bash
 cat Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa | sed 's/cds.*//g' > Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa
 #cat  | grep '>' | cut -f1 | sed 's/>//g'
+```
+
+Activate salmon environment
+```bash
+conda activate salmon
 ```
 
 ```bash
@@ -235,7 +241,7 @@ Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
 echo "$Timepoint"
 OutDir=RNA_alignment/salmon/$Experiment/$Strain/$Timepoint
 ProgDir=/projects/vertclock/git_repos/tools/seq_tools/RNAseq
-sbatch $ProgDir/sub_salmon.sh $Transcriptome $FileF $FileR $OutDir
+sbatch $ProgDir/sub_salmon_1.1.sh $Transcriptome $FileF $FileR $OutDir
 done
 done
 done
