@@ -45,7 +45,7 @@ cp $CurDir/$2 $ReadR
 # and it can then be reused to quantify many experiments.
 # We use the index command of salmon to build our index:
 
-salmon index -t $Transcriptome -i transcripts_index --keepDuplicates -k 31
+salmon index -t $Transcriptome -i transcripts_index --keepDuplicates -k 27
 # ---
 # Step 3
 # Quantifying transcripts
@@ -60,7 +60,7 @@ salmon index -t $Transcriptome -i transcripts_index --keepDuplicates -k 31
 
 salmon quant \
     -i transcripts_index \
-    -l A \
+    -l IU \
     -1 $ReadF \
     -2 $ReadR \
     --validateMappings \
