@@ -147,7 +147,7 @@ for RawData in $(ls qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/R/*.fq.gz); do
 Filter out rRNA Data using BBTools BBduk: https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/
 
 ```bash
-for StrainPath in in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
+for StrainPath in $(ls -d qc_rna/V.dahliae/LP_experiment2019/*); do
     Strain=$(sed 's/.*\///' <<< $StrainPath)
     ProgDir=/projects/oldhome/deakig/pipelines/common/bbtools
     in1=$(ls $StrainPath/F/*trim.fq.gz)
@@ -217,12 +217,7 @@ cat Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa | sed 's/cds.*//g' > Vertic
 #cat  | grep '>' | cut -f1 | sed 's/>//g'
 ```
 
-Activate salmon environment
-```bash
-conda activate salmon
-```
-
-```bash
+<!-- ```bash
 for Transcriptome in $(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa); do
 Strain=$(echo $Transcriptome| rev | cut -d '/' -f2 | rev)
 echo "$Strain"
@@ -245,6 +240,27 @@ sbatch $ProgDir/sub_salmon_1.1.sh $Transcriptome $FileF $FileR $OutDir
 done
 done
 done
+``` -->
+
+Activate salmon environment
+
+```bash
+conda activate salmon
+```
+
+```bash
+salmon index \
+-t /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa \
+-i transcripts_index \
+--keepDuplicates -k 27
+
+salmon quant \
+-i transcripts_index \
+-l IU \
+-1 /projects/vertclock/qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/F/Wc1_D_3_1_cleaned.fq.gz \
+-2 /projects/vertclock/qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/R/Wc1_D_3_2_cleaned.fq.gz \
+--validateMappings -p 4 --numBootstraps 1000 --dumpEq --seqBias --gcBias \
+-o /projects/vertclock/RNA_alignment/salmon/LP_experiment2019/JR2/Wc1_D_3/transcripts_quant
 ```
 
 #Convert Salmon quasi-quanitifcations to gene counts using an awk script:
@@ -258,14 +274,14 @@ mkdir -p projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2
 #This command creates a two column file with transcript_id and gene_id.
 
 ```bash
-for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/quant.sf | head -n1); do
+for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/transcripts_quant/quant.sf | head -n1); do
   cat $File | awk -F"\t" '{c=$1;sub(".t.*","",$1);print c,$1}' OFS="\t" > RNA_alignment/salmon/LP_experiment2019/DeSeq2/trans2gene.txt
 done
 ```
 #Put files in a convenient location for DeSeq.
 
 ```bash
-for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/quant.sf); do
+for File in $(ls RNA_alignment/salmon/LP_experiment2019/JR2/*/transcripts_quant/quant.sf); do
   Prefix=$(echo $File | cut -f5 -d '/' --output-delimiter '_')
   mkdir -p RNA_alignment/salmon/LP_experiment2019/DeSeq2/$Prefix
   cp $PWD/$File RNA_alignment/salmon/LP_experiment2019/DeSeq2/$Prefix/quant.sf
@@ -294,6 +310,8 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("tximport")
+BiocManager::install("Biostrings")
+BiocManager::install("pheatmap")
 
 # Libraries
 library("DESeq2")
@@ -322,20 +340,31 @@ library("ggrepel")
 
 # Create a file for all the samples
 # import transcript to gene mapping info
-tx2gene <- read.table("trans2gene.txt",header=T,sep="\t")
-head(tx2gene)
+tx2gene <- read.table("trans2gene.txt",header=T,sep="\t") head(tx2gene)
 
 # import quantification files
-txi.reps <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""),type="salmon",tx2gene=tx2gene,txOut=T)
+txi <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""),type="salmon",tx2gene=tx2gene)
+names(txi)
+head(txi$counts)
 
 # get the sample names from the folders
 mysamples <- list.dirs("./",full.names=F,recursive=F)
 
 # summarise to gene level (this can be done in the tximport step, but is easier to understand in two steps)
-txi.genes <- summarizeToGene(txi.reps,tx2gene)
+txi.tx <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""), type = "salmon", txOut = TRUE)
 
-# set the sample names for txi.genes
-invisible(sapply(seq(1,3), function(i) {colnames(txi.genes[[i]])<<-mysamples}))
+txi.sum <- summarizeToGene(txi.tx,tx2gene)
+head(txi.sum$counts)
+all.equal(txi$counts, txi.sum$counts)
 
-write.table(txi.genes,"countData",sep="\t",na="",quote=F)
+#set the sample names for txi.genes
+invisible(sapply(seq(1,3), function(i) {colnames(txi.sum[[i]])<<-mysamples}))
+
+write.table(txi.sum$counts,"countData_all",sep="\t",na="",quote=F)
 ```
+
+```R
+#Analysis
+colData <- read.table("colData_all",header=T,sep="\t")
+countData <- read.table("countData",header=T,sep="\t")
+colData$Group <- factor(paste0(colData$Strain,colData$Light,colData$Time))
