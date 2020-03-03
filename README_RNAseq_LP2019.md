@@ -259,7 +259,12 @@ salmon quant \
 -l IU \
 -1 /projects/vertclock/qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/F/Wc1_D_3_1_cleaned.fq.gz \
 -2 /projects/vertclock/qc_rna/V.dahliae/LP_experiment2019/Wc1_D_3/R/Wc1_D_3_2_cleaned.fq.gz \
---validateMappings -p 4 --numBootstraps 1000 --dumpEq --seqBias --gcBias \
+--validateMappings
+-p 4
+--numBootstraps 1000
+--dumpEq
+--seqBias
+--gcBias \
 -o /projects/vertclock/RNA_alignment/salmon/LP_experiment2019/JR2/Wc1_D_3/transcripts_quant
 ```
 
@@ -311,13 +316,13 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 
 BiocManager::install("tximport")
 BiocManager::install("Biostrings")
-BiocManager::install("pheatmap")
+BiocManager::install("gplots")
 
 # Libraries
 library("DESeq2")
 library("BiocParallel")
 register(MulticoreParam(12))
-library(ggplot2)
+library("ggplot2")
 library(Biostrings)
 library(devtools)
 library(data.table)
@@ -339,8 +344,9 @@ library("ggrepel")
 #===============================================================================
 
 # Create a file for all the samples
-# import transcript to gene mapping info
-tx2gene <- read.table("trans2gene.txt",header=T,sep="\t") head(tx2gene)
+# import transcript to gene mapping info following https://bioconductor.org/packages/devel/bioc/vignettes/tximport/inst/doc/tximport.html
+tx2gene <- read.table("trans2gene.txt",header=T,sep="\t")
+head(tx2gene)
 
 # import quantification files
 txi <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""),type="salmon",tx2gene=tx2gene)
@@ -351,20 +357,160 @@ head(txi$counts)
 mysamples <- list.dirs("./",full.names=F,recursive=F)
 
 # summarise to gene level (this can be done in the tximport step, but is easier to understand in two steps)
-txi.tx <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""), type = "salmon", txOut = TRUE)
+#txi.tx <- tximport(paste(list.dirs("./", full.names=T,recursive=F),"/quant.sf",sep=""), type = "salmon", txOut = TRUE)
 
-txi.sum <- summarizeToGene(txi.tx,tx2gene)
-head(txi.sum$counts)
-all.equal(txi$counts, txi.sum$counts)
+#txi.sum <- summarizeToGene(txi.tx,tx2gene)
+#head(txi.sum$counts)
+#all.equal(txi$counts, txi.sum$counts)
 
 #set the sample names for txi.genes
-invisible(sapply(seq(1,3), function(i) {colnames(txi.sum[[i]])<<-mysamples}))
+#invisible(sapply(seq(1,3), function(i) {colnames(txi.tx[[i]])<<-mysamples}))
+invisible(sapply(seq(1,3), function(i) {colnames(txi[[i]])<<-mysamples}))
 
-write.table(txi.sum$counts,"countData_all",sep="\t",na="",quote=F)
+#write.table(txi.sum$counts,"countData_all",sep="\t",na="",quote=F)
 ```
 
 ```R
-#Analysis
-colData <- read.table("colData_all",header=T,sep="\t")
-countData <- read.table("countData",header=T,sep="\t")
-colData$Group <- factor(paste0(colData$Strain,colData$Light,colData$Time))
+#===============================================================================
+# DEseq2 Analysis
+#===============================================================================
+#Data is unordered as it is read in. This means data must be set into the same order as the samples were read into mysamples before integrating metadata and and read counts
+#http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+#countData <- read.table("countData",header=T,sep="\t")
+colData <- read.table("colData",header=T,sep="\t")
+colData$Group <- factor(paste0(colData$Strain, '_', colData$Time))
+
+#Design
+design <- ~ Group
+dds <- DESeqDataSetFromTximport(txi,colData,design)
+
+#To perform the median of ratios method of normalization, DESeq2 has a single estimateSizeFactors() function that will generate size factors for us. In a typical RNA-seq analysis this step is automatically performed by the DESeq() function
+dds <- DESeq(dds)
+resultsNames(dds)
+
+#Transform values
+rld <- rlog( dds, blind=FALSE )
+vsd <- vst(dds, blind=FALSE)
+
+
+#===============================================================================
+#PCA plots
+#===============================================================================
+data <- plotPCA(vsd, intgroup="Strain", returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Strain, shape=Strain)) +
+ geom_point(size=3) +
+ theme_minimal()+
+ theme(axis.title.x = element_text(size=30),
+ axis.title.y = element_text(size=30),
+ legend.text=element_text(size=20),
+ legend.title=element_text(size=20),
+ axis.text.x = element_text(colour="black",size=20),
+ axis.text.y = element_text(colour="black",size=20),)+
+ stat_ellipse(aes(x=PC1,y=PC2, fill=Strain),
+              geom="polygon", level=0.95, alpha=0.2) +
+ xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+ geom_text_repel(aes(label=colnames(vsd)))
+ coord_fixed()
+ggsave("PCA_sample_names_elipses.pdf", pca_plot, dpi=300, height=15, width=20)
+
+
+#===============================================================================
+#Sample distances
+#===============================================================================
+sampleDists <- dist( t( assay(vsd) ) )
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste(vsd$Sample)
+colnames(sampleDistMatrix) <- paste(vsd$Sample)
+colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+heatmap( sampleDistMatrix, trace="none", col=colours, margins = c(10, 10))
+
+dev.off()
+
+#===============================================================================
+#Heatmap of the count matrix
+#===============================================================================
+ntd <- normTransform(dds)
+select <- order(rowMeans(counts(dds,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(dds)[,c("Strain","Time")])
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+				 cluster_cols=FALSE, annotation_col=df)
+
+#===============================================================================
+#Analysis of gene expression
+#===============================================================================
+#Relevel to W53 D
+dds$Time <- relevel(dds$Time, "d")
+dds$Strain <- relevel(dds$Strain, "W53")
+
+#contrasts
+resultsNames(dds)
+
+## W53 15m vs D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "W53_15m", "W53_d"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"W53_15m_vs_d.txt",sep="\t",quote=F)
+
+
+## W53 30m vs D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "W53_30m", "W53_d"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"W53_30m_vs_d.txt",sep="\t",quote=F)
+
+## Wc1 15m vs D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_15m", "Wc1_d"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"Wc1_15m_vs_d.txt",sep="\t",quote=F)
+
+## Wc1 30m vs D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_30m", "Wc1_d"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"Wc1_30m_vs_d.txt",sep="\t",quote=F)
+
+## Wc1 D vs W53 D
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_d", "W53_d"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"Wc1_d_vs_W53_d.txt",sep="\t",quote=F)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+
+
+## Wc1 15m vs W53 15m
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_15m", "W53_15m"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"Wc1_15m_vs_W53_15m.txt",sep="\t",quote=F)
+
+## Wc1 30m vs W53 30m
+alpha <- 0.05
+res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_30m", "W53_30m"))
+mcols(res, use.names=TRUE)
+summary(res)
+
+write.table(res,"Wc1_30m_vs_W53_30m.txt",sep="\t",quote=F)
