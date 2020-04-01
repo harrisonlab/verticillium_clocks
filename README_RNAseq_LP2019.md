@@ -756,6 +756,7 @@ cut -f1 Wc1_30m_vs_d_DOWN.txt > Wc1_30m_vs_d_DOWN_names.txt
 ```
 
 #Wc1/WT53 in D up and down regulated
+#UP
 ```bash
 WorkDir=analysis/enrichment/LP_experiment2019
 OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_D/UP
@@ -774,18 +775,219 @@ cat $Set1Genes $Set2Genes > $AllGenes
 
 $ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
 ```
-
+#DOWN
 ```bash
 WorkDir=analysis/enrichment/LP_experiment2019
 OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_D/DOWN
-ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
-AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
-DEGs=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_all/ALL/Wc1vsWT53_D_down_LFC_names.txt
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_d_vs_W53_d_DOWN_names.txt
 AllGenes=$OutDir/Wc1vsWT53_D_down_allgenes.txt
 cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
 Set1Genes=$OutDir/Wc1vsWT53_D_down_DEGs.txt
 Set2Genes=$OutDir/Wc1vsWT53_D_down2.txt
 AllGenes=$OutDir/Wc1vsWT53_D_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#Wc1/WT53 in 15m L up and down regulated
+#UP
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_15m/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_15m_vs_W53_15m_UP_names.txt
+AllGenes=$OutDir/Wc1vsWT53_15m_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsW53_15m_up_DEGs.txt
+Set2Genes=$OutDir/Wc1vsW53_15m_up2.txt
+AllGenes=$OutDir/Wc1vsW53_15m_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#DOWN
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_15m/DOWN
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_15m_vs_W53_15m_DOWN_names.txt
+AllGenes=$OutDir/Wc1vsWT53_15m_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsWT53_15m_down_DEGs.txt
+Set2Genes=$OutDir/Wc1vsWT53_15m_down2.txt
+AllGenes=$OutDir/Wc1vsWT53_15m_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#Wc1/WT53 in 30m L up and down regulated
+#UP
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_30mm/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_30m_vs_W53_30m_UP_names.txt
+AllGenes=$OutDir/Wc1vsWT53_30m_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsW53_30m_up_DEGs.txt
+Set2Genes=$OutDir/Wc1vsW53_30m_up2.txt
+AllGenes=$OutDir/Wc1vsW53_30m_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#DOWN
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_30m/DOWN
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_30m_vs_W53_30m_DOWN_names.txt
+AllGenes=$OutDir/Wc1vsWT53_30m_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsWT53_30m_down_DEGs.txt
+Set2Genes=$OutDir/Wc1vsWT53_30m_down2.txt
+AllGenes=$OutDir/Wc1vsWT53_30m_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#WT53 15m L vs D up and down regulated
+#UP
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/WT53_15vsD/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/W53_15m_vs_d_UP_names.txt
+AllGenes=$OutDir/WT53_15vsD_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_15vsD_up_DEGs.txt
+Set2Genes=$OutDir/WT53_15vsD_up2.txt
+AllGenes=$OutDir/WT53_15vsD_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#DOWN
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/WT53_15vsD/DOWN
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/W53_15m_vs_d_DOWN_names.txt
+AllGenes=$OutDir/WT53_15vsD_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_15vsD_down_DEGs.txt
+Set2Genes=$OutDir/WT53_15vsD_down2.txt
+AllGenes=$OutDir/WT53_15vsD_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#WT53 30m L vs D up and down regulated
+#UP
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/WT53_30vsD/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/W53_30m_vs_d_UP_names.txt
+AllGenes=$OutDir/WT53_30vsD_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_30vsD_up_DEGs.txt
+Set2Genes=$OutDir/WT53_30vsD_up2.txt
+AllGenes=$OutDir/WT53_30vsD_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#DOWN
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/WT53_30vsD/DOWN
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/W53_30m_vs_d_DOWN_names.txt
+AllGenes=$OutDir/WT53_30vsD_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/WT53_30vsD_down_DEGs.txt
+Set2Genes=$OutDir/WT53_30vsD_down2.txt
+AllGenes=$OutDir/WT53_30vsD_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+#Wc1 30m L vs D up and down regulated
+#UP
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1_30vsD/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_30m_vs_d_UP_names.txt
+AllGenes=$OutDir/Wc1_30vsD_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1_30vsD_up_DEGs.txt
+Set2Genes=$OutDir/Wc1_30vsD_up2.txt
+AllGenes=$OutDir/Wc1_30vsD_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+#DOWN
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1_30vsD/DOWN
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_30m_vs_d_DOWN_names.txt
+AllGenes=$OutDir/Wc1_30vsD_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1_30vsD_down_DEGs.txt
+Set2Genes=$OutDir/Wc1_30vsD_down2.txt
+AllGenes=$OutDir/Wc1_30vsD_down.txt
 cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
 cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
 cat $Set1Genes $Set2Genes > $AllGenes
