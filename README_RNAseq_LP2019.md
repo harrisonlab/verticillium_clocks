@@ -457,24 +457,38 @@ alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group", "W53_15m", "W53_d"))
 mcols(res, use.names=TRUE)
 summary(res)
-
 write.table(res,"W53_15m_vs_d.txt",sep="\t",quote=F)
 
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+write.table(sig.res.upregulated,"W53_15m_vs_d_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"W53_15m_vs_d_DOWN.txt",sep="\t",quote=F)
 
 ## W53 30m vs D
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group", "W53_30m", "W53_d"))
 mcols(res, use.names=TRUE)
 summary(res)
-
 write.table(res,"W53_30m_vs_d.txt",sep="\t",quote=F)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+write.table(sig.res.upregulated,"W53_30m_vs_d_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"W53_30m_vs_d_DOWN.txt",sep="\t",quote=F)
 
 ## Wc1 15m vs D
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_15m", "Wc1_d"))
 mcols(res, use.names=TRUE)
 summary(res)
-
 write.table(res,"Wc1_15m_vs_d.txt",sep="\t",quote=F)
 
 ## Wc1 30m vs D
@@ -482,8 +496,16 @@ alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_30m", "Wc1_d"))
 mcols(res, use.names=TRUE)
 summary(res)
-
 write.table(res,"Wc1_30m_vs_d.txt",sep="\t",quote=F)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+write.table(sig.res.upregulated,"Wc1_30m_vs_d_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wc1_30m_vs_d_DOWN.txt",sep="\t",quote=F)
 
 ## Wc1 D vs W53 D
 alpha <- 0.05
@@ -495,8 +517,12 @@ write.table(res,"Wc1_d_vs_W53_d.txt",sep="\t",quote=F)
 
 sig.res <- subset(res,padj<=alpha)
 sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
 sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
 sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+write.table(sig.res.upregulated,"Wc1_d_vs_W53_d_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wc1_d_vs_W53_d_DOWN.txt",sep="\t",quote=F)
 
 
 ## Wc1 15m vs W53 15m
@@ -507,6 +533,16 @@ summary(res)
 
 write.table(res,"Wc1_15m_vs_W53_15m.txt",sep="\t",quote=F)
 
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+summary(sig.res.upregulated)
+write.table(sig.res.upregulated,"Wc1_15m_vs_W53_15m_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wc1_15m_vs_W53_15m_DOWN.txt",sep="\t",quote=F)
+
 ## Wc1 30m vs W53 30m
 alpha <- 0.05
 res= results(dds, alpha=alpha,contrast=c("Group", "Wc1_30m", "W53_30m"))
@@ -514,3 +550,245 @@ mcols(res, use.names=TRUE)
 summary(res)
 
 write.table(res,"Wc1_30m_vs_W53_30m.txt",sep="\t",quote=F)
+
+sig.res <- subset(res,padj<=alpha)
+sig.res <- sig.res[order(sig.res$padj),]
+summary(sig.res)
+
+sig.res.upregulated <- sig.res[sig.res$log2FoldChange >=1, ]
+sig.res.downregulated <- sig.res[sig.res$log2FoldChange <=-1, ]
+summary(sig.res.upregulated)
+write.table(sig.res.upregulated,"Wc1_30m_vs_W53_30m_UP.txt",sep="\t",quote=F)
+write.table(sig.res.downregulated,"Wc1_30m_vs_W53_30m_DOWN.txt",sep="\t",quote=F)
+
+
+#===============================================================================
+#Plot counts
+#===============================================================================
+#Wc-1
+d <- plotCounts(dds, gene="VDAG_JR2_Chr2g01990", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+	scale_y_log10(breaks=c(1,500,1000,1500, 2000)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+
+#Frq
+d <- plotCounts(dds, gene="VDAG_JR2_Chr1g01960", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1,5000, 10000, 15000)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#Wc2
+d <- plotCounts(dds, gene="VDAG_JR2_Chr7g03830", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1,100, 200, 300)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#Vvd
+d <- plotCounts(dds, gene="VDAG_JR2_Chr3g10380", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1,250, 500, 750, 1000)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#cry
+d <- plotCounts(dds, gene="VDAG_JR2_Chr1g17210", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1,250, 500, 750, 1000)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#Phr
+d <- plotCounts(dds, gene="VDAG_JR2_Chr7g00170", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1, 500, 1000, 1500)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#Phy
+d <- plotCounts(dds, gene="VDAG_JR2_Chr4g09150", intgroup=c("Time", "Strain"),
+                returnData=TRUE)
+library("ggplot2")
+ggplot(d, aes(x=Strain, y=count, color=Time)) +
+  geom_point(position=position_jitter(w=0.1,h=0))+
+	scale_y_log10(breaks=c(1, 400, 800)) +
+	geom_text_repel(aes(label=colnames(vsd)))
+	dev.off()
+
+#frh
+plotCounts(dds, gene="VDAG_JR2_Chr4g00070", intgroup="Strain")
+dev.off()
+
+#fwd-1
+plotCounts(dds, gene="VDAG_JR2_Chr6g03850", intgroup="Strain")
+dev.off()
+```
+
+```R
+#===============================================================================
+#Preparing a file
+#===============================================================================
+#Make a table of raw counts, normalised counts and fpkm values:
+
+raw_counts <- data.frame(counts(dds, normalized=FALSE))
+colnames(raw_counts) <- paste(colData$Group)
+write.table(raw_counts,"raw_counts.txt",sep="\t",na="",quote=F)
+
+norm_counts <- data.frame(counts(dds, normalized=TRUE))
+colnames(norm_counts) <- paste(colData$Group)
+write.table(norm_counts,"normalised_counts.txt",sep="\t",na="",quote=F)
+
+## When the raw_data is created, the column names are shifted, due to the lack of column name for the genes. To fix it, do nano filex, and then added the word "Gene", press tab and save ctr+x
+# robust may be better set at fasle to normalise based on total counts rather than 'library normalisation factors'
+```
+
+# Generating an TSV file with sequencing information
+
+```bash
+for GeneGff in $(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3); do
+    Strain=JR2
+    Organism=V.dahliae
+    Assembly=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
+    TFs=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/analysis/transcription_factors/V.dahliae/JR2/JR2_TF_domains.tsv)
+    InterPro=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv)
+    Antismash=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/analysis/secondary_metabolites/antismash/JR2/fungi-38c21e2b-ce4f-4026-8f65-536412b28aee/geneclusters.txt)
+    SwissProt=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/swissprot/V.dahliae/12008/swissprot_vJul2016_tophit_parsed.tbl)
+    OutDir=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2
+    GeneFasta=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all.fa)
+    Dir1=$(ls -d RNA_alignment/salmon/LP_experiment2019/DeSeq2)
+    DEG_Files=$(ls \
+        $Dir1/W53_15m_vs_d.txt \
+        $Dir1/W53_30m_vs_d.txt \
+        $Dir1/Wc1_15m_vs_d.txt \
+        $Dir1/Wc1_30m_vs_d.txt \
+				$Dir1/Wc1_d_vs_W53_d.txt \
+				$Dir1/Wc1_15m_vs_W53_15m.txt \
+				$Dir1/Wc1_30m_vs_W53_30m.txt \
+        | sed -e "s/$/ /g" | tr -d "\n")
+
+    #RawCount=$(ls $Dir1/raw_counts.txt)
+    #FPKM=$(ls $Dir1/normalised_counts.txt)
+    ProgDir=/projects/vertclock/git_repos/scripts
+    $ProgDir/Vd_annotation_tables.py --gene_gff $GeneGff --gene_fasta $GeneFasta --DEG_files $DEG_Files --TFs $TFs --InterPro $InterPro --Antismash $Antismash --Swissprot $SwissProt > $OutDir/"$Strain"_gene_table.tsv
+done
+
+```
+# Set up R3.6 lib.path in my profile
+```R
+/projects/software/R-3.6.1/bin/R
+.libPaths()
+```
+#[1] "/home/lopeze/R/x86_64-pc-linux-gnu-library/3.6"
+#[2] "/projects/software/R-3.6.1/library"
+
+```bash
+nano /home/lopeze/.profile
+
+#add the following line at the end of the file
+export R_LIBS=/home/lopeze/R/x86_64-pc-linux-gnu-library/3.6:$R_LIBS
+```
+
+```R
+/projects/software/R-3.6.1/bin/R
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("optparse")
+BiocManager::install("Rgraphviz")
+BiocManager::install("topGO")
+BiocManager::install("GO.db")
+```
+
+# FUNCTIONAL annotations
+#Analysis of DEGs vs all genes
+```bash
+OutDir=analysis/enrichment/LP_experiment2019
+InterProTSV=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv
+ProgDir=/projects/oldhome/adamst/git_repos/scripts/fusarium/analysis/gene_enrichment
+$ProgDir/GO_prep_table.py --interpro $InterProTSV > $OutDir/experiment_all_gene_GO_annots.tsv
+```
+#Or copy the experiment_all_gene_GO_annots.tsv file from oldhome
+
+#Create gene list files from the different DEG gene lists
+```bash
+#Extract the first column of one file and save it as a *_name.file
+cut -f1 file > file2
+
+cut -f1 Wc1_d_vs_W53_d_UP.txt > Wc1_d_vs_W53_d_UP_names.txt
+cut -f1 Wc1_d_vs_W53_d_DOWN.txt > Wc1_d_vs_W53_d_DOWN_names.txt
+
+cut -f1 Wc1_15m_vs_W53_15m_UP.txt > Wc1_15m_vs_W53_15m_UP_names.txt
+cut -f1 Wc1_15m_vs_W53_15m_DOWN.txt > Wc1_15m_vs_W53_15m_DOWN_names.txt
+
+cut -f1 Wc1_30m_vs_W53_30m_UP.txt > Wc1_30m_vs_W53_30m_UP_names.txt
+cut -f1 Wc1_30m_vs_W53_30m_DOWN.txt > Wc1_30m_vs_W53_30m_DOWN_names.txt
+
+cut -f1 W53_30m_vs_d_UP.txt > W53_30m_vs_d_UP_names.txt
+cut -f1 W53_30m_vs_d_DOWN.txt > W53_30m_vs_d_DOWN_names.txt
+
+cut -f1 W53_15m_vs_d_UP.txt > W53_15m_vs_d_UP_names.txt
+cut -f1 W53_15m_vs_d_DOWN.txt > W53_15m_vs_d_DOWN_names.txt
+
+cut -f1 Wc1_30m_vs_d_UP.txt > Wc1_30m_vs_d_UP_names.txt
+cut -f1 Wc1_30m_vs_d_DOWN.txt > Wc1_30m_vs_d_DOWN_names.txt
+```
+
+#Wc1/WT53 in D up and down regulated
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_D/UP
+mkdir -p $OutDir
+ProgDir=/projects/vertclock/git_repos/scripts/
+AnnotTable=/projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/clocks/gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/projects/vertclock/RNA_alignment/salmon/LP_experiment2019/DeSeq2/Wc1_d_vs_W53_d_UP_names.txt
+AllGenes=$OutDir/Wc1vsWT53_D_up_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsW53_D_up_DEGs.txt
+Set2Genes=$OutDir/Wc1vsW53_D_up2.txt
+AllGenes=$OutDir/Wc1vsW53_D_up.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
+
+```bash
+WorkDir=analysis/enrichment/LP_experiment2019
+OutDir=analysis/enrichment/LP_experiment2019/Wc1vsWT53_D/DOWN
+ProgDir=/home/lopeze/git_repos/scripts/verticillium_clocks
+AnnotTable=gene_pred/annotation/V.dahliae/JR2/JR2_gene_table_incl_3.tsv
+DEGs=/home/groups/harrisonlab/project_files/verticillium_dahliae/clocks/RNA_alignment/featureCounts/experiment_all/ALL/Wc1vsWT53_D_down_LFC_names.txt
+AllGenes=$OutDir/Wc1vsWT53_D_down_allgenes.txt
+cat $AnnotTable | tail -n+2  | cut -f1 > $AllGenes
+Set1Genes=$OutDir/Wc1vsWT53_D_down_DEGs.txt
+Set2Genes=$OutDir/Wc1vsWT53_D_down2.txt
+AllGenes=$OutDir/Wc1vsWT53_D_down.txt
+cat $DEGs | sed -e 's/$/\t0.001/g' > $Set1Genes
+cat $AnnotTable | tail -n+2 | cut -f1 | cut -d'.' -f1 | grep -v $Set1Genes | sed -e 's/$/\t1.00/g' > $Set2Genes
+cat $Set1Genes $Set2Genes > $AllGenes
+
+$ProgDir/GO_enrichment.r --all_genes $AllGenes --GO_annotations $WorkDir/experiment_all_gene_GO_annots.tsv --out_dir $OutDir > $OutDir/output.txt
+```
