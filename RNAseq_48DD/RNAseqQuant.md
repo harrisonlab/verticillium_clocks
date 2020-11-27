@@ -109,60 +109,18 @@ cp /archives/2020_niab_general/20201117_VdahliaeClock_RNAseq48DD/upload1/WT53_48
 
 ```bash
 # Run fastqc
-for RawData in $(ls RNAseq_data/48DD_experiment2020/WT53/*/*/*.fq.gz | grep 'WT53_1\|WT53_2\|WT53_3\|WT53_4\|WT53_8') 
-do
-echo $RawData
-ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
-sbatch $ProgDir/fastqc.sh $RawData
-done
+    for RawData in $(ls RNAseq_data/48DD_experiment2020/WT53/*/*/*.fq.gz | grep 'WT53_1\|WT53_2\|WT53_3\|WT53_4\|WT53_8') 
+    do
+        echo $RawData
+        ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
+        sbatch $ProgDir/fastqc.sh $RawData
+    done
 ```
 
 
 ```bash
 # Run fastq-mcf
-for RNADir in $(ls -d RNAseq_data/48DD_experiment2020/WT53/T48); do
-FileNum=$(ls $RNADir/F/*_1.fq.gz | wc -l)
-for num in $(seq 1 $FileNum); do
-printf "\n"
-FileF=$(ls $RNADir/F/*.fq.gz | head -n $num | tail -n1)
-FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
-echo $FileF
-echo $FileR
-IluminaAdapters=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc/illumina_full_adapters.fa
-ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
-sbatch $ProgDir/fastq-mcf_himem.sh $FileF $FileR $IluminaAdapters RNA
-done
-done
-```
-
-for RawData in $(ls RNAseq_data/48DD_experiment2020/WT53/*/*/*.fq.gz | grep 'WT53_1\|WT53_2\|WT53_3\|WT53_4\|WT53_8') 
-do
-echo $RawData
-ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
-sbatch $ProgDir/fastqc.sh $RawData
-done
-```
-```
-
-```bash
-# Run fastqc
-for Strain in Strain1 Strain2; do
-    RawData=$(ls raw_dna/paired/$Organism/$Strain/*/*.fastq.gz)
-    echo $RawData;
-    ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
-    sbatch $ProgDir/fastqc.sh $RawData
-done
-```
-
-
-## Salmon 
-
-```bash
-for Transcriptome in $(ls public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa); do
-    Strain=$(echo $Transcriptome| rev | cut -d '/' -f2 | rev)
-    Organism=V.dahliae
-    echo "$Organism - $Strain"
-    for RNADir in $(ls -d RNAseq_data/48DD_experiment2020/WT53/*); do
+    for RNADir in $(ls -d RNAseq_data/48DD_experiment2020/WT53/T48); do
     FileNum=$(ls $RNADir/F/*_1.fq.gz | wc -l)
         for num in $(seq 1 $FileNum); do
             printf "\n"
@@ -170,16 +128,56 @@ for Transcriptome in $(ls public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4
             FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
             echo $FileF
             echo $FileR
-            Prefix=$(echo $RNADir | rev | cut -f2 -d '/' | rev)
-            Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
-            Sample_Name=$(echo $FileF | rev | cut -d '/' -f1 | rev | sed 's/_1.fq.gz//g')
-            echo "$Prefix"
-            echo "$Timepoint"
-            echo "$Sample_Name"
-            OutDir=alignment/salmon/$Organism/$Strain/$Prefix/$Timepoint/$Sample_Name
-            ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/RNAseq_analysis
-            sbatch $ProgDir/salmon.sh $Transcriptome $FileF $FileR $OutDir
+            IluminaAdapters=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc/illumina_full_adapters.fa
+            ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
+            sbatch $ProgDir/fastq-mcf_himem.sh $FileF $FileR $IluminaAdapters RNA
         done
     done
-done
+```
+
+```bash
+    # Run fastqc
+    for RawData in $(ls qc_rna/48DD_experiment2020/WT53/*/*/*.fq.gz | grep 'WT53_1\|WT53_2\|WT53_3\|WT53_4\|WT53_8') 
+    do
+        echo $RawData
+        ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/SEQdata_qc
+        sbatch $ProgDir/fastqc.sh $RawData
+    done
+```
+
+            
+## Salmon 
+
+```bash
+    # I have installed the latest version in a new env
+    conda config --add channels conda-forge
+    conda config --add channels bioconda
+    conda create -n salmon salmon
+```
+
+```bash
+    for Transcriptome in $(ls public_genomes/JR2/Verticillium_dahliaejr2.VDAG_JR2v.4.0.cds.all_parsed.fa); do
+        Strain=$(echo $Transcriptome| rev | cut -d '/' -f2 | rev)
+        Organism=V.dahliae
+        echo "$Organism - $Strain"
+        for RNADir in $(ls -d qc_rna/48DD_experiment2020/WT53/*); do
+            FileNum=$(ls $RNADir/F/*_1_trim.fq.gz | wc -l)
+            for num in $(seq 1 $FileNum); do
+                printf "\n"
+                FileF=$(ls $RNADir/F/*.fq.gz | head -n $num | tail -n1)
+                FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
+                echo $FileF
+                echo $FileR
+                Prefix=$(echo $RNADir | rev | cut -f2 -d '/' | rev)
+                Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+                Sample_Name=$(echo $FileF | rev | cut -d '/' -f1 | rev | sed 's/_1_trim.fq.gz//g')
+                echo "$Prefix"
+                echo "$Timepoint"
+                echo "$Sample_Name"
+                OutDir=alignment/salmon/48DD_experiment/$Organism/$Strain/$Prefix/$Timepoint/$Sample_Name
+                ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/RNAseq_analysis
+                sbatch $ProgDir/salmon.sh $Transcriptome $FileF $FileR $OutDir
+            done
+        done
+    done
 ```
