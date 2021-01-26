@@ -439,3 +439,202 @@ pca(experiment.table="C+E/fpkm_norm_counts.txt", type="FPKM",
       legend.position="topleft", covariatesInNames=FALSE, samplesName=TRUE,
       principal.components=c(1,2), pdf = TRUE,
       output.folder=getwd())
+
+
+
+setwd("/Users/antoniogomez/Desktop/VertRNA")
+
+require(DESeq2)
+colData <- read.table("colData",header=T,sep="\t")
+countData <- read.table("countData_WT",header=T,sep="\t")
+colData$Group <- paste0(colData$Strain,colData$Light,colData$Time)
+
+colData <- read.table("/Users/antoniogomez/Desktop/VertRNA/Vd_clocks_RNAseq_design.txt",header=T,sep="\t")
+countData <- read.table("/Users/antoniogomez/Desktop/VertRNA/C+E/fpkm_norm_counts.txt",header=T,sep="\t")
+
+write.table(rownames(countData,"countData_annot"))
+
+#Do it in Bash
+cut -f1 countData_WT > counData_annot
+
+source("JTKversion3/JTK_CYCLEv3.1.R")
+project <- "WT53"
+options(stringsAsFactors=FALSE)
+annot <- read.delim("counData_annot.txt")
+data <- read.delim("TPM/TPM_id2.txt")
+
+
+jtkdist(12, 3)       # 13 total time points, 2 replicates per time point
+
+periods <- 12       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("JTK",project,"rda",sep="."))
+write.table(results,file=paste("/Users/antoniogomez/Desktop/VertRNA/TPM/JTK_WT53_2.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+
+
+source("JTKversion3/JTK_CYCLEv3.1.R")
+project <- "WT53"
+options(stringsAsFactors=FALSE)
+annot <- read.delim("counData_annot.txt")
+data <- read.delim("fpkm/fpkm4jtk_counts.txt")
+
+
+jtkdist(12, 3)       # 13 total time points, 2 replicates per time point
+
+periods <- 12       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("JTK",project,"rda",sep="."))
+write.table(results,file=paste("/Users/antoniogomez/Desktop/VertRNA/fpkm/JTK_WT53_fpkm_counts.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+
+```
+
+Interproscan
+
+
+```bash
+awk -F'.p1' '{print $1}' public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.pep.all.fa > genes.pep.fa
+```
+
+
+```bash
+# This command will split your gene fasta file and run multiple interproscan jobs.
+  ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/Feature_annotation
+  for Genes in $(ls genes.pep.fa); do
+    echo $Genes
+    $ProgDir/interproscan.sh $Genes
+  done 2>&1 | tee -a interproscan_submisison.log
+```
+```bash
+  ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/Feature_annotation
+  for Proteins in $(ls genes.pep.fa); do
+    Strain=JR2
+    Organism=V.dahliae
+    InterProRaw=gene_pred/interproscan/V.dahliae/JR2/raw
+    $ProgDir/append_interpro.sh $Proteins $InterProRaw
+  done
+
+
+for GeneGff in $(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.33_parsed.gff3); do
+Strain=JR2
+Organism=V.dahliae
+Assembly=$(ls public_genomes/JR2/Verticillium_dahliaejr2.GCA_000400815.2.dna.toplevel.fa)
+InterPro=$(ls /projects/oldhome/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/interproscan/V.dahliae/JR2/JR2_interproscan.tsv)
+#SwissProt=$(ls /home/groups/harrisonlab/project_files/verticillium_dahliae/pathogenomics/gene_pred/swissprot/V.dahliae/12008/swissprot_vJul2016_tophit_parsed.tbl)
+OutDir=gene_pred/annotation/$Organism/$Strain
+mkdir -p $OutDir
+GeneFasta=$(ls genes.pep.fa)
+ProgDir=/home/gomeza/git_repos/scripts/verticillium_clocks/annotation
+$ProgDir/Vd_annotation_tables_vAG.py --gene_gff $GeneGff --gene_fasta $GeneFasta --InterPro $InterPro > $OutDir/"$Strain"_gene_table_incl_exp.tsv
+done
+
+cat $OutDir/"$Strain"_gene_table_incl_exp.tsv | cut -f1 | awk -F'.t1' '{print $1}' > table.tsv
+
+```
+```r
+source("JTKversion3/JTK_CYCLEv3.1.R")
+project <- "WT53"
+options(stringsAsFactors=FALSE)
+annot <- read.delim("counData_annot.txt")
+data <- read.delim("fpkm/normalised_counts4jtk.txt")
+
+
+jtkdist(12, 3)       # 13 total time points, 2 replicates per time point
+
+periods <- 12       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("JTK",project,"rda",sep="."))
+write.table(results,file=paste("/Users/antoniogomez/Desktop/VertRNA/fpkm/JTK_WT53_norm_counts.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+
+same results using norm counts or fpkm robus yes
+
+source("JTKversion3/JTK_CYCLEv3.1.R")
+project <- "WT53"
+options(stringsAsFactors=FALSE)
+annot <- read.delim("counData_annot.txt")
+data <- read.delim("fpkm/fpkm_robust/fpkm4jtk.txt")
+
+
+jtkdist(12, 3)       # 13 total time points, 2 replicates per time point
+
+periods <- 2:11       # looking for rhythms between 20-28 hours (i.e. between 5 and 7 time points per cycle).
+jtk.init(periods,4)  # 4 is the number of hours between time points
+
+cat("JTK analysis started on",date(),"\n")
+flush.console()
+
+st <- system.time({
+  res <- apply(data,1,function(z) {
+    jtkx(z)
+    c(JTK.ADJP,JTK.PERIOD,JTK.LAG,JTK.AMP)
+  })
+  res <- as.data.frame(t(res))
+  bhq <- p.adjust(unlist(res[,1]),"BH")
+  res <- cbind(bhq,res)
+  colnames(res) <- c("BH.Q","ADJ.P","PER","LAG","AMP")
+  results <- cbind(annot,res,data)
+  results <- results[order(res$ADJ.P,-res$AMP),]
+})
+print(st)
+
+save(results,file=paste("JTK",project,"rda",sep="."))
+write.table(results,file=paste("/Users/antoniogomez/Desktop/VertRNA/fpkm/fpkm_robust/last_fpkm_norm2.txt"),row.names=F,col.names=T,quote=F,sep="\t")
+```
+T1<-read.delim("JR2_gene_table_incl_exp.tsv",header=T)
+T2<-read.table("fpkm/fpkm_robust/01.txt",header=T,sep="\t")
+T3<-merge(T2,T1, by.x="ID",by.y="ID",all.x=TRUE)
+write.table(T3,"TableAG.txt",sep="\t",na="",quote=F)
+T3<-read.table("Table3.txt",header=T,sep="\t")
