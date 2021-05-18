@@ -292,8 +292,6 @@ write.table(txi.genes,"alignment/salmon/48DD_experiment/V.dahliae/JR2/DeSeq2/txi
 write.table(txi.reps,"alignment/salmon/48DD_experiment/V.dahliae/JR2/DeSeq2/txireps.txt",sep="\t",na="",quote=F)
 
 
-
-
 pca(experiment.table="txigenes2.txt", type="TPM",
       legend.position="topleft", covariatesInNames=FALSE, samplesName=TRUE,
       principal.components=c(1,2), pdf = TRUE,
@@ -378,13 +376,13 @@ pca(experiment.table="fpkm_norm_counts.txt", type="FPKM",
 
 write.csv(vst, file="vst.csv")
 
-
+# Correcting the experimental desing
 
 # Define the DESeq 'GLM' model
 design <- ~ Condition + Experiment
 dds <- DESeqDataSetFromTximport(txi.genes,colData,design)
 
-# Library normalisation
+# Library normalisation (this is done in the DeSeq function)
 dds <- estimateSizeFactors(dds)
 
 # Deseq
@@ -401,6 +399,73 @@ resultsNames(dds)
  [9] "Condition_WT53_40_vs_WT53_12" "Condition_WT53_44_vs_WT53_12"
 [11] "Condition_WT53_48_vs_WT53_12" "Condition_WT53_8_vs_WT53_12" 
 [13] "Experiment_B_vs_A"            "Experiment_C_vs_A" 
+
+# Varianze stabilizing transformation
+
+vst<-varianceStabilizingTransformation(dds)
+write.csv(assay(vst), file="vst_true.csv")
+
+pdf("PCA_vst_true.pdf")
+plotPCA(vst,intgroup=c("Experiment"))
+dev.off()
+
+# Remove batch effect associated with the Experiment (replicas)
+mat1 <- assay(vst)
+mat1 <- limma::removeBatchEffect(mat1, vst$Experiment)
+write.csv(mat1, file="vst_true_batchcorrected.csv")
+assay(vst) <- mat1
+
+pdf("PCA_vst_true_corrected.pdf")
+plotPCA(vst,intgroup=c("Experiment"))
+dev.off()
+
+# Blind false
+vst4<-varianceStabilizingTransformation(dds,blind=FALSE)
+write.csv(assay(vst4), file="vst_false.csv")
+
+pdf("PCA_vst_false.pdf")
+plotPCA(vst4,intgroup=c("Experiment"))
+dev.off()
+
+# Remove batch effect associated with the Experiment (replicas)
+mat <- assay(vst4)
+mat <- limma::removeBatchEffect(mat, vst4$Experiment)
+write.csv(mat, file="vst_false_batchcorrected.csv")
+assay(vst4) <- mat
+
+pdf("PCA_vst_false_corrected.pdf")
+plotPCA(vst4,intgroup=c("Experiment"))
+dev.off()
+
+# Test vst function 
+vst2<-vst(dds,blind=FALSE)
+write.csv(assay(vst2), file="vst2.csv")
+vst3<-vst(dds,blind=TRUE)
+write.csv(assay(vst3), file="vst3.csv")
+
+pdf("PCA_vst2.pdf")
+plotPCA(vst2,intgroup=c("Experiment"))
+dev.off()
+pdf("PCA_vst3.pdf")
+plotPCA(vst3,intgroup=c("Experiment"))
+dev.off()
+
+C2 <- assay(vst2)
+C2 <- limma::removeBatchEffect(C2, vst2$Experiment)
+write.csv(C2, file="vst2_batchcorrected.csv")
+assay(vst2) <- C2
+pdf("PCA_vst2_corrected.pdf")
+plotPCA(vst2,intgroup=c("Experiment"))
+dev.off()
+
+C3 <- assay(vst3)
+C3 <- limma::removeBatchEffect(C3, vst3$Experiment)
+write.csv(C3, file="vst3_batchcorrected.csv")
+assay(vst3) <- C3
+pdf("PCA_vst3_corrected.pdf")
+plotPCA(vst3,intgroup=c("Experiment"))
+dev.off()
+
 
 #Make a table of raw counts, normalised counts and fpkm values:
 raw_counts <- data.frame(counts(dds, normalized=FALSE))
@@ -440,6 +505,19 @@ pca(experiment.table="C+E/fpkm_norm_counts.txt", type="FPKM",
       principal.components=c(1,2), pdf = TRUE,
       output.folder=getwd())
 
+# Full PCA with sample names
+data <- plotPCA(vst4, intgroup=c("Condition","Experiment"), returnData=TRUE)
+percentVar <- round(100 * attr(data, "percentVar"))
+pca_plot<- ggplot(data, aes(PC1, PC2, color=Experiment)) +
+geom_point(size=3) +
+xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+geom_text_repel(aes(label=colnames(vst4))) + theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), panel.background = element_blank(),
+panel.border = element_rect(colour = "black", fill = NA, size = 1),
+axis.text = element_text(size = 14), axis.title = element_text(size = 18))
+coord_fixed()
+ggsave("PCA_sample_names1.pdf", pca_plot, dpi=300, height=10, width=12)
 
 
 setwd("/Users/antoniogomez/Desktop/VertRNA")
@@ -633,8 +711,11 @@ print(st)
 save(results,file=paste("JTK",project,"rda",sep="."))
 write.table(results,file=paste("/Users/antoniogomez/Desktop/VertRNA/fpkm/fpkm_robust/last_fpkm_norm2.txt"),row.names=F,col.names=T,quote=F,sep="\t")
 ```
-T1<-read.delim("JR2_gene_table_incl_exp.tsv",header=T)
+T1<-read.delim("inter.txt",header=T)
 T2<-read.table("fpkm/fpkm_robust/01.txt",header=T,sep="\t")
 T3<-merge(T2,T1, by.x="ID",by.y="ID",all.x=TRUE)
 write.table(T3,"TableAG.txt",sep="\t",na="",quote=F)
 T3<-read.table("Table3.txt",header=T,sep="\t")
+
+write.table(T3,"Echointer.txt",sep="\t",na="",quote=F)
+write.table(T5,"jtkinter.txt",sep="\t",na="",quote=F)
